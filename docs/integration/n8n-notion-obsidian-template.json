@@ -1,0 +1,279 @@
+{
+  "name": "Notion ↔ Obsidian Sync (Market Orca)",
+  "nodes": [
+    {
+      "id": "cron-trigger",
+      "name": "Schedule Trigger (Daily 7AM)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [240, 300],
+      "parameters": {
+        "rule": {
+          "interval": [
+            { "field": "days", "hoursInterval": 24 }
+          ]
+        }
+      }
+    },
+    {
+      "id": "notion-watch",
+      "name": "Watch Notion DB (New Entries)",
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2,
+      "position": [460, 300],
+      "credentials": {
+        "notionOAuth2Api": "Market Orca Notion"
+      },
+      "parameters": {
+        "resource": "databasePage",
+        "operation": "getAll",
+        "databaseId": "{{ $parameter.notionDatabaseId }}",
+        "options": {
+          "sort": {
+            "direction": "descending",
+            "timestamp": "created_time"
+          },
+          "pageSize": 10
+        }
+      }
+    },
+    {
+      "id": "filter-new",
+      "name": "Filter Only New Items",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 1,
+      "position": [680, 300],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "type": "string",
+            "rightValue": ""
+          },
+          "conditions": [
+            {
+              "id": "created-check",
+              "leftValue": "={{ $json.created_time }}",
+              "type": "dateTime",
+              "rightValue": "={{ new Date(new Date().setDate(new Date().getDate()-1)).toISOString() }}",
+              "operator": { "greaterEqual": true }
+            }
+          ],
+          "combinator": "and"
+        }
+      }
+    },
+    {
+      "id": "format-md",
+      "name": "Format Notion → Markdown",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 2,
+      "position": [900, 300],
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "obsidianContent",
+              "value": "=---\ntitle: \"{{ $json.properties.Name.title[0].text.content }}\"\ndate: \"{{ $json.created_time }}\"\nsource: notion\nnotion_url: {{ $json.url }}\nnotion_id: {{ $json.id }}\ntags: \n  - notion-sync\n  - market-orca\n---\n\n# {{ $json.properties.Name.title[0].text.content }}\n\n**Synced from Notion:** {{ $json.created_time }}\n\n{{ $json.properties.Content.rich_text[0].text.content }}\n"
+            },
+            {
+              "name": "fileName",
+              "value": "=Notion/{{ $json.properties.Name.title[0].text.content | replace(/[\\\\/:*?\"<>|]/g, '-') }}.md"
+            },
+            {
+              "name": "vaultPath",
+              "value": "/home/dicky/ObsidianVault"
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "write-obsidian",
+      "name": "Write to Obsidian Vault",
+      "type": "n8n-nodes-base.writeBinaryFile",
+      "typeVersion": 1,
+      "position": [1120, 300],
+      "parameters": {
+        "fileName": "={{ $json.vaultPath }}/{{ $json.fileName }}",
+        "dataPropertyName": "obsidianContent",
+        "options": {}
+      }
+    },
+    {
+      "id": "notify-discord",
+      "name": "Notify Discord",
+      "type": "n8n-nodes-base.discord",
+      "typeVersion": 2,
+      "position": [1120, 500],
+      "parameters": {
+        "resource": "message",
+        "operation": "send",
+        "channelId": "{{ $parameter.discordChannelId }}",
+        "text": "=✅ **Notion → Obsidian sync complete**\n**{{ $json.properties.Name.title[0].text.content }}** written to vault\nSource: {{ $json.url }}"
+      }
+    },
+    {
+      "id": "obsidian-trigger",
+      "name": "Webhook: Obsidian Changed",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [240, 600],
+      "parameters": {
+        "path": "obsidian-update",
+        "options": {
+          "rawBody": true,
+          "responseMode": "responseToWebhook",
+          "responseData": "={{ {\"received\": true} }}"
+        }
+      },
+      "webhookId": "obsidian-update"
+    },
+    {
+      "id": "read-vault",
+      "name": "Read Obsidian Note",
+      "type": "n8n-nodes-base.readBinaryFiles",
+      "typeVersion": 1,
+      "position": [460, 600],
+      "parameters": {
+        "filePath": "={{ $json.filePath || '/home/dicky/ObsidianVault/**/*.md' }}"
+      }
+    },
+    {
+      "id": "parse-frontmatter",
+      "name": "Extract Frontmatter",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [680, 600],
+      "parameters": {
+        "language": "javascript",
+        "code": "// Parse Obsidian frontmatter and content\nconst items = $input.all();\nreturn items.map(item => {\n  const content = item.binary.data.toString();\n  const frontmatterMatch = content.match(/^---\\n([\\s\\S]*?)\\n---\\n([\\s\\S]*)$/);\n  \n  if (!frontmatterMatch) {\n    return { ...item.json, body: content, frontmatter: {} };\n  }\n  \n  const frontmatterStr = frontmatterMatch[1];\n  const body = frontmatterMatch[2].trim();\n  \n  // Simple frontmatter parse\n  const frontmatter = {};\n  frontmatterStr.split('\\n').forEach(line => {\n    const sep = line.indexOf(':');\n    if (sep > 0) {\n      const key = line.slice(0, sep).trim();\n      let val = line.slice(sep + 1).trim();\n      if (val.startsWith('\"') || val.startsWith(\"'\")) val = val.slice(1, -1);\n      frontmatter[key] = val;\n    }\n  });\n  \n  return {\n    ...item.json,\n    frontmatter,\n    body,\n    title: frontmatter.title || item.json.fileName.replace('.md', '')\n  };\n});"
+      }
+    },
+    {
+      "id": "notion-sync-page",
+      "name": "Sync to Notion DB",
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2,
+      "position": [900, 600],
+      "credentials": {
+        "notionOAuth2Api": "Market Orca Notion"
+      },
+      "parameters": {
+        "resource": "databasePage",
+        "operation": "create",
+        "databaseId": "{{ $parameter.notionDatabaseId }}",
+        "title": "={{ $json.title }}",
+        "properties": {
+          "Name": { "title": [{ "text": { "content": "={{ $json.title }}" } }] },
+          "Content": { "rich_text": [{ "text": { "content": "={{ $json.body.substring(0, 2000) }}" } }] },
+          "Type": { "select": { "name": "obsidian-note" } },
+          "Source": { "url": "=obsidian://open?vault={{ $json.fileName.split('/')[0] }}&file={{ $json.fileName.replace(/^.*?\\//, '').replace('.md', '') }}" }
+        }
+      }
+    },
+    {
+      "id": "daily-report-cron",
+      "name": "Cron: Daily Report (Mon-Fri 8AM)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [240, 900],
+      "parameters": {
+        "rule": {
+          "interval": [
+            { "field": "cronExpression", "expression": "0 8 * * 1-5" }
+          ]
+        }
+      }
+    },
+    {
+      "id": "mcp-report",
+      "name": "Generate Report via Market Orca MCP",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [460, 900],
+      "parameters": {
+        "method": "POST",
+        "url": "http://localhost:4567/mcp/tool/report.daily",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "bodyParameters": {},
+        "options": {
+          "timeout": 60000
+        }
+      }
+    },
+    {
+      "id": "save-to-obsidian",
+      "name": "Save Report to Obsidian",
+      "type": "n8n-nodes-base.writeBinaryFile",
+      "typeVersion": 1,
+      "position": [680, 900],
+      "parameters": {
+        "fileName": "=/home/dicky/ObsidianVault/Market-Orca/Reports/Daily-{{ new Date().toISOString().split('T')[0] }}.md",
+        "dataPropertyName": "data",
+        "options": {}
+      }
+    },
+    {
+      "id": "send-to-discord",
+      "name": "Send Daily Report to Discord",
+      "type": "n8n-nodes-base.discord",
+      "typeVersion": 2,
+      "position": [900, 900],
+      "parameters": {
+        "resource": "message",
+        "operation": "send",
+        "channelId": "{{ $parameter.discordChannelId }}",
+        "text": "=📊 **Daily Market Report**\nGenerated and saved to Obsidian vault."
+      }
+    }
+  ],
+  "connections": {
+    "Schedule Trigger (Daily 7AM)": {
+      "main": [[ { "node": "Watch Notion DB (New Entries)", "type": "main", "index": 0 } ]]
+    },
+    "Watch Notion DB (New Entries)": {
+      "main": [[ { "node": "Filter Only New Items", "type": "main", "index": 0 } ]]
+    },
+    "Filter Only New Items": {
+      "main": [[ { "node": "Format Notion → Markdown", "type": "main", "index": 0 } ]]
+    },
+    "Format Notion → Markdown": {
+      "main": [[ { "node": "Write to Obsidian Vault", "type": "main", "index": 0 } ]]
+    },
+    "Write to Obsidian Vault": {
+      "main": [[ { "node": "Notify Discord", "type": "main", "index": 0 } ]]
+    },
+    "Webhook: Obsidian Changed": {
+      "main": [[ { "node": "Read Obsidian Note", "type": "main", "index": 0 } ]]
+    },
+    "Read Obsidian Note": {
+      "main": [[ { "node": "Extract Frontmatter", "type": "main", "index": 0 } ]]
+    },
+    "Extract Frontmatter": {
+      "main": [[ { "node": "Sync to Notion DB", "type": "main", "index": 0 } ]]
+    },
+    "Cron: Daily Report (Mon-Fri 8AM)": {
+      "main": [[ { "node": "Generate Report via Market Orca MCP", "type": "main", "index": 0 } ]]
+    },
+    "Generate Report via Market Orca MCP": {
+      "main": [[ { "node": "Save Report to Obsidian", "type": "main", "index": 0 } ]]
+    },
+    "Save Report to Obsidian": {
+      "main": [[ { "node": "Send Daily Report to Discord", "type": "main", "index": 0 } ]]
+    }
+  },
+  "pinData": {},
+  "versionId": "notion-obsidian-master-v1",
+  "active": false,
+  "settings": {},
+  "tags": ["notion", "obsidian", "market-orca", "sync", "daily-report"],
+  "parameters": {
+    "notionDatabaseId": "",
+    "discordChannelId": ""
+  }
+}

@@ -1,0 +1,12 @@
+services:
+  searxng:
+    image: searxng/searxng:latest
+    container_name: market-orca-searxng
+    ports:
+      - "127.0.0.1:18080:8080"
+    volumes:
+      - ./searxng:/etc/searxng
+      - /tmp/searxng-final.yml:/etc/searxng/settings.yml
+    environment:
+      - SEARXNG_BASE_URL=http://127.0.0.1:18080/
+    restart: unless-stopped

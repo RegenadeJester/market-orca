@@ -1,0 +1,46 @@
+use_default_settings: true
+server:
+  secret_key: "change-me"
+  limiter: false
+  image_proxy: false
+search:
+  safe_search: 0
+  autocomplete: "duckduckgo"
+  formats:
+    - html
+    - json
+outgoing:
+  request_timeout: 10.0
+  max_request_timeout: 15.0
+engines:
+  - name: google
+    disabled: false
+  - name: bing
+    disabled: false
+  - name: duckduckgo
+    disabled: false
+  - name: yahoo
+    disabled: false
+  - name: wikipedia
+    disabled: false
+  - name: arxiv
+    disabled: false
+  - name: github
+    disabled: false
+
+ui:
+  static_path: "/etc/searxng"
+  default_locale: ""
+  custom_links:
+    - title: "Market Orca"
+      url: "https://market-orca.anomali.web.id"
+      icon: "globe"
+    - title: "Report Dashboard"
+      url: "https://report.anomali.web.id/report"
+      icon: "file-text"
+    - title: "MCP Docs"
+      url: "https://market-orca.anomali.web.id/docs/mcp"
+      icon: "book"
+general:
+  instance_name: "AROXNG"
+  debug: false

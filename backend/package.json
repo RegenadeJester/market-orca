@@ -1,0 +1,22 @@
+{
+  "name": "market-orca-backend",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "PORT=1745 node --watch src/server.js",
+    "start": "PORT=1745 node src/server.js",
+    "seed": "node src/seed.js",
+    "test": "node --test src/*.test.js",
+    "mcp": "node src/mcp-server.js",
+    "mcp:http": "node src/mcp-http-server.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "better-sqlite3": "^12.2.0",
+    "compression": "^1.7.5",
+    "cors": "^2.8.5",
+    "discord.js": "^14.21.0",
+    "express": "^4.21.2",
+    "pdfkit": "^0.18.0"
+  }
+}

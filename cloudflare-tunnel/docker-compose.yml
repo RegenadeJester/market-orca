@@ -1,0 +1,10 @@
+services:
+  cloudflared-market-orca-mcp:
+    image: cloudflare/cloudflared:latest
+    container_name: cloudflared-market-orca-mcp
+    restart: unless-stopped
+    network_mode: host
+    command: tunnel --no-autoupdate --config /etc/cloudflared/config.yml run
+    volumes:
+      - ./config.yml:/etc/cloudflared/config.yml:ro
+      - ./credentials.json:/etc/cloudflared/YOUR_TUNNEL_ID.json:ro

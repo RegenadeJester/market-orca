@@ -1,0 +1,3 @@
+/* AROXNG branding */
+.search_field form::before { content: "🔍 AROXNG — Federated Intelligence Search"; display: block; text-align: center; font-size: 1.1em; font-weight: 700; color: #38bdf8; margin-bottom: 8px; }
+#logo::after { content: "AROXNG"; font-weight: 900; font-size: 1.4em; color: #1e293b; margin-left: 8px; }

@@ -1,0 +1,118 @@
+# =============================================================================
+# Market Orca — .gitignore
+# Public repo: zero secrets, zero credentials, zero generated data.
+# =============================================================================
+
+# ── Environment / Secrets ────────────────────────────────────────────────────
+.env
+.env.*
+!.env.example
+!.env.test
+*.key
+*.cert
+*.pem
+*.crt
+credentials.json
+service-account*.json
+oauth*.json
+client_secret*.json
+*.auth
+*.token
+*.secret
+
+# ── Credential patterns (catch-all) ─────────────────────────────────────────
+**/config*.local.*
+**/credentials
+**/passwd
+**/auth*.local.*
+
+# ── Dependencies ─────────────────────────────────────────────────────────────
+node_modules/
+.pnp
+.pnp.js
+.pnp.cjs
+
+# ── Build Output ─────────────────────────────────────────────────────────────
+dist/
+dist-ssr/
+*.tsbuildinfo
+build/
+out/
+
+# ── Logs ─────────────────────────────────────────────────────────────────────
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+frontend.log
+mcp-error.log
+report-error.log
+
+# ── Database / Runtime Data ──────────────────────────────────────────────────
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+*.sqlite
+data/
+!backend/data/.gitkeep
+*.pid
+*.pid.lock
+
+# ── Generated Reports ────────────────────────────────────────────────────────
+reports/
+!reports/.gitkeep
+Market_Orca_Audit_Report.*
+content-ideas-*.md
+health-dashboard.html
+
+# ── Docker / Cloudflare ──────────────────────────────────────────────────────
+cloudflare-tunnel/.env
+cloudflare-tunnel/cert.pem
+
+# ── VitePress Cache ──────────────────────────────────────────────────────────
+docs/.vitepress/cache/
+
+# ── Python ───────────────────────────────────────────────────────────────────
+.venv*/
+venv/
+__pycache__/
+*.pyc
+
+# ── Tests / Coverage ─────────────────────────────────────────────────────────
+coverage/
+.nyc_output/
+
+# ── Agent / AI Config ────────────────────────────────────────────────────────
+.claude/
+agent-cache/
+.hermes/
+
+# ── Nested Repos ─────────────────────────────────────────────────────────────
+frontend/
+
+# ── Temp / Cache ─────────────────────────────────────────────────────────────
+tmp/
+temp/
+.tmp/
+*.swp
+*.swo
+*~
+
+# ── OS / Editor ──────────────────────────────────────────────────────────────
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+.vscode/
+!.vscode/extensions.json
+.idea/
+*.iml
+*.sublime-*
+credentials.json
