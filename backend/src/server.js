@@ -1498,9 +1498,7 @@ app.post('/api/ai-daily-report/generate', async (_req, res) => {
   }
 })
 
-app.get('/market', (_req, res) => {
-  res.redirect(APP_CONFIG.publicBaseUrl + '/')
-})
+// /market is now served by the Vue SPA catch-all below
 
 // Report portal list
 app.get('/report', (_req, res) => {
@@ -2453,6 +2451,19 @@ Url: ${MCP_BASE}/mcp</code></pre>
 
 // ── Indonesia Economic Indicators ─────────────────────────────────
 app.use('/api/indonesia', indonesiaRoutes)
+
+// ── Serve Vue SPA for client-side routes ─────────────────────────
+const FRONTEND_DIST = path.resolve(__dirname, '../../frontend/dist')
+if (fs.existsSync(FRONTEND_DIST)) {
+  app.use(express.static(FRONTEND_DIST))
+  // Catch-all: serve index.html for SPA routes not matched above
+  app.get('*', (req, res, next) => {
+    if (req.path.startsWith('/api/') || req.path.startsWith('/mcp/')) return next()
+    res.sendFile(path.join(FRONTEND_DIST, 'index.html'))
+  })
+} else {
+  console.warn('[spa] frontend/dist not found at', FRONTEND_DIST)
+}
 
 app.listen(PORT, () => {
   console.log(`market-orca backend listening on http://localhost:${PORT}`)
