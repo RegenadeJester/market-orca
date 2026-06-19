@@ -1177,7 +1177,7 @@ app.get('/api/report/:slug/preview/:channel', (req, res) => {
   }
 })
 
-app.post('/api/report/:slug/publish/:channel', (req, res) => {
+app.post('/api/report/:slug/publish/:channel', async (req, res) => {
   const user = requireUser(req, res)
   if (!user) return
   const slug = String(req.params.slug || '').replace(/[^0-9a-z-]/gi, '')
@@ -1185,7 +1185,7 @@ app.post('/api/report/:slug/publish/:channel', (req, res) => {
   const editedText = req.body?.textReport || req.body?.content
   if (!editedText) return res.status(400).json({ ok: false, error: 'textReport_required' })
   try {
-    const result = publishChannel(slug, channel, editedText)
+    const result = await publishChannel(slug, channel, editedText)
     res.json(result)
   } catch (error) {
     res.status(500).json({ ok: false, error: String(error) })

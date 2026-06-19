@@ -1947,6 +1947,62 @@ async function sendDiscordAlert(alertData) {
   }
 }
 
+// ── Send Report to Discord channel ────────────────────────────────────────
+async function sendDiscordReport(reportData) {
+  try {
+    const client = _client
+    if (!client?.isReady()) return { ok: false, error: 'Bot not ready' }
+
+    const channelId = getDiscordSetting('report_channel_id')
+    if (!channelId) {
+      console.warn('[discord] No report_channel_id configured')
+      return { ok: false, error: 'No report channel configured' }
+    }
+
+    const channel = await client.channels.fetch(channelId).catch(() => null)
+    if (!channel) {
+      console.warn(`[discord] Report channel ${channelId} not found`)
+      return { ok: false, error: 'Channel not found' }
+    }
+
+    const embed = buildReportEmbed({ report: reportData })
+    await channel.send({ embeds: [embed] })
+    console.log(`[discord] Report sent to #${channel.name}`)
+    return { ok: true }
+  } catch (e) {
+    console.error('[discord] sendDiscordReport error:', e)
+    return { ok: false, error: e.message }
+  }
+}
+
+// ── Send News to Discord channel ──────────────────────────────────────────
+async function sendDiscordNews(newsData) {
+  try {
+    const client = _client
+    if (!client?.isReady()) return { ok: false, error: 'Bot not ready' }
+
+    const channelId = getDiscordSetting('market_channel_id')
+    if (!channelId) {
+      console.warn('[discord] No market_channel_id configured')
+      return { ok: false, error: 'No market channel configured' }
+    }
+
+    const channel = await client.channels.fetch(channelId).catch(() => null)
+    if (!channel) {
+      console.warn(`[discord] Market channel ${channelId} not found`)
+      return { ok: false, error: 'Channel not found' }
+    }
+
+    const embed = buildNewsEmbed({ newsList: newsData })
+    await channel.send({ embeds: [embed] })
+    console.log(`[discord] News sent to #${channel.name}`)
+    return { ok: true }
+  } catch (e) {
+    console.error('[discord] sendDiscordNews error:', e)
+    return { ok: false, error: e.message }
+  }
+}
+
 async function initDiscordBot() {
   // Return existing if already initializing
   if (botClientPromise) return botClientPromise
@@ -2009,6 +2065,8 @@ export {
   getBotClient,
   initDiscordBot,
   sendDiscordAlert,
+  sendDiscordReport,
+  sendDiscordNews,
   updateDiscordPresence,
   buildEmbed,
   loadEnv,
