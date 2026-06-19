@@ -174,8 +174,8 @@ export function renderPreviewForChannel(slug, channel = 'editor') {
   }
 }
 
-// ── Publish: save edited textReport back to JSON & regenerate HTML ───
-export function publishChannel(slug, channel, editedText) {
+// ── Publish: save edited textReport back to JSON, regenerate HTML, send to Discord ───
+export async function publishChannel(slug, channel, editedText) {
   const jsonFp = path.join(reportDir, `${slug}.json`)
   if (!fs.existsSync(jsonFp)) {
     return { ok: false, error: 'report_not_found' }
@@ -185,7 +185,6 @@ export function publishChannel(slug, channel, editedText) {
 
   if (channel === 'editor' && typeof editedText === 'string') {
     report.textReport = editedText
-    // Rebuild topics from editor content if provided as structured data
     fs.writeFileSync(jsonFp, JSON.stringify(report, null, 2), 'utf8')
   }
 
@@ -194,7 +193,21 @@ export function publishChannel(slug, channel, editedText) {
   const html = buildHtmlFromReport(report)
   fs.writeFileSync(htmlFp, html, 'utf8')
 
-  return { ok: true, slug, channel, updated: ['json', 'html'] }
+  const result = { ok: true, slug, channel, updated: ['json', 'html'] }
+
+  // Send to Discord if channel is 'discord'
+  if (channel === 'discord') {
+    try {
+      const { sendDiscordReport } = await import('./discord.js')
+      const discordResult = await sendDiscordReport({ ...report, slug })
+      result.discord = discordResult
+    } catch (e) {
+      console.error('[channel-preview] Discord send failed:', e.message)
+      result.discord = { ok: false, error: e.message }
+    }
+  }
+
+  return result
 }
 
 function buildHtmlFromReport(report) {
