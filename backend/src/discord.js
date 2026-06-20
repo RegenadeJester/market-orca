@@ -1930,13 +1930,16 @@ async function sendDiscordAlert(alertData) {
     await channel.send({ embeds: [embed] })
     setDiscordSetting('last_alert_time', new Date().toISOString())
 
-    // Also DM subscribers
-    const subscribers = listDmSubscribers()
-    for (const sub of subscribers) {
-      try {
-        const user = await client.users.fetch(sub.user_id).catch(() => null)
-        if (user) await user.send({ embeds: [embed] }).catch(() => { })
-      } catch { }
+    // Only DM subscribers if alert_dm_enabled in DB
+    const dmEnabled = getDiscordSetting('alert_dm_enabled') !== 'false'
+    if (dmEnabled) {
+      const subscribers = listDmSubscribers()
+      for (const sub of subscribers) {
+        try {
+          const user = await client.users.fetch(sub.user_id).catch(() => null)
+          if (user) await user.send({ embeds: [embed] }).catch(() => { })
+        } catch { }
+      }
     }
 
     console.log(`[discord] Alert sent for ${alertData.symbol || '?'}`)

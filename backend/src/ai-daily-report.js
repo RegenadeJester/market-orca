@@ -1,5 +1,6 @@
 import { EmbedBuilder, AttachmentBuilder } from 'discord.js'
 import { initDiscordBot } from './discord.js'
+import { getDiscordSetting } from './discord-settings.js'
 import { db, recordIncidentStatus, getIncidentStatusHistory, incidentTitleHash } from './db.js'
 import { buildRagContext, formatRagMarkdown, saveRagCitations } from './rag.js'
 import { deepWebSearch } from './web-search.js'
@@ -2044,44 +2045,63 @@ function splitDiscordText(text, max = 1900) {
 export async function sendAiReportToUser(textReport, _embed, topics) {
   const botClient = await getBotClient().catch(() => null)
   if (!botClient?.isReady()) { console.error('[ai-report] Bot not available'); return false }
-  const user = await botClient.users.fetch(process.env.DISCORD_USER_ID || '313588026766917632').catch(() => null)
-  if (!user) { console.error('[ai-report] User not found'); return false }
 
+  // Send digest to report channel (not DM)
+  const channelId = getDiscordSetting('report_channel_id')
+  if (!channelId) { console.warn('[ai-report] No report_channel_id, falling back to DM'); return sendAiReportToUserDm(textReport, _embed, topics) }
+
+  const channel = await botClient.channels.fetch(channelId).catch(() => null)
+  if (!channel) { console.warn(`[ai-report] Channel ${channelId} not found, fallback DM`); return sendAiReportToUserDm(textReport, _embed, topics) }
+
+  // Send text digest as multiple messages (Discord 2000 char limit)
   const parts = splitDiscordText(discordDigest(textReport), 1900)
   let totalParts = 0
   for (let i = 0; i < parts.length; i++) {
-    await user.send(parts[i].slice(0, 2000)).then(() => logDelivery('daily', 'text_digest', 'ok', `part ${i+1}/${parts.length}`)).catch((e) => { logDelivery('daily', 'text_digest', 'fail', e.message); console.warn('[ai-report] text send fail:', e.message) })
+    await channel.send(parts[i].slice(0, 2000)).then(() => logDelivery('daily', 'text_digest', 'ok', `part ${i+1}/${parts.length}`)).catch((e) => { logDelivery('daily', 'text_digest', 'fail', e.message); console.warn('[ai-report] text send fail:', e.message) })
     totalParts++
   }
-  console.log(`[ai-report] Text sent in ${totalParts} parts`)
+  console.log(`[ai-report] Text sent in ${totalParts} parts to channel #${channel.name}`)
 
-  // Save report + send web link
+  // Save report + send web link (still to channel)
   if (topics?.length > 0) {
     try {
       const { slug } = await saveReport(topics, textReport)
       const cardPath = path.join(__dirname, '..', '..', 'reports', `${slug}-card.png`)
       const { APP_CONFIG } = await import("./config.js");
       const msg = `**Web version:**\n<${APP_CONFIG.publicBaseUrl}/report/${slug}>\n<${APP_CONFIG.tailscaleBaseUrl}/report/${slug}>`
-      if (fs.existsSync(cardPath)) await user.send({ content: msg, files: [new AttachmentBuilder(cardPath, { name: `ai-report-card-${slug}.png` })] }).then(() => logDelivery(slug,'web_card','ok')).catch((e) => { logDelivery(slug,'web_card','fail',e.message); return user.send(msg).catch(() => {}) })
-      else await user.send(msg).then(() => logDelivery(slug,'web_link','ok')).catch((e) => logDelivery(slug,'web_link','fail',e.message))
+      if (fs.existsSync(cardPath)) await channel.send({ content: msg, files: [new AttachmentBuilder(cardPath, { name: `ai-report-card-${slug}.png` })] }).then(() => logDelivery(slug,'web_card','ok')).catch((e) => { logDelivery(slug,'web_card','fail',e.message); return channel.send(msg).catch(() => {}) })
+      else await channel.send(msg).then(() => logDelivery(slug,'web_link','ok')).catch((e) => logDelivery(slug,'web_link','fail',e.message))
       const mdPath = path.join(__dirname, '..', '..', 'reports', `${slug}.md`)
-      if (fs.existsSync(mdPath)) await user.send({ content: '**Markdown file:**', files: [new AttachmentBuilder(mdPath, { name: `AI-Daily-Report-${slug}.md` })] }).then(() => logDelivery(slug,'md','ok')).catch((e) => { logDelivery(slug,'md','fail',e.message); console.warn('[ai-report] MD send fail:', e.message) })
-      console.log('[ai-report] Web link + MD sent:', slug)
+      if (fs.existsSync(mdPath)) await channel.send({ content: '**Markdown file:**', files: [new AttachmentBuilder(mdPath, { name: `AI-Daily-Report-${slug}.md` })] }).then(() => logDelivery(slug,'md','ok')).catch((e) => { logDelivery(slug,'md','fail',e.message); console.warn('[ai-report] MD send fail:', e.message) })
+      console.log('[ai-report] Web link + MD sent to channel')
     } catch (e) { console.warn('[ai-report] Save report:', e.message) }
   }
 
-  // PDF — async, tidak blocking
-  if (topics?.length > 0) generateAndSendPdf(user, topics)
+  // PDF — async
+  if (topics?.length > 0) generateAndSendPdfToChannel(channel, topics)
   return true
 }
 
-async function generateAndSendPdf(user, topics) {
+// Fallback: no DM — just log the error
+async function sendAiReportToUserDm(textReport, _embed, topics) {
+  console.error('[ai-report] Cannot send report: no report_channel_id configured, and DM delivery is disabled')
+  // Still save the report for manual access
+  if (topics?.length > 0) {
+    try {
+      const { slug } = await saveReport(topics, textReport)
+      console.log(`[ai-report] Report saved to slug=${slug}`)
+    } catch (e) { console.warn('[ai-report] Save report:', e.message) }
+  }
+  return false
+}
+
+async function generateAndSendPdfToChannel(channel, topics) {
   try {
     const pdfPath = await buildPdfReport(topics)
     if (pdfPath && fs.existsSync(pdfPath)) {
       const att = new AttachmentBuilder(pdfPath, { name: 'AI-Daily-Report.pdf' })
-      await user.send({ files: [att] }).then(() => logDelivery('daily','pdf','ok')).catch((e) => { logDelivery('daily','pdf','fail',e.message); console.warn('[ai-report] PDF send fail:', e.message) })
-      console.log('[ai-report] PDF sent')
+      await channel.send({ files: [att] }).then(() => logDelivery('daily','pdf','ok')).catch((e) => { logDelivery('daily','pdf','fail',e.message); console.warn('[ai-report] PDF send fail:', e.message) })
+      console.log('[ai-report] PDF sent to channel')
       setTimeout(() => fs.promises.unlink(pdfPath).catch(() => {}), 10000)
     }
   } catch (e) { console.warn('[ai-report] PDF:', e.message) }

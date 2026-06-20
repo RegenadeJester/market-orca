@@ -1,6 +1,6 @@
 use_default_settings: true
 server:
-  secret_key: "change-me"
+  secret_key: "market-orca-aroxng-2026"
   limiter: false
   image_proxy: false
 search:
@@ -15,32 +15,22 @@ outgoing:
 engines:
   - name: google
     disabled: false
+  - name: google news
+    disabled: false
   - name: bing
     disabled: false
   - name: duckduckgo
+    disabled: false
+  - name: duckduckgo news
     disabled: false
   - name: yahoo
     disabled: false
   - name: wikipedia
     disabled: false
-  - name: arxiv
-    disabled: false
-  - name: github
-    disabled: false
 
 ui:
   static_path: "/etc/searxng"
   default_locale: ""
-  custom_links:
-    - title: "Market Orca"
-      url: "https://market-orca.anomali.web.id"
-      icon: "globe"
-    - title: "Report Dashboard"
-      url: "https://report.anomali.web.id/report"
-      icon: "file-text"
-    - title: "MCP Docs"
-      url: "https://market-orca.anomali.web.id/docs/mcp"
-      icon: "book"
 general:
   instance_name: "AROXNG"
   debug: false
