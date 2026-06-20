@@ -120,6 +120,35 @@ app.get('/api/overview', async (_req, res) => {
   }
 })
 
+// ── Market News (SearXNG) ───────────────────────────────────────────────
+app.get('/api/market-news', async (_req, res) => {
+  try {
+    const queries = ['saham IDX berita hari ini', 'IHSG market update', 'saham naik turun']
+    const allResults = []
+    for (const q of queries.slice(0, 2)) {
+      try {
+        const data = await searchNews(q, { limit: 5, language: 'id', time_range: 'week' })
+        allResults.push(...(data?.results || []))
+      } catch {}
+    }
+    const seen = new Set()
+    const unique = allResults.filter(r => {
+      if (seen.has(r.url)) return false
+      seen.add(r.url)
+      return true
+    }).slice(0, 10).map(r => ({
+      title: r.title,
+      url: r.url,
+      snippet: r.snippet,
+      source: r.source || r.domain || 'unknown',
+      publishedAt: r.published_at || ''
+    }))
+    res.json({ ok: true, news: unique })
+  } catch (error) {
+    res.status(500).json({ ok: false, error: error.message })
+  }
+})
+
 app.get('/api/assets', async (req, res) => {
   try {
     const q = (req.query.q || '').toString().toLowerCase()

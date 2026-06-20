@@ -5,14 +5,7 @@ const binanceTickerUrl = (symbol) => `https://api.binance.com/api/v3/ticker/24hr
 const stooqUrl = (symbol) => `https://stooq.com/q/l/?s=${encodeURIComponent(symbol)}&f=sd2t2ohlcv&h&e=csv`
 const searchNewsUrl = (query) => `https://news.google.com/rss/search?q=${encodeURIComponent(query)}&hl=en-US&gl=US&ceid=US:en`
 const yahooNewsUrl = (query) => `https://feeds.finance.yahoo.com/rss/2.0/headline?s=${encodeURIComponent(query)}&region=US&lang=en-US`
-// Indonesian financial news RSS feeds
-const indoNewsSources = [
-  { name: 'Kontan', url: (q) => `https://news.google.com/rss/search?q=${encodeURIComponent(q + ' site:kontan.co.id')}&hl=id&gl=ID&ceid=ID:id` },
-  { name: 'Bisnis.com', url: (q) => `https://news.google.com/rss/search?q=${encodeURIComponent(q + ' site:bisnis.com')}&hl=id&gl=ID&ceid=ID:id` },
-  { name: 'Tempo', url: (q) => `https://news.google.com/rss/search?q=${encodeURIComponent(q + ' site:tempo.co')}&hl=id&gl=ID&ceid=ID:id` },
-  { name: 'CNBC Indonesia', url: (q) => `https://news.google.com/rss/search?q=${encodeURIComponent(q + ' site:cnbcindonesia.com')}&hl=id&gl=ID&ceid=ID:id` },
-  { name: 'Liputan6', url: (q) => `https://news.google.com/rss/search?q=${encodeURIComponent(q + ' site:liputan6.com')}&hl=id&gl=ID&ceid=ID:id` },
-]
+// Indonesian financial news now fetched via SearXNG (see fetchIndoNewsSearxng)
 import { enrichNewsItem } from './news-enrich.js'
 
 import { validateFetchUrl } from './web-search.js'
@@ -122,7 +115,7 @@ function buildQuery(asset) {
   if (asset.market === 'CRYPTO') return `${base} crypto OR bitcoin OR ETF OR inflow OR liquidation OR Fed ${exclude}`
   if (asset.market === 'COMMODITY') return `${base} commodity OR gold OR oil OR futures OR demand ${exclude}`
   if (asset.market === 'FOREX') return `${base} forex OR rate OR inflation OR central bank ${exclude}`
-  if (asset.market === 'IDX') return `${base} saham OR IDX OR IHSG OR LQ45 OR laba OR emiten site:kontan.co.id OR site:cnbcindonesia.com ${exclude}`
+  if (asset.market === 'IDX') return `${base} saham OR IDX OR IHSG OR LQ45 OR laba OR emiten ${exclude}`
   return `${base} earnings OR guidance OR analyst OR stock OR market ${exclude}`
 }
 function newsKey(title='') { return title.toLowerCase().replace(/\s+[-–—]\s+[^-–—]+$/, '').replace(/[^a-z0-9\s]/g, '').replace(/\s+/g, ' ').trim().slice(0,80) }
@@ -138,6 +131,8 @@ function newsRelevance(item, asset) {
   return score
 }
 
+
+const SEARXNG_BASE = process.env.SEARXNG_URL || 'http://localhost:18080'
 
 const searxngUrl = (query) => `http://localhost:18080/search?q=${encodeURIComponent(query)}&format=json`
 
@@ -156,6 +151,25 @@ async function parseSearxngGoldQuote(symbol) {
     }
   }
   throw new Error('SearXNG gold parse failed')
+}
+
+async function fetchIndoNewsSearxng(query, limit = 5) {
+  try {
+    const url = `${SEARXNG_BASE}/search?q=${encodeURIComponent(query + ' berita saham IDX')}&format=json&categories=news&time_range=week&language=id`
+    const data = await fetchJson(url, 10000, { internal: true })
+    return (data.results || []).slice(0, limit).map(r => ({
+      title: cleanTitle(r.title || ''),
+      summary: (r.content || '').slice(0, 280),
+      sentiment: inferSentiment(`${r.title} ${r.content}`),
+      source: 'searxng',
+      link: r.url || '',
+      created_at: r.publishedDate || new Date().toISOString(),
+      freshness: newsAgeLabel(r.publishedDate || ''),
+      freshness_ts: parseDateValue(r.publishedDate || ''),
+      thumbnail: inferThumbnail({ title: r.title, summary: r.content }),
+      image: ''
+    })).filter(item => item.title)
+  } catch { return [] }
 }
 
 async function tryProviders(asset) {
@@ -196,13 +210,11 @@ async function getCachedLiveAsset(asset) {
         fetchText(searchNewsUrl(query), 9000),
         fetchText(yahooNewsUrl(asset.symbol), 9000),
       ]
-      // Fetch from Indonesian sources for IDX assets
+      // Fetch from SearXNG for IDX assets
       if (asset.market === 'IDX') {
-        for (const src of indoNewsSources.slice(0, 3)) {
-          newsPromises.push(
-            fetchText(src.url(asset.symbol), 9000).then(xml => ({ xml, source: src.name })).catch(() => null)
-          )
-        }
+        newsPromises.push(
+          fetchIndoNewsSearxng(asset.name || asset.symbol, 6).then(items => ({ searxng: items })).catch(() => null)
+        )
       }
       const settledNews = await Promise.allSettled(newsPromises)
       const rawNews = []
@@ -215,6 +227,8 @@ async function getCachedLiveAsset(asset) {
           } else if (val?.xml) {
             // Indonesian source
             rawNews.push(...parseNews(val.xml, val.source))
+          } else if (val?.searxng) {
+            rawNews.push(...val.searxng)
           }
         }
       }
