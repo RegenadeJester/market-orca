@@ -14,4 +14,5 @@ Daily feature pipeline: brainstorm → plan → branch → implement → PR → 
 | Date | # | Feature | Branch | Status |
 |------|---|---------|--------|--------|
 || 2026-06-19 | 1 | Discord Report/News Publishing via publishChannel API | feat/discord-report-publish | merged |
-|| 2026-06-19 | 2 | GitHub Actions CI pipeline (test + build) | feat/ci-pipeline | PR #2 open |
+|| 2026-06-19 | 2 | GitHub Actions CI pipeline (test + build) | feat/ci-pipeline | PR #2 merged |
+|| 2026-06-20 | 3 | CDS spread fetcher — Indo-US 5Y yield spread proxy | feat/cds-spread-fetcher | PR #3 open |
