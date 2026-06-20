@@ -257,6 +257,10 @@ export function getLatestFearGreed() {
   return db.prepare('SELECT * FROM indo_fear_greed ORDER BY id DESC LIMIT 1').get()
 }
 
+export function getLatestCdsSpread() {
+  return db.prepare('SELECT * FROM indo_cds_spread ORDER BY id DESC LIMIT 1').get()
+}
+
 export function getFearGreedHistory(days = 30) {
   return db.prepare(`
     SELECT * FROM indo_fear_greed
