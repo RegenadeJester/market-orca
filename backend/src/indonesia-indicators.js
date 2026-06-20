@@ -4,7 +4,7 @@
  */
 import { getYieldCurveHistory, getLatestCompositeScore, getLatestFearGreed } from './indonesia-db.js'
 import { getIHSGData, getForexData } from './market-data.js'
-import { fetchYieldCurve, fetchMacroData, fetchForeignFlows } from './indonesia-data-fetcher.js'
+import { fetchYieldCurve, fetchMacroData, fetchForeignFlows, fetchFearGreed, fetchCdsSpread } from './indonesia-data-fetcher.js'
 
 // ── Indicator weights ───────────────────────────────────────────
 const WEIGHTS = {
@@ -198,20 +198,21 @@ function scoreFearGreed(fg) {
 
 export async function calculateCompositeScore() {
   // Gather all data
-  const [yieldData, macroData, ihsgData, forexBorrowData, fgData, flowData] = await Promise.all([
+  const [yieldData, macroData, ihsgData, forexBorrowData, fgData, flowData, cdsData] = await Promise.all([
     fetchYieldCurve().catch(() => null),
     fetchMacroData().catch(() => null),
     getIHSGData().catch(() => null),
     getForexData().catch(() => null),
     fetchFearGreed().catch(() => null),
     fetchForeignFlows().catch(() => null),
+    fetchCdsSpread().catch(() => null),
   ])
 
   const curve = yieldData?.curve || {}
   const bars = ihsgData?.chart || []
   const forexBars = forexBorrowData?.pairs?.[0]?.chart || []
   const macro = macroData?.indicators || {}
-  const cdsSpread = null  // TODO: fetch from data
+  const cdsSpread = cdsData?.spread_bps ?? null
 
   const breakdown = {
     yield_curve: scoreYieldCurve(curve),
@@ -256,6 +257,7 @@ export async function calculateCompositeScore() {
       },
       fearGreed: fgData ? { value: fgData.value, classification: fgData.classification } : null,
       foreignFlow: flowData?.flows || null,
+      cdsSpread: cdsData ? { spread_bps: cdsData.spread_bps, source: cdsData.source, status: cdsData.status } : null,
     },
     weightsApplied: totalWeight,
     calculatedAt: new Date().toISOString(),
