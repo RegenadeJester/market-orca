@@ -30,7 +30,6 @@ import { getTradingViewScreener, getTradingViewChart, getTradingViewTechnical, g
 import { fetchIndonesianNews, fetchTrendingNews, INDONESIAN_NEWS_SOURCES } from './news-fetcher.js'
 import { getIHSGData, getForexData, getMarketOverview, FOREX_SYMBOLS } from './market-data.js'
 import indonesiaRoutes from './indonesia/indonesia-router.js'
-import { initIndonesiaCron } from './indonesia-cron.js'
 // New structured Indonesia modules
 import { initIndonesiaTables } from './indonesia/db.js'
 import { startIndonesiaCron as startStructuredIndonesiaCron } from './indonesia/cron-indonesia.js'
@@ -2467,7 +2466,6 @@ if (fs.existsSync(FRONTEND_DIST)) {
 
 app.listen(PORT, () => {
   console.log(`market-orca backend listening on http://localhost:${PORT}`)
-  initIndonesiaCron()
   startStructuredIndonesiaCron()  // New structured Indonesia module
   if (process.env.NO_DISCORD !== '1') initDiscordBot().catch((err) => console.error('[discord] init-failed', err))
   if (jakartaHour() >= 7 && !reportExists(todaySlug())) {

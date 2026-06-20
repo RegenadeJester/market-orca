@@ -77,7 +77,7 @@ function parseYahooQuote(symbol, payload) {
 }
 
 async function parseBinanceQuote(symbol) {
-  const map = { 'BTC-USD': 'BTCUSDT', 'ETH-USD': 'ETHUSDT', 'SOL-USD': 'SOLUSDT', 'DOGE-USD': 'DOGEUSDT', 'SHIB-USD': 'SHIBUSDT', 'PEPE-USD': 'PEPEUSDT' }
+  const map = { 'BTC-USD': 'BTCUSDT', 'ETH-USD': 'ETHUSDT', 'ETH-USDT': 'ETHUSDT', 'SOL-USD': 'SOLUSDT', 'DOGE-USD': 'DOGEUSDT', 'SHIB-USD': 'SHIBUSDT', 'PEPE-USD': 'PEPEUSDT' }
   const pair = map[symbol]
   if (!pair) throw new Error('No binance pair')
   const [rows, ticker] = await Promise.all([fetchJson(binanceUrl(pair), 9000), fetchJson(binanceTickerUrl(pair), 9000).catch(() => null)])
@@ -172,17 +172,20 @@ async function fetchIndoNewsSearxng(query, limit = 5) {
   } catch { return [] }
 }
 
+// Normalise Yahoo symbols (BRK.B → BRK-B)
+function yahooSymbol(s) { return s.replace(/\./g, '-') }
+
 async function tryProviders(asset) {
   const attempts = []
   if (asset.market === 'CRYPTO') {
     try { return await parseBinanceQuote(asset.symbol) } catch (err) { attempts.push(`binance:${err}`) }
   }
-  try { return parseYahooChart(asset.symbol, await fetchJson(quoteUrl(asset.symbol), 12000)) } catch (err) { attempts.push(`yahoo-chart:${err}`) }
-  try { return parseYahooQuote(asset.symbol, await fetchJson(yahooQuoteUrl(asset.symbol), 9000)) } catch (err) { attempts.push(`yahoo-quote:${err}`) }
+  try { return parseYahooChart(asset.symbol, await fetchJson(quoteUrl(yahooSymbol(asset.symbol)), 12000)) } catch (err) { attempts.push(`yahoo-chart:${err}`) }
+  try { return parseYahooQuote(asset.symbol, await fetchJson(yahooQuoteUrl(yahooSymbol(asset.symbol)), 9000)) } catch (err) { attempts.push(`yahoo-quote:${err}`) }
   if (asset.market === 'US') {
     try { return await parseStooqQuote(asset.symbol) } catch (err) { attempts.push(`stooq:${err}`) }
   }
-  if (asset.symbol === 'XAUUSD' || asset.market === 'COMMODITY') {
+  if (asset.symbol === 'XAUUSD' || asset.market === 'COMMODITY' || (asset.symbol === 'XAUUSD' && asset.market === 'FOREX')) {
     try { return await parseSearxngGoldQuote(asset.symbol) } catch (err) { attempts.push(`searxng-gold:${err}`) }
   }
   throw new Error(`All providers failed for ${asset.symbol} :: ${attempts.join(' | ')}`)

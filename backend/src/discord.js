@@ -1880,7 +1880,12 @@ async function registerSlashCommands(client) {
 
 async function updateDiscordPresence(client) {
   try {
-    const embedStyle = getDiscordSetting('embed_style', 'default')
+    // Fall back to module-level _client if caller passed a non-Discord object (e.g. {text:...})
+    if (!client || !client.user || typeof client.user.setActivity !== 'function') {
+      client = _client
+    }
+    if (!client || !client.isReady?.()) return
+
     const richMode = getDiscordSetting('rich_mode', 'auto')
 
     if (richMode === 'off') {
