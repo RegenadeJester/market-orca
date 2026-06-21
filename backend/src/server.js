@@ -1922,7 +1922,28 @@ app.get('/api/report-export-audit', (req, res) => {
 // Get list of available reports
 app.get('/api/reports', (_req, res) => {
   const files = fs.readdirSync(reportDir).filter(f => f.endsWith('.json')).sort().reverse()
-  res.json(files.map(f => f.replace('.json', '')))
+  const slugs = files.map(f => f.replace('.json', ''))
+  // ?metadata=true → enriched objects
+  if (_req.query?.metadata) {
+    const list = slugs.map(slug => {
+      try {
+        const data = JSON.parse(fs.readFileSync(path.join(reportDir, `${slug}.json`), 'utf8'))
+        return {
+          slug,
+          date: data.date || slug,
+          title: data.executiveBrief?.split('\n')[0] || data.topics?.[0]?.title || slug,
+          generatedAt: data.generatedAt || null,
+          topicCount: (data.topics || []).length,
+          hasIncidents: !!(data.incidents || []).length,
+          incidentCount: (data.incidents || []).length
+        }
+      } catch {
+        return { slug, date: slug, title: slug, topicCount: 0, hasIncidents: false, incidentCount: 0 }
+      }
+    })
+    return res.json(list)
+  }
+  res.json(slugs)
 })
 
 // ── Multi-Channel Report Preview & Edit ──────────────────────────────

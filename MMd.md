@@ -18,3 +18,4 @@ Daily feature pipeline: brainstorm → plan → branch → implement → PR → 
 || 2026-06-20 | 3 | CDS spread fetcher — Indo-US 5Y yield spread proxy | feat/cds-spread-fetcher | PR #3 merged |
 
 | 2026-06-21 | 4 | SearXNG IDX news + channel delivery + DM toggle + market-news API | feat/channel-delivery-searxng-news | PR #4 merged |
+| 2026-06-21 | 5 | Enriched report list API (?metadata=true) + recent report cards on homepage | feat/report-list-metadata | PR #5 |
