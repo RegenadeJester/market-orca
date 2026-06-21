@@ -842,7 +842,7 @@ app.get('/report', (_req, res) => {
   }).join('')
   res.setHeader('Content-Type', 'text/html; charset=utf-8')
   res.send(`<!doctype html><html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>AI Report Archive</title><style>
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap');*{box-sizing:border-box}body{margin:0;background:#f4f1ea;color:#151515;font-family:Inter,system-ui,sans-serif}.wrap{max-width:1100px;margin:auto;padding:28px 16px 60px}.mast{border-bottom:4px solid #111;padding-bottom:18px;margin-bottom:24px}.k{font-size:12px;font-weight:900;letter-spacing:.18em;text-transform:uppercase;color:#7c2d12}h1{font-size:clamp(38px,8vw,86px);line-height:.9;margin:6px 0 8px;font-weight:900;letter-spacing:-.07em}.sub{font-size:16px;color:#57534e}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}.card{display:block;text-decoration:none;color:inherit;background:#fff;border:2px solid #111;padding:12px;min-height:190px;box-shadow:6px 6px 0 #111;transition:.15s}.card:hover{transform:translate(-2px,-2px);box-shadow:9px 9px 0 #111}.card img{width:100%;aspect-ratio:4/5;object-fit:cover;border:2px solid #111;margin-bottom:12px}.date{font-size:12px;font-weight:900;color:#7c2d12;letter-spacing:.12em;text-transform:uppercase}.card h2{font-size:22px;line-height:1.05;margin:14px 0 10px;font-weight:900;letter-spacing:-.03em}.card p{color:#57534e;font-weight:600}@media(max-width:600px){.card{box-shadow:4px 4px 0 #111}h1{font-size:44px}}.market-overview{margin-bottom:28px;border:2px solid #111;box-shadow:6px 6px 0 #111;background:#fff;padding:16px}.mo-header{font-size:14px;font-weight:900;color:#7c2d12;margin-bottom:14px;letter-spacing:.05em}.mo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px}.mo-card{background:#fafaf9;border:2px solid #e7e5e4;padding:10px;border-radius:4px;text-align:center}.mo-sym{font-size:11px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;color:#7c2d12}.mo-price{font-size:16px;font-weight:900;color:#151515;margin:4px 0 2px}.mo-chg{font-size:12px;font-weight:800}.mo-chg.up{color:#16a34a}.mo-chg.down{color:#dc2626}.mo-name{font-size:10px;color:#57534e;margin-top:2px}
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap');*{box-sizing:border-box}body{margin:0;background:#0a0a0f;color:#e4e4e7;font-family:'Geist',Inter,system-ui,sans-serif}.wrap{max-width:1100px;margin:auto;padding:28px 16px 60px}.mast{border-bottom:1px solid rgba(255,255,255,.06);padding-bottom:18px;margin-bottom:24px}.k{font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#14b8a6}h1{font-size:clamp(32px,8vw,72px);line-height:.92;margin:6px 0 8px;font-weight:700;letter-spacing:-.04em;color:#fff}.sub{font-size:15px;color:#a1a1aa}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}.card{display:block;text-decoration:none;color:inherit;background:#fff;border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:12px;min-height:190px;transition:all .15s;background:#111118}.card:hover{transform:translateY(-2px);border-color:rgba(20,184,166,.3)}.card img{width:100%;aspect-ratio:4/5;object-fit:cover;border:2px solid #111;margin-bottom:12px}.date{font-size:12px;font-weight:900;color:#14b8a6;letter-spacing:.08em;text-transform:uppercase}.card h2{font-size:20px;line-height:1.1;margin:12px 0 8px;font-weight:600;letter-spacing:-.02em;color:#fff}.card p{color:#a1a1aa;font-weight:400;font-size:13px}@media(max-width:600px){.card{min-height:auto}h1{font-size:44px}}.market-overview{margin-bottom:28px;border:2px solid #111;box-shadow:6px 6px 0 #111;background:#fff;padding:16px}.mo-header{font-size:14px;font-weight:900;color:#7c2d12;margin-bottom:14px;letter-spacing:.05em}.mo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px}.mo-card{background:#fafaf9;border:2px solid #e7e5e4;padding:10px;border-radius:4px;text-align:center}.mo-sym{font-size:11px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;color:#7c2d12}.mo-price{font-size:16px;font-weight:900;color:#151515;margin:4px 0 2px}.mo-chg{font-size:12px;font-weight:800}.mo-chg.up{color:#16a34a}.mo-chg.down{color:#dc2626}.mo-name{font-size:10px;color:#57534e;margin-top:2px}
   </style></head><body><main class="wrap"><section class="mast"><div class="k">Little Candle Archive</div><h1>AI Report<br>Portal</h1><p class="sub">Headline besar, ringkasan cepat, full report, PDF, dan content ideas.</p></section>${marketHtml}<section class="grid">${cards || '<p>No reports yet.</p>'}</section></main></body></html>`)
 })
 
@@ -857,6 +857,22 @@ app.get('/report/:slug/card.png', (req, res) => {
 })
 
 app.get('/report/:slug', (req, res) => {
+  const ua = req.headers['user-agent'] || ''
+  const isBot = /bot|spider|crawl|googlebot|bingbot|slurp|duckduckbot|yandexbot|facebookexternalhit|twitterbot/i.test(ua)
+  if (isBot) {
+    // Serve pre-rendered HTML for SEO crawlers
+    const fp = safeReportPath(reportDir, req.params.slug, 'html')
+    if (!fp || !fs.existsSync(fp)) return res.status(404).send('Report not found')
+    res.setHeader('Content-Type', 'text/html; charset=utf-8')
+    return res.send(fs.readFileSync(fp, 'utf8'))
+  }
+  // Serve SPA for real users (redesigned Vue component)
+  const indexPath = path.join(frontendDist, 'index.html')
+  if (fs.existsSync(indexPath)) {
+    res.setHeader('Content-Type', 'text/html; charset=utf-8')
+    return res.sendFile(indexPath)
+  }
+  // Fallback to static HTML
   const fp = safeReportPath(reportDir, req.params.slug, 'html')
   if (!fp || !fs.existsSync(fp)) return res.status(404).send('Report not found')
   res.setHeader('Content-Type', 'text/html; charset=utf-8')
@@ -959,6 +975,21 @@ function reportQualityFromBlocks(slug) {
 // ── Report Data API ──────────────────────────────────────────────────────
 app.get('/api/reports', (_req, res) => {
   const files = fs.readdirSync(reportDir).filter(f => f.endsWith('.json')).sort().reverse()
+  if (_req.query.metadata === 'true') {
+    const enriched = files.map(f => {
+      try {
+        const d = JSON.parse(fs.readFileSync(path.join(reportDir, f), 'utf8'))
+        const slug = f.replace('.json', '')
+        const date = slug
+        const topicCount = (d.topics || []).length
+        const items = (d.topics || []).flatMap(t => t.items || [])
+        const hero = items.find(i => i.title) || {}
+        const title = (hero.title || 'AI Daily Report').replace(/[<>&\"]/g, '')
+        return { slug, date, title, topicCount, itemCount: items.length, hasIncidents: !!d.incidents?.length, incidentCount: d.incidents?.length || 0 }
+      } catch { return { slug: f.replace('.json', ''), date: f.replace('.json', ''), title: 'AI Daily Report', topicCount: 0, itemCount: 0 } }
+    })
+    return res.json(enriched)
+  }
   res.json(files.map(f => f.replace('.json', '')))
 })
 
@@ -1382,6 +1413,29 @@ app.get('*', (req, res) => {
   }
 })
 
+// ── API proxy: forward unknown /api/* to main backend (:4567) ──────────────
+import http from 'node:http'
+const PROXY_TARGET = `http://localhost:${APP_CONFIG?.port || 4567}`
+
+app.use('/api', (req, res, next) => {
+  // If this report-server already handled the route, Express would have sent a response.
+  // Only hit this middleware for routes NOT defined above.
+  // But Express doesn't work that way — all app.use('/api') routes above are matched first.
+  // We need a catch-all that fires after all explicit routes.
+  // Trick: forward only if res hasn't been sent.
+  if (res.headersSent) return next()
+  const targetUrl = new URL(req.originalUrl, PROXY_TARGET)
+  const proxyReq = http.request(targetUrl, {
+    method: req.method,
+    headers: { ...req.headers, host: `localhost:${APP_CONFIG?.port || 4567}` },
+  }, (proxyRes) => {
+    res.writeHead(proxyRes.statusCode, proxyRes.headers)
+    proxyRes.pipe(res)
+  })
+  proxyReq.on('error', () => { if (!res.headersSent) res.status(502).json({ ok: false, error: 'proxy_error' }) })
+  req.pipe(proxyReq)
+})
+
 // ── Error handler ────────────────────────────────────────────────────────
 app.use((err, _req, res, next) => {
   if (err?.type === 'entity.too.large') return res.status(413).json({ ok: false, error: 'payload_too_large', maxBytes: 512000 })
@@ -1390,7 +1444,7 @@ app.use((err, _req, res, next) => {
 })
 
 // ── Start server ─────────────────────────────────────────────────────────
-app.listen(PORT, () => {
-  console.log(`[report-server] listening on http://localhost:${PORT}`)
+app.listen(PORT, '::', () => {
+  console.log(`[report-server] listening on http://localhost:${PORT} (IPv4+IPv6)`)
   console.log(`[report-server] SPA dist: ${frontendDist} (exists: ${fs.existsSync(frontendDist)})`)
 })

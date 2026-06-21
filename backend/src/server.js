@@ -2485,8 +2485,8 @@ if (fs.existsSync(FRONTEND_DIST)) {
   console.warn('[spa] frontend/dist not found at', FRONTEND_DIST)
 }
 
-app.listen(PORT, () => {
-  console.log(`market-orca backend listening on http://localhost:${PORT}`)
+app.listen(PORT, '::', () => {
+  console.log(`market-orca backend listening on http://localhost:${PORT} (IPv4+IPv6)`)
   startStructuredIndonesiaCron()  // New structured Indonesia module
   if (process.env.NO_DISCORD !== '1') initDiscordBot().catch((err) => console.error('[discord] init-failed', err))
   if (jakartaHour() >= 7 && !reportExists(todaySlug())) {
