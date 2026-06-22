@@ -1,23 +1,18 @@
 # =============================================================================
-# Cloudflare Tunnel — Ingress Configuration
-# Replace YOUR_TUNNEL_ID and hostnames with your own values.
-# See: https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/
+# Cloudflare Tunnel — Ingress Configuration (token-based)
 # =============================================================================
 
-tunnel: YOUR_TUNNEL_ID
-credentials-file: /etc/cloudflared/YOUR_TUNNEL_ID.json
-
 ingress:
-  - hostname: market-orca.example.com
-    service: http://localhost:4567
-  - hostname: report.example.com
+  - hostname: report.anomali.web.id
     service: http://localhost:4568
-  - hostname: mcp.example.com
+  - hostname: market-orca.anomali.web.id
+    service: http://localhost:4567
+  - hostname: mcp.anomali.web.id
     service: http://localhost:1788
-  - hostname: searxng.example.com
+  - hostname: searxng.anomali.web.id
     service: http://localhost:18080
-  - hostname: n8n.example.com
+  - hostname: n8n.anomali.web.id
     service: http://localhost:5678
-  - hostname: docs.example.com
+  - hostname: docs.anomali.web.id
     service: http://localhost:4173
   - service: http_status:404

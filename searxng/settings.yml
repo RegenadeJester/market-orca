@@ -1,6 +1,6 @@
 use_default_settings: true
 server:
-  secret_key: "market-orca-aroxng-2026"
+  secret_key: "market-orca-searxng-2026"
   limiter: false
   image_proxy: false
 search:
@@ -29,8 +29,9 @@ engines:
     disabled: false
 
 ui:
-  static_path: "/etc/searxng"
+  static_path: "/usr/local/searxng/searx/static"
   default_locale: ""
+  theme: "simple"
 general:
-  instance_name: "AROXNG"
+  instance_name: "Market Orca Search"
   debug: false
