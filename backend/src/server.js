@@ -1318,6 +1318,88 @@ app.get('/api/alerts/suggested/block', (_req, res) => {
   } catch (e) { res.status(500).json({ ok: false, error: String(e) }) }
 })
 
+// ── Market Alerts Summary Dashboard ───────────────────────────────
+app.get('/api/market/alerts-summary', async (_req, res) => {
+  try {
+    // 1. Active triggered alerts from alerts table
+    const triggeredAlerts = db.prepare(`
+      SELECT a.*, ast.symbol, ast.name, ast.market, ast.category, ast.price AS current_price, ast.change_percent
+      FROM alerts a
+      JOIN assets ast ON ast.slug = a.asset_slug
+      ORDER BY a.id DESC
+      LIMIT 50
+    `).all()
+
+    // 2. Pending suggested alerts from reports
+    const suggestedAlerts = db.prepare(`
+      SELECT sa.*, ast.symbol, ast.name, ast.market, ast.category, ast.price AS current_price, ast.change_percent
+      FROM suggested_alerts sa
+      JOIN assets ast ON ast.slug = sa.asset_slug
+      WHERE sa.status = 'pending'
+      ORDER BY sa.id DESC
+      LIMIT 20
+    `).all()
+
+    // 3. Active threshold alerts from asset_settings
+    const thresholdAlerts = db.prepare(`
+      SELECT ast.slug, ast.symbol, ast.name, ast.market, ast.category, ast.price AS current_price, ast.change_percent,
+             s.threshold_up, s.threshold_down
+      FROM assets ast
+      JOIN asset_settings s ON s.asset_slug = ast.slug
+      WHERE s.watch_enabled = 1
+      ORDER BY ast.change_percent DESC
+    `).all()
+
+    // 4. Compute breach status for threshold alerts
+    const thresholdWithStatus = thresholdAlerts.map(a => {
+      const pct = a.change_percent || 0
+      const up = a.threshold_up || (a.market === 'CRYPTO' ? 3 : a.market === 'IDX' ? 1.5 : 2)
+      const down = a.threshold_down || -up
+      let breach = 'none', severity = 'info'
+      if (pct >= up) { breach = 'up'; severity = pct >= up * 1.5 ? 'critical' : 'warning' }
+      else if (pct <= down) { breach = 'down'; severity = pct <= down * 1.5 ? 'critical' : 'warning' }
+      return { ...a, breach, severity, distance_up: Number((pct - up).toFixed(2)), distance_down: Number((pct - down).toFixed(2)) }
+    }).filter(a => a.breach !== 'none' || Math.abs(a.change_percent || 0) > 0.5)
+
+    // 5. Aggregate stats
+    const triggeredCount = triggeredAlerts.length
+    const suggestedCount = suggestedAlerts.length
+    const thresholdBreaches = thresholdWithStatus.filter(a => a.breach !== 'none').length
+    const criticalCount = [...triggeredAlerts, ...thresholdWithStatus].filter(a => a.severity === 'critical').length
+    const warningCount = [...triggeredAlerts, ...thresholdWithStatus].filter(a => a.severity === 'warning').length
+
+    res.json({
+      ok: true,
+      summary: {
+        triggered: triggeredCount,
+        suggested: suggestedCount,
+        threshold_breaches: thresholdBreaches,
+        critical: criticalCount,
+        warning: warningCount,
+        total_active: triggeredCount + thresholdBreaches
+      },
+      triggered: triggeredAlerts.map(a => ({
+        id: a.id, asset_slug: a.asset_slug, symbol: a.symbol, name: a.name, market: a.market,
+        title: a.title, message: a.message, current_price: a.current_price,
+        change_percent: a.change_percent, created_at: a.created_at, discord_sent: a.discord_sent
+      })),
+      suggested: suggestedAlerts.map(a => ({
+        id: a.id, asset_slug: a.asset_slug, symbol: a.symbol, name: a.name, market: a.market,
+        target_price: a.target_price, direction: a.direction, reason: a.reason,
+        confidence: a.confidence, current_price: a.current_price, change_percent: a.change_percent,
+        distance_pct: Number(((a.target_price - a.current_price) / a.current_price * 100).toFixed(2))
+      })),
+      threshold_alerts: thresholdWithStatus.slice(0, 30).map(a => ({
+        asset_slug: a.slug, symbol: a.symbol, name: a.name, market: a.market,
+        current_price: a.current_price, change_percent: a.change_percent,
+        threshold_up: a.threshold_up, threshold_down: a.threshold_down,
+        breach: a.breach, severity: a.severity,
+        distance_up: a.distance_up, distance_down: a.distance_down
+      }))
+    })
+  } catch (e) { res.status(500).json({ ok: false, error: String(e) }) }
+})
+
 const reportDir = path.join(__dirname, '..', '..', 'reports')
 function usableTopics(topics) { return Array.isArray(topics) && topics.reduce((s,t)=>s+(t.items?.length||0),0) >= 20 }
 function latestSavedReport() {
