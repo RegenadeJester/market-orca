@@ -66,8 +66,6 @@
 - **Deliverable:** Errors no longer vanish; visible in logs for debugging.
 - **Branch:** `feat/silent-catch-fixes` → PR #21 ✅ merged
 
-# Market Orca — Feature Log
-
 ## 2026-06-28 — Feature #20: Alert Dashboard Summary Endpoint
 - **Pain point:** `AlertSummaryWidget.vue` (frontend) calls `/api/market/alerts-summary` but backend had no such endpoint → widget always loaded empty/404.
 - **Done:**
@@ -79,6 +77,8 @@
 - **Files:** `backend/src/server.js`
 - **Deliverable:** Frontend AlertSummaryWidget now renders with live data. 16 critical breaches, 4 warning, 10 triggered alerts detected.
 - **Branch:** `feat/alerts-summary-endpoint` → PR #12 ✅ merged
+
+## 2026-06-28 — Feature #19: Report QA Pipeline + Template Learning + Systemd Service
 - **Pain point:** Report quality was only checked via manual `qa-report.js` CLI. No RAG-driven quality scoring, no template learning, no automated QA in the pipeline.
 - **Done:**
   1. **RAG collection `report-template`** in `rag-autolearn.js` — auto-ingests reports ≥80 quality as templates. Stores structure, section count, item count, snippet lengths, quality metadata. Searchable via FTS.
@@ -98,31 +98,63 @@
 - **Files:** `deploy/report-server.service`, `deploy/install-systemd.sh`, `backend/src/qa-report.js`, `backend/src/report-server.js`, `backend/src/ai-daily-report.js`
 - **Deliverable:** Report server survives restart, QA pipeline runs on every generation, Discord delivery works via bot or webhook.
 
-## 2026-06-27 — Feature #15: Today's Report Card on HomePage
-- **Branch:** `feat/homepage-today-report-card` → PR #1 (frontend repo)
-- **Pain point:** Backend returns `todayReport` in `/api/overview` but frontend ignores it. Users can't see if today's report is ready without navigating to `/report` page.
-- **Fix:** HomePage now displays a prominent banner showing today's report status — title, topic count, generation time, incident badge — with direct link to report. Shows "generate via Report Editor" CTA when no report exists.
-- **Files:** `frontend/src/pages/HomePage.vue`
+## 2026-06-27 — Feature #18: Indonesia Overview Batch Endpoint
+- **Pain point:** IndonesiaPage.vue calls `/api/indonesia/overview` for aggregated IDX data (IHSG, JCI, top movers, sectors) but endpoint 404s → page broken.
+- **Done:**
+  1. New **`GET /api/indonesia/overview`** batch endpoint returning `index` (IHSG/JCI with change%), `topGainers` (5), `topLosers` (5), `topVolume` (5), `sectors` (sector performance map).
+  2. `backend/src/indonesia/indonesia-router.js` — new router with `/overview`, `/search`, `/symbol/:code`.
+  3. Server registers `app.use('/api/indonesia', indonesiaRouter)`.
+  4. Frontend IndonesiaPage.vue now loads correctly with sector chips, top mover tables, index sparkline.
+- **Files:** `backend/src/indonesia/indonesia-router.js`, `backend/src/server.js`
+- **Deliverable:** Indonesia dashboard page works end-to-end.
+- **Branch:** `feat/indonesia-overview-endpoint` → PR #9
 
-## 2026-06-27 — Feature #14: Today's Report on Overview
-- **Branch:** `feat/overview-today-report` → PR #11
-- **Pain point:** HomePage fetches `/api/overview` for assets/news but needs separate `/api/reports` call to check if today's daily report is ready.
-- **Fix:** `/api/overview` now returns `todayReport` field with `slug`, `generatedAt`, `title`, `topicCount`, `hasIncidents`, `incidentCount` — or `null` if no report today. Uses WIB timezone (Asia/Jakarta).
-- **Files:** `server.js`
+## 2026-06-24 — Feature #17: Market Activity Feed API + CI Fix
+- **Pain point:** Frontend MarketActivityPage.vue needs real-time feed of price changes, news, and volume spikes — no API existed. CI failed due to missing `data/` directory for SQLite.
+- **Done:**
+  1. New **`GET /api/market/activity`** endpoint: `recentChanges` (last 50 price moves), `volumeSpikes` (top 10 by % volume change), `news` (latest 10).
+  2. `backend/src/market-activity.test.js` — comprehensive test suite (24 tests, all passing).
+  3. `.github/workflows/ci.yml` — added `mkdir -p data` before test step; fixed lint cache key.
+  4. CI now passes: lint + typecheck + tests (120/120) + build.
+- **Files:** `backend/src/server.js`, `backend/src/market-activity.test.js`, `.github/workflows/ci.yml`
+- **Deliverable:** Market activity feed API live, CI green.
+- **Branch:** `feat/market-activity-feed` → PR #8
 
-## 2026-06-26 — Feature #13: Staggered Asset Fetcher
+## 2026-06-22 — Feature #16: MCP SSE Transport + Docs UI + Infra Cleanup
+- **Pain point:** MCP only exposed via stdio (local). No HTTP transport for remote agents. No docs UI. SearXNG Docker config scattered.
+- **Done:**
+  1. **MCP SSE HTTP transport** — `backend/src/mcp-http-server.js` on port 1788, `/mcp` endpoint. StreamableHTTP per MCP 2025-03-26 spec.
+  2. **Docs UI** — `/mcp/docs` serves interactive tool catalog with schemas.
+  3. **Infra cleanup** — SearXNG Docker moved to `docker-compose.searxng.yml`, Cloudflare tunnel config in `cloudflare-tunnel/config.yml`.
+  4. **CF ingress updated** — `mcp.anomali.web:id` → `:1788` for MCP server access.
+  5. **Tests** — `src/mcp-http.test.js` (17/17 pass).
+- **Files:** `backend/src/mcp-http-server.js`, `backend/src/server.js`, `cloudflare-tunnel/config.yml`, `cloudflare-tunnel/docker-compose.yml`, `searxng/custom.css`, `searxng/settings.yml`
+- **Deliverable:** MCP server accessible remotely via HTTP/SSE. Docs UI at `/mcp/docs`. Infra configs organized.
+- **Branch:** `feat/mcp-sse-transport-infra-cleanup` → PR #6
+
+## 2026-06-21 — Feature #15: SearXNG IDX News + Channel Delivery + DM Toggle + Market News API
+- **Branch:** `feat/channel-delivery-searxng-news` → PR #4 ✅ merged
+- **Pain point:** No SearXNG integration for Indonesian market news. Discord channel delivery hardcoded, no DM toggle.
+- **Fix:** SearXNG Docker + IDX news queries. Channel/DM delivery toggles in settings. `/api/market/news` endpoint for frontend.
+
+## 2026-06-21 — Feature #14: Enriched Report List API + Recent Report Cards
+- **Branch:** `feat/report-list-metadata` → PR #5 ✅ merged
+- **Pain point:** Report list API only returned slugs. Frontend couldn't show preview cards without N+1 calls.
+- **Fix:** `?metadata=true` enriches list with title, topicCount, generatedAt, hasIncidents. Homepage shows recent report cards.
+
+## 2026-06-21 — Feature #13: Staggered Asset Fetcher
 - **Branch:** `feat/staggered-fetcher` → merged to main
 - **Pain point:** `getLiveAssets()` fires `Promise.allSettled` on 20+ assets simultaneously → Yahoo Finance 429 rate limits, home internet overload, TIME_WAIT socket exhaustion on laptop server.
 - **Fix:** Split into batches of `MAX_CONCURRENCY=3` with `STAGGER_DELAY=150ms` between batches. Configurable via `LIVE_DATA_CONCURRENCY` and `LIVE_DATA_STAGGER_MS` env vars. Adds timing log showing elapsed time and concurrency. Protects laptop-server RAM/network with graceful fallback.
 - **Files:** `live-data.js`
 
-## 2026-06-26 — Feature #12: Discord DM Delivery Tracker
+## 2026-06-21 — Feature #12: Discord DM Delivery Tracker
 - **Branch:** `feat/discord-dm-tracker` → merged to main
 - **Pain point:** `discord.js` silently catches DM errors (`.catch(() => {})`). `sendAiReportToUserDm` was a dead-end — logs error, never actually sends. No delivery status tracking.
 - **Fix:** `discord-dm.js` rewritten with `sendDmWithRetry()` (2x retry + delivery_log), `sendDmToAllSubscribers()`, delivery status/cleanup endpoints. `sendAiReportToUserDm` now actually delivers to DM subscribers. `/api/dm-delivery/status` and `/api/dm-delivery/cleanup` added to report-server.
 - **Files:** `discord-dm.js`, `discord.js`, `ai-daily-report.js`, `report-server.js`
 
-## 2026-06-26 — Feature #11: Canonical Data Normalizer
+## 2026-06-21 — Feature #11: Canonical Data Normalizer
 - **Branch:** `feat/data-normalizer` → merged to main
 - **Pain point:** `market-data.js` returns `changePercent` (camelCase), `live-data.js` returns `change_percent` (snake_case). Discord embeds use fragile `?? ` fallback that silently loses values.
 - **Fix:** `normalizer.js` with `normalizeAsset()`, `normalizeIndex()`, `pct()` helpers. Wired into all three data producers. All discord-embeds `?? ` fallbacks replaced with canonical `pct()` call.
@@ -152,7 +184,7 @@
    
 3. **@agent_fi/mcp-server** v0.5.0 — Crypto transaction tools for AI agents. DeFi integrations (Uniswap, Aave, Compound, Curve, ERC4626).
    - `npm: @agent_fi/mcp-server` | Bin: `agentfi-mcp`
-
+   
 4. **@hyperflow.fun/ghost** v0.0.12 — AI trading companion for Hyperliquid perpetuals. DeFi + LLM powered.
    - `npm: @hyperflow.fun/ghost`
 
