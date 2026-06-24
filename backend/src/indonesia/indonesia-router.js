@@ -1,11 +1,12 @@
 /**
- * Indonesia Express Router — 6 endpoints
+ * Indonesia Express Router — 7 endpoints
  * GET /api/indonesia/composite — composite crisis/success score
  * GET /api/indonesia/ihsg      — IHSG data with technicals
  * GET /api/indonesia/crypto    — crypto prices in IDR
  * GET /api/indonesia/macro     — macro indicators (World Bank)
  * GET /api/indonesia/yield-curve — yield curve data
  * GET /api/indonesia/signals   — crisis/success signals
+ * GET /api/indonesia/overview  — batch all data (composite, yield, ihsg, macro, crypto, fear-greed, signals)
  */
 import { Router } from 'express'
 import { calculateCompositeScore, calculateYieldCurveScore, calculateIHSGScore, calculateMacroScore, detectCrisisSignals } from './indicator-calculator.js'
@@ -208,6 +209,79 @@ router.get('/signals', async (req, res) => {
     })
   } catch (e) {
     console.error('[indonesia-router] /signals error:', e.message)
+    res.status(500).json({ ok: false, error: e.message })
+  }
+})
+
+// ── 7. OVERVIEW (batch) ────────────────────────────────────────
+router.get('/overview', async (req, res) => {
+  try {
+    // Fetch all sections in parallel
+    const [compositeResult, yieldResult, ihsgResult, macroResult, cryptoResult, fgResult] = await Promise.allSettled([
+      calculateCompositeScore(),
+      fetchYieldCurve(),
+      Promise.all([fetchIHSG('6mo'), fetchIDXStocks('6mo').catch(() => null), fetchIDRUSD('6mo').catch(() => null)]),
+      fetchMacroData(),
+      fetchCryptoPrices(),
+      fetchFearGreedIndex()
+    ])
+
+    const composite = compositeResult.status === 'fulfilled' ? compositeResult.value : null
+    const yieldCurve = yieldResult.status === 'fulfilled' ? yieldResult.value : null
+    const ihsgData = ihsgResult.status === 'fulfilled' ? ihsgResult.value : null
+    const macroData = macroResult.status === 'fulfilled' ? macroResult.value : null
+    const cryptoData = cryptoResult.status === 'fulfilled' ? cryptoResult.value : null
+    const fgData = fgResult.status === 'fulfilled' ? fgResult.value : null
+
+    // Compute signals from composite if available
+    const signals = composite ? detectCrisisSignals(composite) : []
+
+    // Build IHSG response
+    const ihsg = ihsgData ? {
+      ihsg: {
+        symbol: ihsgData[0]?.symbol,
+        price: ihsgData[0]?.currentPrice,
+        change: ihsgData[0]?.change,
+        changePercent: Number((ihsgData[0]?.changePercent || 0).toFixed(2))
+      },
+      stocks: ihsgData[1]?.stocks || [],
+      idrUsd: ihsgData[2] ? { rate: ihsgData[2].currentRate, changePercent: Number((ihsgData[2].changePercent || 0).toFixed(2)) } : null,
+      bars: (ihsgData[0]?.bars || []).slice(-60)
+    } : null
+
+    // Build yield curve response
+    const yc = yieldCurve?.curve || {}
+    const spread2y10y = Number(((yc['10y'] ?? 5.35) - (yc['2y'] ?? 5.55)).toFixed(4))
+
+    const result = {
+      ok: true,
+      composite: composite ? {
+        compositeScore: composite.compositeScore,
+        zone: composite.zone,
+        breakdown: composite.breakdown,
+        history: getCrisisScoreHistory(30)
+      } : null,
+      yieldCurve: yieldCurve ? {
+        curve: yc,
+        source: yieldCurve.source,
+        status: yieldCurve.status,
+        spread2y10y,
+        inverted: spread2y10y < 0,
+        score: calculateYieldCurveScore(yc),
+        biRate: BI_RATE,
+        interpretation: spread2y10y < 0 ? 'INVERTED — recession signal' : spread2y10y < 0.1 ? 'FLAT — caution' : 'NORMAL — healthy'
+      } : null,
+      ihsg,
+      macro: macroData ? { indicators: macroData.indicators, status: macroData.status } : null,
+      crypto: cryptoData ? { prices: cryptoData.prices } : null,
+      fearGreed: fgData ? { value: fgData.value, classification: fgData.classification } : null,
+      signals,
+      alerts: [],
+      fetchedAt: new Date().toISOString()
+    }
+    res.json(result)
+  } catch (e) {
+    console.error('[indonesia-router] /overview error:', e.message)
     res.status(500).json({ ok: false, error: e.message })
   }
 })
