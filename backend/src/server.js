@@ -1946,6 +1946,69 @@ app.get('/api/reports', (_req, res) => {
   res.json(slugs)
 })
 
+// ── Market Activity Feed ──────────────────────────────────────────────
+app.get('/api/market/activity', (_req, res) => {
+  try {
+    const timestamp = Date.now()
+    const significantMoves = db.prepare(`
+      SELECT slug, symbol, name, market, price, change_percent
+      FROM assets WHERE abs(change_percent) > 1.5 ORDER BY abs(change_percent) DESC LIMIT 10
+    `).all()
+
+    const recentAlerts = db.prepare(`
+      SELECT id, asset_slug, title, message, discord_sent, created_at
+      FROM alerts ORDER BY id DESC LIMIT 8
+    `).all()
+
+    const recentDeliveries = db.prepare(`
+      SELECT id, slug, channel, step, status, detail, created_at
+      FROM delivery_log ORDER BY id DESC LIMIT 8
+    `).all()
+
+    const recentReports = (() => {
+      const dir = path.join(__dirname, '..', '..', 'reports')
+      if (!fs.existsSync(dir)) return []
+      return fs.readdirSync(dir)
+        .filter(f => f.endsWith('.json'))
+        .slice(0, 8)
+        .map(f => {
+          const slug = f.replace(/\.json$/, '')
+          const fp = path.join(dir, f)
+          let title = slug, topicCount = 0, hasIncidents = false
+          try {
+            const data = JSON.parse(fs.readFileSync(fp, 'utf8'))
+            title = data.title || slug
+            topicCount = data.topics?.length || 0
+            hasIncidents = data.incidents?.length > 0
+          } catch {}
+          const stat = fs.statSync(fp)
+          return { slug, title, topicCount, hasIncidents, generatedAt: stat.mtime.toISOString() }
+        })
+        .sort((a, b) => b.generatedAt.localeCompare(a.generatedAt))
+    })()
+
+    const now = new Date().toISOString()
+    res.json({
+      ok: true,
+      timestamp: now,
+      counts: {
+        significantMoves: significantMoves.length,
+        recentAlerts: recentAlerts.length,
+        recentDeliveries: recentDeliveries.length,
+        recentReports: recentReports.length,
+      },
+      data: {
+        significantMoves,
+        recentAlerts,
+        recentDeliveries,
+        recentReports,
+      },
+    })
+  } catch (error) {
+    res.status(500).json({ ok: false, error: String(error) })
+  }
+})
+
 // ── Multi-Channel Report Preview & Edit ──────────────────────────────
 app.get('/api/channel-constraints', (_req, res) => {
   res.json({ ok: true, channels: CHANNEL_CONSTRAINTS })
