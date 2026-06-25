@@ -949,8 +949,19 @@ export async function buildPdfReport(topics) {
 
       const hero = pickHero(topics)
       const heroTitle = safe(punchyHeadline(hero))
+      const heroImageUrl = hero?.imageUrl || hero?.image || null
+      const heroImgBuf = heroImageUrl ? imageBuffers.get(heroImageUrl) : null
 
-      // ─── TITLE PAGE ───
+      // ─── TITLE PAGE WITH HERO IMAGE ───
+      if (heroImgBuf) {
+        try {
+          doc.image(heroImgBuf, 55, 55, { width: 500, height: 280, fit: [500, 280], align: 'center', valign: 'center' })
+          doc.rect(55, 55, 500, 280).stroke('#E5E7EB')
+          doc.y = 345
+        } catch (_) {
+          doc.y = 55
+        }
+      }
       doc.fontSize(24).font('Helvetica-Bold').fillColor(P).text('AI DAILY REPORT', { align: 'center' })
       doc.moveDown(0.6)
       doc.fontSize(22).font('Helvetica-Bold').fillColor(DK).text(heroTitle, { align: 'center', lineGap: 3 })
@@ -958,7 +969,7 @@ export async function buildPdfReport(topics) {
       doc.fontSize(13).font('Helvetica').fillColor(GY).text(dateStr, { align: 'center' })
       doc.moveDown(0.3)
       doc.fontSize(10).font('Helvetica').fillColor(GY).text('Curated by Little Candle -- 18 sources, 13 sections', { align: 'center' })
-      doc.moveDown(1.5)
+      doc.moveDown(1)
       doc.moveTo(55, doc.y).lineTo(545, doc.y).strokeColor(PG).lineWidth(3).stroke()
       doc.moveDown(1.5)
       topics.forEach((t, i) => {
@@ -991,6 +1002,39 @@ export async function buildPdfReport(topics) {
       // ─── MARKET IMPACT PAGE ───
       const impact = buildImpactWatch(topics)
       const quality = reportQuality(topics)
+
+      // ─── TOP STORIES GALLERY (images + headlines) ───
+      const topStories = topics.flatMap(t => (t.items || []).filter(i => i.title && i.imageUrl)).slice(0, 6)
+      if (topStories.length >= 3) {
+        doc.addPage()
+        doc.rect(55, doc.y, 500, 22).fill(PG)
+        doc.fillColor(P).fontSize(13).font('Helvetica-Bold').text('Top Stories Gallery', 65, doc.y + 5)
+        doc.fillColor(DK).moveDown(1.8)
+
+        // Show images in 2 rows of 3
+        const rows = Math.min(2, Math.ceil(topStories.length / 3))
+        for (let row = 0; row < rows; row++) {
+          const rowItems = topStories.slice(row * 3, (row + 1) * 3)
+          const imgY = doc.y
+          let maxH = 90
+          for (const item of rowItems) {
+            const buf = item.imageUrl ? imageBuffers.get(item.imageUrl) : null
+            if (buf) {
+              try {
+                const ix = 55 + rowItems.indexOf(item) * 175
+                doc.image(buf, ix, imgY, { width: 155, height: 90, fit: [155, 90] })
+              } catch (_) {}
+            }
+          }
+          doc.y = imgY + maxH + 8
+          for (const item of rowItems) {
+            const ix = 55 + rowItems.indexOf(item) * 175
+            doc.fontSize(8).font('Helvetica').fillColor(DK).text(safe(item.title).slice(0, 70), ix, doc.y, { width: 155, lineGap: 2 })
+          }
+          doc.moveDown(0.5)
+        }
+      }
+
       doc.addPage()
       doc.rect(55, doc.y, 500, 22).fill(PG)
       doc.fillColor(P).fontSize(13).font('Helvetica-Bold').text('Market Impact + Quality', 65, doc.y + 5)
