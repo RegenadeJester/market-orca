@@ -1442,39 +1442,75 @@ const RSS_FEEDS = [
 // MAIN GENERATION
 // ═══════════════════════════════════════════
 
+/**
+ * Wrapper for feed fetchers: adds a timeout guard + status logging.
+ * Uses Promise.race so a slow feed returns [] instead of hanging the whole batch.
+ */
+async function fetchFeedWithTimeout(label, fetchFn, timeoutMs = 12000) {
+  const start = Date.now()
+  try {
+    const result = await Promise.race([
+      fetchFn(),
+      new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), timeoutMs)),
+    ])
+    const elapsed = Date.now() - start
+    console.log(`[ai-report] ${label}: ok ${result.length} items (${elapsed}ms)`)
+    return result
+  } catch (e) {
+    const elapsed = Date.now() - start
+    const reason = e.message === 'timeout' ? 'timeout' : e.message.slice(0, 60)
+    console.warn(`[ai-report] ${label}: fail ${reason} (${elapsed}ms)`)
+    return []
+  }
+}
+
 export async function generateAiDailyReport() {
   const startTime = Date.now()
-  console.log('[ai-report] Generating...')
+  console.log('[ai-report] Generating with timeouts per feed...')
 
+  // Fetch all feeds in parallel with individual timeouts; one failure doesn't block others
+  const results = await Promise.allSettled([
+    fetchFeedWithTimeout('HN', fetchFromHNSearch),
+    fetchFeedWithTimeout('TechCrunch', () => fetchFromRSS(RSS_FEEDS[0].url, RSS_FEEDS[0].label)),
+    fetchFeedWithTimeout('VentureBeat', () => fetchFromRSS(RSS_FEEDS[1].url, RSS_FEEDS[1].label)),
+    fetchFeedWithTimeout('TheVerge', () => fetchFromRSS(RSS_FEEDS[2].url, RSS_FEEDS[2].label)),
+    fetchFeedWithTimeout('GoogleAI', () => fetchFromRSS(RSS_FEEDS[3].url, RSS_FEEDS[3].label, { onlyAi: true })),
+    fetchFeedWithTimeout('MIT_TechRev', () => fetchFromRSS(RSS_FEEDS[4].url, RSS_FEEDS[4].label)),
+    fetchFeedWithTimeout('ArsTechnica', () => fetchFromRSS(RSS_FEEDS[5].url, RSS_FEEDS[5].label)),
+    fetchFeedWithTimeout('DevTo', () => fetchFromRSS(RSS_FEEDS[6].url, RSS_FEEDS[6].label, { maxItems: 8 })),
+    fetchFeedWithTimeout('BBC_Tech', () => fetchFromRSS(RSS_FEEDS[7].url, RSS_FEEDS[7].label)),
+    fetchFeedWithTimeout('GuardianTech', () => fetchFromRSS(RSS_FEEDS[8].url, RSS_FEEDS[8].label)),
+    fetchFeedWithTimeout('Engadget', () => fetchFromRSS(RSS_FEEDS[9].url, RSS_FEEDS[9].label)),
+    fetchFeedWithTimeout('CNBCTech', () => fetchFromRSS(RSS_FEEDS[10].url, RSS_FEEDS[10].label)),
+    fetchFeedWithTimeout('CoinDesk', () => fetchFromRSS(RSS_FEEDS[11].url, RSS_FEEDS[11].label)),
+    fetchFeedWithTimeout('AnalyticsVidhya', () => fetchFromRSS(RSS_FEEDS[12].url, RSS_FEEDS[12].label)),
+    fetchFeedWithTimeout('Forbes', () => fetchFromRSS(RSS_FEEDS[13].url, RSS_FEEDS[13].label)),
+    fetchFeedWithTimeout('MarketWatch', () => fetchFromRSS(RSS_FEEDS[14].url, RSS_FEEDS[14].label)),
+    fetchFeedWithTimeout('HF_Models', fetchFromHF),
+    fetchFeedWithTimeout('GitHub', fetchFromGitHub),
+  ])
+
+  // Unwrap results (allSettled guaranteed to resolve)
+  const extract = (i) => results[i]?.status === 'fulfilled' ? results[i].value : []
   const [
     hnArticles, tcArticles, vbArticles, vergeArticles, googleArticles,
     mitArticles, arsArticles, devArticles, bbcArticles, guardianArticles,
     engadgetArticles, cnbcArticles, coinDeskArticles, avArticles,
     forbesArticles, marketWatchArticles,
     hfModels, ghRepos,
-  ] = await Promise.all([
-    fetchFromHNSearch(),
-    fetchFromRSS(RSS_FEEDS[0].url, RSS_FEEDS[0].label),
-    fetchFromRSS(RSS_FEEDS[1].url, RSS_FEEDS[1].label),
-    fetchFromRSS(RSS_FEEDS[2].url, RSS_FEEDS[2].label),
-    fetchFromRSS(RSS_FEEDS[3].url, RSS_FEEDS[3].label, { onlyAi: true }),
-    fetchFromRSS(RSS_FEEDS[4].url, RSS_FEEDS[4].label),
-    fetchFromRSS(RSS_FEEDS[5].url, RSS_FEEDS[5].label),
-    fetchFromRSS(RSS_FEEDS[6].url, RSS_FEEDS[6].label, { maxItems: 8 }),
-    fetchFromRSS(RSS_FEEDS[7].url, RSS_FEEDS[7].label),
-    fetchFromRSS(RSS_FEEDS[8].url, RSS_FEEDS[8].label),
-    fetchFromRSS(RSS_FEEDS[9].url, RSS_FEEDS[9].label),
-    fetchFromRSS(RSS_FEEDS[10].url, RSS_FEEDS[10].label),
-    fetchFromRSS(RSS_FEEDS[11].url, RSS_FEEDS[11].label),
-    fetchFromRSS(RSS_FEEDS[12].url, RSS_FEEDS[12].label),
-    fetchFromRSS(RSS_FEEDS[13].url, RSS_FEEDS[13].label),
-    fetchFromRSS(RSS_FEEDS[14].url, RSS_FEEDS[14].label),
-    fetchFromHF(),
-    fetchFromGitHub(),
-  ])
+  ] = [
+    extract(0), extract(1), extract(2), extract(3), extract(4),
+    extract(5), extract(6), extract(7), extract(8), extract(9),
+    extract(10), extract(11), extract(12), extract(13), extract(14),
+    extract(15), extract(16), extract(17),
+  ]
 
-  const log = (l,a) => `${l}=${a.length}`
-  console.log(`[ai-report] Sources: ${log('HN',hnArticles)} ${log('TC',tcArticles)} ${log('VB',vbArticles)} ${log('VG',vergeArticles)} ${log('GA',googleArticles)} ${log('MIT',mitArticles)} ${log('Ars',arsArticles)} ${log('Dev',devArticles)} ${log('BBC',bbcArticles)} ${log('GRD',guardianArticles)} ${log('ENG',engadgetArticles)} ${log('CNBC',cnbcArticles)} ${log('CD',coinDeskArticles)} ${log('AV',avArticles)} ${log('FB',forbesArticles)} ${log('MW',marketWatchArticles)} ${log('HF',hfModels)} ${log('GH',ghRepos)}`)
+  const totalItems = hnArticles.length + tcArticles.length + vbArticles.length + vergeArticles.length +
+    googleArticles.length + mitArticles.length + arsArticles.length + devArticles.length +
+    bbcArticles.length + guardianArticles.length + engadgetArticles.length + cnbcArticles.length +
+    coinDeskArticles.length + avArticles.length + forbesArticles.length + marketWatchArticles.length +
+    hfModels.length + ghRepos.length
+  console.log(`[ai-report] Total items from all feeds: ${totalItems}`)
 
   const allArticles = await enrichOgThumbnails(stripStaleAndDupe([
     ...hnArticles, ...tcArticles, ...vbArticles, ...vergeArticles, ...googleArticles,
