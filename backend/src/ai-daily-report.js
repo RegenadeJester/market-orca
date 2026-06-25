@@ -1983,45 +1983,116 @@ function showToast(msg){ let t=document.getElementById('toast'); if(!t){t=docume
 function stripLongRagBlock(s) {
   return String(s || '').replace(/\n## Retrieval Evidence \/ RAG[\s\S]*?(?=\n[-=·%]{5,}|\n## Market Impact Watch|\n## Actionable)/, '\n## Bukti & Sitasi\n- Ringkasan sumber lengkap tersedia di web/MD/PDF.\n')
 }
+// Sections that should be REMOVED from the Discord digest (internal/QA/meta, not user-facing)
+const DIGEST_REMOVE_SECTIONS = new Set([
+  'user context',
+  'report quality',
+  'improvement / added features qa pack',
+  'reliability / incident / qa add-on batch 3',
+  'anomali harga/volume',
+  '⚡ suggested alerts',
+  'actionable watchlist',
+  'bukti & sitasi',
+  'data status',
+  'context gap interviewer',
+  'market impact watch',
+  'sentiment trend',
+  'source diversity score',
+  'market regime',
+  'tailored for you',
+  'data quality & validation',
+])
+
+/**
+ * Strip internal/QA sections from report text for Discord digest.
+ * Uses explicit section header matching (not regex boundary hacks).
+ */
 function discordDigest(text) {
   const s = stripLongRagBlock(text)
   const cut = s.indexOf('\n# Full Drop')
   let digest = cut > 0 ? s.slice(0, cut).trim() : s.trim()
 
-  // Remove internal/QA sections — keep only user-facing blocks
-  const removeSections = [
-    /\n## User Context[\s\S]*?(?=\n[·▸\n]+\n)/,
-    /\n## Report Quality[\s\S]*?(?=\n[·▸\n]+\n)/,
-    /\n## Improvement \/ Added Features QA Pack[\s\S]*?(?=\n[·▸\n]+\n)/,
-    /\n## Reliability \/ Incident \/ QA Add-on Batch 3[\s\S]*?(?=\n[·▸\n]+\n)/,
-    /\n## Anomali Harga\/Volume[\s\S]*?(?=\n[·▸\n]+\n)/,
-    /\n## ⚡ Suggested Alerts[\s\S]*?(?=\n[·▸\n]+\n)/,
-    /\n## Actionable Watchlist[\s\S]*?(?=\n## Red Flags|\n$)/,
-    /\n## Bukti & Sitasi[\s\S]*?(?=\n[·▸\n]+\n)/,
-    /\n## Data Status[\s\S]*?(?=\n[·▸\n]+\n)/,
-  ]
-  for (const pat of removeSections) digest = digest.replace(pat, '')
+  // Split by section headers (## or #) and filter out internal sections
+  const lines = digest.split('\n')
+  const kept = []
+  let skipUntilNextSection = false
+  for (const line of lines) {
+    const headerMatch = line.match(/^#{1,2}\s+(.+)/)
+    if (headerMatch) {
+      const headerLower = headerMatch[1].trim().toLowerCase()
+      skipUntilNextSection = DIGEST_REMOVE_SECTIONS.has(headerLower)
+    }
+    if (!skipUntilNextSection) kept.push(line)
+  }
+  digest = kept.join('\n')
 
-  // Remove empty funFact sections
+  // Remove empty funFact lines
   digest = digest.replace(/\n\*\*Fun Fact:\*\*.*(?:\n|$)/g, '')
 
   // Standardize dotline separators
   digest = digest.replace(/(\n[·▸─\n]+\n)+/g, '\n──────\n\n').trim()
 
+  // Smart truncation at sentence boundary
   const maxChars = 7600
   if (digest.length > maxChars) {
     let endPos = maxChars
-    const lastSentence = Math.max(digest.lastIndexOf('. ', maxChars), digest.lastIndexOf('!\n', maxChars), digest.lastIndexOf('?\n', maxChars), digest.lastIndexOf('.\n', maxChars))
-    if (lastSentence > maxChars * 0.6) {
+    const lastSentence = Math.max(
+      digest.lastIndexOf('. ', maxChars),
+      digest.lastIndexOf('!\n', maxChars),
+      digest.lastIndexOf('?\n', maxChars),
+      digest.lastIndexOf('.\n', maxChars),
+      digest.lastIndexOf('\n\n', maxChars),
+    )
+    if (lastSentence > maxChars * 0.5) {
       endPos = lastSentence + 2
     } else {
       endPos = digest.lastIndexOf('\n', maxChars)
-      if (endPos < maxChars * 0.5) endPos = maxChars
+      if (endPos < maxChars * 0.4) endPos = maxChars
     }
     while (endPos > 0 && /\S/.test(digest[endPos - 1]) && /\S/.test(digest[endPos])) endPos--
     digest = digest.slice(0, endPos).trim() + '\n\n…dipotong. Full report ada di web/MD/PDF.'
   }
   return `${digest}\n\nFull report ada di web/MD/PDF.`
+}
+
+/**
+ * Build a rich Embed card to lead the Discord digest.
+ * Shows top story, stats, regime, and links — makes the report visually scannable.
+ */
+function buildDigestEmbed(text, topics) {
+  try {
+    const hero = pickHero(topics)
+    const impact = buildImpactWatch(topics)
+    const quality = reportQuality(topics)
+    const allItems = topics.flatMap(t => t.items.filter(i => i.title))
+    const sources = new Set(allItems.map(i => i.source).filter(Boolean)).size
+    const dateStr = formatDateIndonesia()
+
+    const embed = new EmbedBuilder()
+      .setColor(impact.regime.regime === 'risk-on' ? 0x22c55e : impact.regime.regime === 'risk-off' ? 0xef4444 : 0x6366f1)
+      .setTitle(hero ? clean(hero.title).slice(0, 100) : 'AI Daily Report')
+      .setURL(hero?.url || 'https://market-orca.local')
+      .setDescription(`📅 ${dateStr}\n${hero ? clean(whyItMatters(hero)).slice(0, 200) : ''}`)
+      .addFields(
+        { name: '📊 Stats', value: `${allItems.length} item · ${sources} sumber · Quality ${quality.score}/100`, inline: true },
+        { name: '📈 Regime', value: `${impact.regime.regime.toUpperCase()} ${impact.regime.signals.slice(0, 2).join(' · ')}`, inline: true },
+        { name: '🇮🇩 Indonesia', value: impact.pulse ? impact.pulse.slice(0, 100) : 'data pending', inline: true },
+      )
+      .setTimestamp()
+      .setFooter({ text: `🐋 Little Candle · market-orca` })
+
+    // Add og:image of hero if available
+    const heroImg = hero?.imageUrl || hero?.image
+    if (heroImg) embed.setImage(heroImg)
+
+    return embed
+  } catch {
+    return new EmbedBuilder()
+      .setColor(0x6366f1)
+      .setTitle('📊 AI Daily Report')
+      .setDescription('Gagal membangun embed ringkasan.')
+      .setTimestamp()
+  }
 }
 
 function splitDiscordText(text, max = 1900) {
@@ -2084,7 +2155,13 @@ export async function sendAiReportToUser(textReport, _embed, topics) {
   const channel = await botClient.channels.fetch(channelId).catch(() => null)
   if (!channel) { console.warn(`[ai-report] Channel ${channelId} not found, fallback DM`); return sendAiReportToUserDm(textReport, _embed, topics) }
 
-  // Send text digest as multiple messages (Discord 2000 char limit)
+  // ── Send rich embed card FIRST (visual summary) ──
+  const digestEmbed = buildDigestEmbed(textReport, topics)
+  await channel.send({ embeds: [digestEmbed] })
+    .then(() => logDelivery('daily', 'embed_card', 'ok'))
+    .catch(e => { logDelivery('daily', 'embed_card', 'fail', e.message); console.warn('[ai-report] embed card send fail:', e.message) })
+
+  // ── Send text digest as follow-up messages ──
   const parts = splitDiscordText(discordDigest(textReport), 1900)
   let totalParts = 0
   for (let i = 0; i < parts.length; i++) {
