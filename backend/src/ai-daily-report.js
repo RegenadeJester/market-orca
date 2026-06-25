@@ -949,8 +949,19 @@ export async function buildPdfReport(topics) {
 
       const hero = pickHero(topics)
       const heroTitle = safe(punchyHeadline(hero))
+      const heroImageUrl = hero?.imageUrl || hero?.image || null
+      const heroImgBuf = heroImageUrl ? imageBuffers.get(heroImageUrl) : null
 
-      // ─── TITLE PAGE ───
+      // ─── TITLE PAGE WITH HERO IMAGE ───
+      if (heroImgBuf) {
+        try {
+          doc.image(heroImgBuf, 55, 55, { width: 500, height: 280, fit: [500, 280], align: 'center', valign: 'center' })
+          doc.rect(55, 55, 500, 280).stroke('#E5E7EB')
+          doc.y = 345
+        } catch (_) {
+          doc.y = 55
+        }
+      }
       doc.fontSize(24).font('Helvetica-Bold').fillColor(P).text('AI DAILY REPORT', { align: 'center' })
       doc.moveDown(0.6)
       doc.fontSize(22).font('Helvetica-Bold').fillColor(DK).text(heroTitle, { align: 'center', lineGap: 3 })
@@ -958,7 +969,7 @@ export async function buildPdfReport(topics) {
       doc.fontSize(13).font('Helvetica').fillColor(GY).text(dateStr, { align: 'center' })
       doc.moveDown(0.3)
       doc.fontSize(10).font('Helvetica').fillColor(GY).text('Curated by Little Candle -- 18 sources, 13 sections', { align: 'center' })
-      doc.moveDown(1.5)
+      doc.moveDown(1)
       doc.moveTo(55, doc.y).lineTo(545, doc.y).strokeColor(PG).lineWidth(3).stroke()
       doc.moveDown(1.5)
       topics.forEach((t, i) => {
@@ -991,6 +1002,39 @@ export async function buildPdfReport(topics) {
       // ─── MARKET IMPACT PAGE ───
       const impact = buildImpactWatch(topics)
       const quality = reportQuality(topics)
+
+      // ─── TOP STORIES GALLERY (images + headlines) ───
+      const topStories = topics.flatMap(t => (t.items || []).filter(i => i.title && i.imageUrl)).slice(0, 6)
+      if (topStories.length >= 3) {
+        doc.addPage()
+        doc.rect(55, doc.y, 500, 22).fill(PG)
+        doc.fillColor(P).fontSize(13).font('Helvetica-Bold').text('Top Stories Gallery', 65, doc.y + 5)
+        doc.fillColor(DK).moveDown(1.8)
+
+        // Show images in 2 rows of 3
+        const rows = Math.min(2, Math.ceil(topStories.length / 3))
+        for (let row = 0; row < rows; row++) {
+          const rowItems = topStories.slice(row * 3, (row + 1) * 3)
+          const imgY = doc.y
+          let maxH = 90
+          for (const item of rowItems) {
+            const buf = item.imageUrl ? imageBuffers.get(item.imageUrl) : null
+            if (buf) {
+              try {
+                const ix = 55 + rowItems.indexOf(item) * 175
+                doc.image(buf, ix, imgY, { width: 155, height: 90, fit: [155, 90] })
+              } catch (_) {}
+            }
+          }
+          doc.y = imgY + maxH + 8
+          for (const item of rowItems) {
+            const ix = 55 + rowItems.indexOf(item) * 175
+            doc.fontSize(8).font('Helvetica').fillColor(DK).text(safe(item.title).slice(0, 70), ix, doc.y, { width: 155, lineGap: 2 })
+          }
+          doc.moveDown(0.5)
+        }
+      }
+
       doc.addPage()
       doc.rect(55, doc.y, 500, 22).fill(PG)
       doc.fillColor(P).fontSize(13).font('Helvetica-Bold').text('Market Impact + Quality', 65, doc.y + 5)
@@ -1442,39 +1486,75 @@ const RSS_FEEDS = [
 // MAIN GENERATION
 // ═══════════════════════════════════════════
 
+/**
+ * Wrapper for feed fetchers: adds a timeout guard + status logging.
+ * Uses Promise.race so a slow feed returns [] instead of hanging the whole batch.
+ */
+async function fetchFeedWithTimeout(label, fetchFn, timeoutMs = 12000) {
+  const start = Date.now()
+  try {
+    const result = await Promise.race([
+      fetchFn(),
+      new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), timeoutMs)),
+    ])
+    const elapsed = Date.now() - start
+    console.log(`[ai-report] ${label}: ok ${result.length} items (${elapsed}ms)`)
+    return result
+  } catch (e) {
+    const elapsed = Date.now() - start
+    const reason = e.message === 'timeout' ? 'timeout' : e.message.slice(0, 60)
+    console.warn(`[ai-report] ${label}: fail ${reason} (${elapsed}ms)`)
+    return []
+  }
+}
+
 export async function generateAiDailyReport() {
   const startTime = Date.now()
-  console.log('[ai-report] Generating...')
+  console.log('[ai-report] Generating with timeouts per feed...')
 
+  // Fetch all feeds in parallel with individual timeouts; one failure doesn't block others
+  const results = await Promise.allSettled([
+    fetchFeedWithTimeout('HN', fetchFromHNSearch),
+    fetchFeedWithTimeout('TechCrunch', () => fetchFromRSS(RSS_FEEDS[0].url, RSS_FEEDS[0].label)),
+    fetchFeedWithTimeout('VentureBeat', () => fetchFromRSS(RSS_FEEDS[1].url, RSS_FEEDS[1].label)),
+    fetchFeedWithTimeout('TheVerge', () => fetchFromRSS(RSS_FEEDS[2].url, RSS_FEEDS[2].label)),
+    fetchFeedWithTimeout('GoogleAI', () => fetchFromRSS(RSS_FEEDS[3].url, RSS_FEEDS[3].label, { onlyAi: true })),
+    fetchFeedWithTimeout('MIT_TechRev', () => fetchFromRSS(RSS_FEEDS[4].url, RSS_FEEDS[4].label)),
+    fetchFeedWithTimeout('ArsTechnica', () => fetchFromRSS(RSS_FEEDS[5].url, RSS_FEEDS[5].label)),
+    fetchFeedWithTimeout('DevTo', () => fetchFromRSS(RSS_FEEDS[6].url, RSS_FEEDS[6].label, { maxItems: 8 })),
+    fetchFeedWithTimeout('BBC_Tech', () => fetchFromRSS(RSS_FEEDS[7].url, RSS_FEEDS[7].label)),
+    fetchFeedWithTimeout('GuardianTech', () => fetchFromRSS(RSS_FEEDS[8].url, RSS_FEEDS[8].label)),
+    fetchFeedWithTimeout('Engadget', () => fetchFromRSS(RSS_FEEDS[9].url, RSS_FEEDS[9].label)),
+    fetchFeedWithTimeout('CNBCTech', () => fetchFromRSS(RSS_FEEDS[10].url, RSS_FEEDS[10].label)),
+    fetchFeedWithTimeout('CoinDesk', () => fetchFromRSS(RSS_FEEDS[11].url, RSS_FEEDS[11].label)),
+    fetchFeedWithTimeout('AnalyticsVidhya', () => fetchFromRSS(RSS_FEEDS[12].url, RSS_FEEDS[12].label)),
+    fetchFeedWithTimeout('Forbes', () => fetchFromRSS(RSS_FEEDS[13].url, RSS_FEEDS[13].label)),
+    fetchFeedWithTimeout('MarketWatch', () => fetchFromRSS(RSS_FEEDS[14].url, RSS_FEEDS[14].label)),
+    fetchFeedWithTimeout('HF_Models', fetchFromHF),
+    fetchFeedWithTimeout('GitHub', fetchFromGitHub),
+  ])
+
+  // Unwrap results (allSettled guaranteed to resolve)
+  const extract = (i) => results[i]?.status === 'fulfilled' ? results[i].value : []
   const [
     hnArticles, tcArticles, vbArticles, vergeArticles, googleArticles,
     mitArticles, arsArticles, devArticles, bbcArticles, guardianArticles,
     engadgetArticles, cnbcArticles, coinDeskArticles, avArticles,
     forbesArticles, marketWatchArticles,
     hfModels, ghRepos,
-  ] = await Promise.all([
-    fetchFromHNSearch(),
-    fetchFromRSS(RSS_FEEDS[0].url, RSS_FEEDS[0].label),
-    fetchFromRSS(RSS_FEEDS[1].url, RSS_FEEDS[1].label),
-    fetchFromRSS(RSS_FEEDS[2].url, RSS_FEEDS[2].label),
-    fetchFromRSS(RSS_FEEDS[3].url, RSS_FEEDS[3].label, { onlyAi: true }),
-    fetchFromRSS(RSS_FEEDS[4].url, RSS_FEEDS[4].label),
-    fetchFromRSS(RSS_FEEDS[5].url, RSS_FEEDS[5].label),
-    fetchFromRSS(RSS_FEEDS[6].url, RSS_FEEDS[6].label, { maxItems: 8 }),
-    fetchFromRSS(RSS_FEEDS[7].url, RSS_FEEDS[7].label),
-    fetchFromRSS(RSS_FEEDS[8].url, RSS_FEEDS[8].label),
-    fetchFromRSS(RSS_FEEDS[9].url, RSS_FEEDS[9].label),
-    fetchFromRSS(RSS_FEEDS[10].url, RSS_FEEDS[10].label),
-    fetchFromRSS(RSS_FEEDS[11].url, RSS_FEEDS[11].label),
-    fetchFromRSS(RSS_FEEDS[12].url, RSS_FEEDS[12].label),
-    fetchFromRSS(RSS_FEEDS[13].url, RSS_FEEDS[13].label),
-    fetchFromRSS(RSS_FEEDS[14].url, RSS_FEEDS[14].label),
-    fetchFromHF(),
-    fetchFromGitHub(),
-  ])
+  ] = [
+    extract(0), extract(1), extract(2), extract(3), extract(4),
+    extract(5), extract(6), extract(7), extract(8), extract(9),
+    extract(10), extract(11), extract(12), extract(13), extract(14),
+    extract(15), extract(16), extract(17),
+  ]
 
-  const log = (l,a) => `${l}=${a.length}`
-  console.log(`[ai-report] Sources: ${log('HN',hnArticles)} ${log('TC',tcArticles)} ${log('VB',vbArticles)} ${log('VG',vergeArticles)} ${log('GA',googleArticles)} ${log('MIT',mitArticles)} ${log('Ars',arsArticles)} ${log('Dev',devArticles)} ${log('BBC',bbcArticles)} ${log('GRD',guardianArticles)} ${log('ENG',engadgetArticles)} ${log('CNBC',cnbcArticles)} ${log('CD',coinDeskArticles)} ${log('AV',avArticles)} ${log('FB',forbesArticles)} ${log('MW',marketWatchArticles)} ${log('HF',hfModels)} ${log('GH',ghRepos)}`)
+  const totalItems = hnArticles.length + tcArticles.length + vbArticles.length + vergeArticles.length +
+    googleArticles.length + mitArticles.length + arsArticles.length + devArticles.length +
+    bbcArticles.length + guardianArticles.length + engadgetArticles.length + cnbcArticles.length +
+    coinDeskArticles.length + avArticles.length + forbesArticles.length + marketWatchArticles.length +
+    hfModels.length + ghRepos.length
+  console.log(`[ai-report] Total items from all feeds: ${totalItems}`)
 
   const allArticles = await enrichOgThumbnails(stripStaleAndDupe([
     ...hnArticles, ...tcArticles, ...vbArticles, ...vergeArticles, ...googleArticles,
@@ -1983,45 +2063,116 @@ function showToast(msg){ let t=document.getElementById('toast'); if(!t){t=docume
 function stripLongRagBlock(s) {
   return String(s || '').replace(/\n## Retrieval Evidence \/ RAG[\s\S]*?(?=\n[-=·%]{5,}|\n## Market Impact Watch|\n## Actionable)/, '\n## Bukti & Sitasi\n- Ringkasan sumber lengkap tersedia di web/MD/PDF.\n')
 }
+// Sections that should be REMOVED from the Discord digest (internal/QA/meta, not user-facing)
+const DIGEST_REMOVE_SECTIONS = new Set([
+  'user context',
+  'report quality',
+  'improvement / added features qa pack',
+  'reliability / incident / qa add-on batch 3',
+  'anomali harga/volume',
+  '⚡ suggested alerts',
+  'actionable watchlist',
+  'bukti & sitasi',
+  'data status',
+  'context gap interviewer',
+  'market impact watch',
+  'sentiment trend',
+  'source diversity score',
+  'market regime',
+  'tailored for you',
+  'data quality & validation',
+])
+
+/**
+ * Strip internal/QA sections from report text for Discord digest.
+ * Uses explicit section header matching (not regex boundary hacks).
+ */
 function discordDigest(text) {
   const s = stripLongRagBlock(text)
   const cut = s.indexOf('\n# Full Drop')
   let digest = cut > 0 ? s.slice(0, cut).trim() : s.trim()
 
-  // Remove internal/QA sections — keep only user-facing blocks
-  const removeSections = [
-    /\n## User Context[\s\S]*?(?=\n[·▸\n]+\n)/,
-    /\n## Report Quality[\s\S]*?(?=\n[·▸\n]+\n)/,
-    /\n## Improvement \/ Added Features QA Pack[\s\S]*?(?=\n[·▸\n]+\n)/,
-    /\n## Reliability \/ Incident \/ QA Add-on Batch 3[\s\S]*?(?=\n[·▸\n]+\n)/,
-    /\n## Anomali Harga\/Volume[\s\S]*?(?=\n[·▸\n]+\n)/,
-    /\n## ⚡ Suggested Alerts[\s\S]*?(?=\n[·▸\n]+\n)/,
-    /\n## Actionable Watchlist[\s\S]*?(?=\n## Red Flags|\n$)/,
-    /\n## Bukti & Sitasi[\s\S]*?(?=\n[·▸\n]+\n)/,
-    /\n## Data Status[\s\S]*?(?=\n[·▸\n]+\n)/,
-  ]
-  for (const pat of removeSections) digest = digest.replace(pat, '')
+  // Split by section headers (## or #) and filter out internal sections
+  const lines = digest.split('\n')
+  const kept = []
+  let skipUntilNextSection = false
+  for (const line of lines) {
+    const headerMatch = line.match(/^#{1,2}\s+(.+)/)
+    if (headerMatch) {
+      const headerLower = headerMatch[1].trim().toLowerCase()
+      skipUntilNextSection = DIGEST_REMOVE_SECTIONS.has(headerLower)
+    }
+    if (!skipUntilNextSection) kept.push(line)
+  }
+  digest = kept.join('\n')
 
-  // Remove empty funFact sections
+  // Remove empty funFact lines
   digest = digest.replace(/\n\*\*Fun Fact:\*\*.*(?:\n|$)/g, '')
 
   // Standardize dotline separators
   digest = digest.replace(/(\n[·▸─\n]+\n)+/g, '\n──────\n\n').trim()
 
+  // Smart truncation at sentence boundary
   const maxChars = 7600
   if (digest.length > maxChars) {
     let endPos = maxChars
-    const lastSentence = Math.max(digest.lastIndexOf('. ', maxChars), digest.lastIndexOf('!\n', maxChars), digest.lastIndexOf('?\n', maxChars), digest.lastIndexOf('.\n', maxChars))
-    if (lastSentence > maxChars * 0.6) {
+    const lastSentence = Math.max(
+      digest.lastIndexOf('. ', maxChars),
+      digest.lastIndexOf('!\n', maxChars),
+      digest.lastIndexOf('?\n', maxChars),
+      digest.lastIndexOf('.\n', maxChars),
+      digest.lastIndexOf('\n\n', maxChars),
+    )
+    if (lastSentence > maxChars * 0.5) {
       endPos = lastSentence + 2
     } else {
       endPos = digest.lastIndexOf('\n', maxChars)
-      if (endPos < maxChars * 0.5) endPos = maxChars
+      if (endPos < maxChars * 0.4) endPos = maxChars
     }
     while (endPos > 0 && /\S/.test(digest[endPos - 1]) && /\S/.test(digest[endPos])) endPos--
     digest = digest.slice(0, endPos).trim() + '\n\n…dipotong. Full report ada di web/MD/PDF.'
   }
   return `${digest}\n\nFull report ada di web/MD/PDF.`
+}
+
+/**
+ * Build a rich Embed card to lead the Discord digest.
+ * Shows top story, stats, regime, and links — makes the report visually scannable.
+ */
+function buildDigestEmbed(text, topics) {
+  try {
+    const hero = pickHero(topics)
+    const impact = buildImpactWatch(topics)
+    const quality = reportQuality(topics)
+    const allItems = topics.flatMap(t => t.items.filter(i => i.title))
+    const sources = new Set(allItems.map(i => i.source).filter(Boolean)).size
+    const dateStr = formatDateIndonesia()
+
+    const embed = new EmbedBuilder()
+      .setColor(impact.regime.regime === 'risk-on' ? 0x22c55e : impact.regime.regime === 'risk-off' ? 0xef4444 : 0x6366f1)
+      .setTitle(hero ? clean(hero.title).slice(0, 100) : 'AI Daily Report')
+      .setURL(hero?.url || 'https://market-orca.local')
+      .setDescription(`📅 ${dateStr}\n${hero ? clean(whyItMatters(hero)).slice(0, 200) : ''}`)
+      .addFields(
+        { name: '📊 Stats', value: `${allItems.length} item · ${sources} sumber · Quality ${quality.score}/100`, inline: true },
+        { name: '📈 Regime', value: `${impact.regime.regime.toUpperCase()} ${impact.regime.signals.slice(0, 2).join(' · ')}`, inline: true },
+        { name: '🇮🇩 Indonesia', value: impact.pulse ? impact.pulse.slice(0, 100) : 'data pending', inline: true },
+      )
+      .setTimestamp()
+      .setFooter({ text: `🐋 Little Candle · market-orca` })
+
+    // Add og:image of hero if available
+    const heroImg = hero?.imageUrl || hero?.image
+    if (heroImg) embed.setImage(heroImg)
+
+    return embed
+  } catch {
+    return new EmbedBuilder()
+      .setColor(0x6366f1)
+      .setTitle('📊 AI Daily Report')
+      .setDescription('Gagal membangun embed ringkasan.')
+      .setTimestamp()
+  }
 }
 
 function splitDiscordText(text, max = 1900) {
@@ -2084,7 +2235,13 @@ export async function sendAiReportToUser(textReport, _embed, topics) {
   const channel = await botClient.channels.fetch(channelId).catch(() => null)
   if (!channel) { console.warn(`[ai-report] Channel ${channelId} not found, fallback DM`); return sendAiReportToUserDm(textReport, _embed, topics) }
 
-  // Send text digest as multiple messages (Discord 2000 char limit)
+  // ── Send rich embed card FIRST (visual summary) ──
+  const digestEmbed = buildDigestEmbed(textReport, topics)
+  await channel.send({ embeds: [digestEmbed] })
+    .then(() => logDelivery('daily', 'embed_card', 'ok'))
+    .catch(e => { logDelivery('daily', 'embed_card', 'fail', e.message); console.warn('[ai-report] embed card send fail:', e.message) })
+
+  // ── Send text digest as follow-up messages ──
   const parts = splitDiscordText(discordDigest(textReport), 1900)
   let totalParts = 0
   for (let i = 0; i < parts.length; i++) {
