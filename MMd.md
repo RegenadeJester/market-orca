@@ -1,5 +1,11 @@
 # Market Orca — Feature Log
 
+## 2026-06-27 — Feature #14: Today's Report on Overview
+- **Branch:** `feat/overview-today-report` → PR #11
+- **Pain point:** HomePage fetches `/api/overview` for assets/news but needs separate `/api/reports` call to check if today's daily report is ready.
+- **Fix:** `/api/overview` now returns `todayReport` field with `slug`, `generatedAt`, `title`, `topicCount`, `hasIncidents`, `incidentCount` — or `null` if no report today. Uses WIB timezone (Asia/Jakarta).
+- **Files:** `server.js`
+
 ## 2026-06-26 — Feature #13: Staggered Asset Fetcher
 - **Branch:** `feat/staggered-fetcher` → merged to main
 - **Pain point:** `getLiveAssets()` fires `Promise.allSettled` on 20+ assets simultaneously → Yahoo Finance 429 rate limits, home internet overload, TIME_WAIT socket exhaustion on laptop server.
