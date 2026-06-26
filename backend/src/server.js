@@ -266,7 +266,24 @@ app.get('/api/overview', async (_req, res) => {
     live.forEach(saveAssetSnapshot)
     const assets = live.map((x) => ({ ...x.asset, sparkline: (x.candles || []).slice(-12).map((c) => c.close ?? c.value) }))
     const latestNews = live.flatMap((x) => (x.news || []).slice(0, 3).map((n) => ({ ...n, name: x.asset.name, symbol: x.asset.symbol, slug: x.asset.slug }))).slice(0, 20)
-    res.json({ assets, latestNews })
+    const todaySlug = todayReportSlug()
+    const hasTodayReport = todayReportExists()
+    let todayReport = null
+    if (hasTodayReport) {
+      try {
+        const fp = path.join(reportDir, `${todaySlug}.json`)
+        const d = JSON.parse(fs.readFileSync(fp, 'utf8'))
+        todayReport = {
+          slug: todaySlug,
+          generatedAt: d.generatedAt || null,
+          title: d.executiveBrief?.split('\n')[0] || d.topics?.[0]?.title || todaySlug,
+          topicCount: (d.topics || []).length,
+          hasIncidents: !!(d.incidents || []).length,
+          incidentCount: (d.incidents || []).length
+        }
+      } catch {}
+    }
+    res.json({ assets, latestNews, todayReport })
   } catch (error) {
     res.status(500).json({ error: String(error) })
   }
@@ -1319,6 +1336,12 @@ app.get('/api/alerts/suggested/block', (_req, res) => {
 })
 
 const reportDir = path.join(__dirname, '..', '..', 'reports')
+function todayReportSlug() {
+  return new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Jakarta', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date())
+}
+function todayReportExists() {
+  return fs.existsSync(path.join(reportDir, `${todayReportSlug()}.json`))
+}
 function usableTopics(topics) { return Array.isArray(topics) && topics.reduce((s,t)=>s+(t.items?.length||0),0) >= 20 }
 function latestSavedReport() {
   if (!fs.existsSync(reportDir)) return null
