@@ -1399,6 +1399,26 @@ app.post('/api/rag/crawl/run', async (req, res) => {
   catch (error) { res.status(500).json({ ok: false, error: String(error) }) }
 })
 
+// ── DM Delivery Status ───────────────────────────────────────────────────
+import { getDmDeliveryStatus, getDmFailCount, cleanupOldDeliveryLogs, getDmSubscriberCount } from './discord-dm.js'
+
+app.get('/api/dm-delivery/status', (_req, res) => {
+  try {
+    const recent = getDmDeliveryStatus(20)
+    const failCount = getDmFailCount()
+    const subscriberCount = getDmSubscriberCount()
+    res.json({ ok: true, subscriberCount, failCountLast24h: failCount, recentDeliveries: recent })
+  } catch (e) { res.status(500).json({ ok: false, error: String(e) }) }
+})
+
+app.post('/api/dm-delivery/cleanup', (req, res) => {
+  try {
+    const maxAgeDays = Number(req.body?.maxAgeDays || 7)
+    const result = cleanupOldDeliveryLogs(maxAgeDays)
+    res.json(result)
+  } catch (e) { res.status(500).json({ ok: false, error: String(e) }) }
+})
+
 // ── Catch-all: serve SPA for client-side routing ─────────────────────────
 app.get('*', (req, res) => {
   if (req.path.startsWith('/api/') || req.path.startsWith('/mcp/')) {

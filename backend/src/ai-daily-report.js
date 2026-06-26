@@ -9,6 +9,7 @@ import { enqueueRagCrawl } from './rag-crawler.js'
 import { getAssetFreshness, buildDataStatusBlock, dataFreshnessQA } from './market-calendar.js'
 import { scoreSourceTrust } from './source-reliability.js'
 import { getPersona, buildContextPrompt } from './persona.js'
+import { listDmSubscribers, sendDmToAllSubscribers } from './discord-dm.js'
 import PDFDocument from 'pdfkit'
 import fs from 'node:fs'
 import path from 'node:path'
@@ -2270,17 +2271,60 @@ export async function sendAiReportToUser(textReport, _embed, topics) {
   return true
 }
 
-// Fallback: no DM — just log the error
+// Fallback: send to DM subscribers instead of a dead-end log
 async function sendAiReportToUserDm(textReport, _embed, topics) {
-  console.error('[ai-report] Cannot send report: no report_channel_id configured, and DM delivery is disabled')
-  // Still save the report for manual access
+  const botClient = await getBotClient().catch(() => null)
+  if (!botClient?.isReady()) {
+    console.warn('[ai-report] Cannot send DM: bot not ready')
+    logDelivery('daily', 'dm_fallback', 'fail', 'bot_not_ready')
+    if (topics?.length > 0) {
+      try {
+        const { slug } = await saveReport(topics, textReport)
+        logDelivery(slug, 'dm_fallback', 'ok', 'saved')
+        console.log(`[ai-report] Report saved to slug=${slug}`)
+      } catch (e) { console.warn('[ai-report] Save report:', e.message) }
+    }
+    return false
+  }
+
+  const digest = discordDigest(textReport)
+  const parts = splitDiscordText(digest, 1900)
+
+  // Send to ALL DM subscribers
+  const subscribers = listDmSubscribers().filter(s => s.enabled)
+  if (!subscribers.length) {
+    logDelivery('daily', 'dm_fallback', 'fail', 'no_subscribers')
+    console.warn('[ai-report] No DM subscribers — report only saved')
+    if (topics?.length > 0) {
+      try {
+        const { slug } = await saveReport(topics, textReport)
+        logDelivery(slug, 'dm_saved', 'ok', 'saved')
+      } catch (e) { console.warn('[ai-report] Save report:', e.message) }
+    }
+    return false
+  }
+
+  let okCount = 0
+  let failCount = 0
+
+  for (const sub of subscribers) {
+    const payload = { content: parts[0]?.slice(0, 2000) || 'Report tidak tersedia.' }
+    const result = await sendDmWithRetry(botClient, sub.user_id, payload, 'daily')
+    if (result.ok) okCount++; else failCount++
+  }
+
+  logDelivery('daily', 'dm_fallback', okCount > 0 ? 'ok' : 'fail', `DM sent to ${okCount}/${subscribers.length} subscribers`)
+  console.log(`[ai-report] DM sent to ${okCount}/${subscribers.length} subscribers`)
+
+  // Still save for web access
   if (topics?.length > 0) {
     try {
       const { slug } = await saveReport(topics, textReport)
-      console.log(`[ai-report] Report saved to slug=${slug}`)
+      logDelivery(slug, 'dm_saved', 'ok', 'saved')
     } catch (e) { console.warn('[ai-report] Save report:', e.message) }
   }
-  return false
+
+  return okCount > 0
 }
 
 async function generateAndSendPdfToChannel(channel, topics) {

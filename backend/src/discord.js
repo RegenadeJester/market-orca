@@ -14,7 +14,7 @@ import {
 } from 'discord.js'
 import { APP_CONFIG } from './config.js'
 import { getDiscordSetting, setDiscordSetting, getDiscordSettings } from './discord-settings.js'
-import { addDmSubscriber, removeDmSubscriber, listDmSubscribers } from './discord-dm.js'
+import { addDmSubscriber, removeDmSubscriber, listDmSubscribers, sendDmWithRetry, sendDmToAllSubscribers } from './discord-dm.js'
 import {
   buildSummaryEmbed, buildAssetEmbed, buildNewsEmbed, buildReportEmbed,
   buildAlertEmbed, buildErrorEmbed, buildHelpEmbed, buildSettingsEmbed,
@@ -1940,10 +1940,7 @@ async function sendDiscordAlert(alertData) {
     if (dmEnabled) {
       const subscribers = listDmSubscribers()
       for (const sub of subscribers) {
-        try {
-          const user = await client.users.fetch(sub.user_id).catch(() => null)
-          if (user) await user.send({ embeds: [embed] }).catch(() => { })
-        } catch { }
+        await sendDmWithRetry(client, sub.user_id, { embeds: [embed] }, `alert-${alertData.symbol || 'unknown'}`).catch(e => console.warn(`[discord] DM ${sub.user_id} fail:`, e.message))
       }
     }
 
