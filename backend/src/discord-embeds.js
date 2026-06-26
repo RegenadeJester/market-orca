@@ -4,6 +4,7 @@
 // ═══════════════════════════════════════════════════════════════════════════
 import { EmbedBuilder } from 'discord.js'
 import { APP_CONFIG } from './config.js'
+import { pct } from './normalizer.js'
 
 // ── Color Palette ─────────────────────────────────────────────────────────
 export const COLORS = {
@@ -44,7 +45,7 @@ export function buildSummaryEmbed({ ihsg, forex, crypto, topMovers } = {}) {
     const isUp = (ihsg.change ?? 0) >= 0
     e.addFields({
       name: '📈 IHSG',
-      value: `**${Number(ihsg.price || 0).toLocaleString('id-ID')}** ${isUp ? '🟢' : '🔴'} ${isUp ? '+' : ''}${(ihsg.changePercent ?? ihsg.change_percent ?? 0).toFixed(2)}%`,
+      value: `**${Number(ihsg.price || 0).toLocaleString('id-ID')}** ${isUp ? '🟢' : '🔴'} ${isUp ? '+' : ''}${pct(ihsg).toFixed(2)}%`,
       inline: true,
     })
   }
@@ -78,12 +79,12 @@ export function buildSummaryEmbed({ ihsg, forex, crypto, topMovers } = {}) {
     let desc = ''
     if (gainers.length) {
       desc += '**🟢 Top Gainers**\n'
-      desc += gainers.map((g, i) => `${i + 1}. \`${g.symbol?.toUpperCase() || '?'}\` **${(g.changePercent ?? g.change_percent ?? 0) > 0 ? '+' : ''}${(g.changePercent ?? g.change_percent ?? 0).toFixed(2)}%**`).join('\n')
+      desc += gainers.map((g, i) => `${i + 1}. \`${g.symbol?.toUpperCase() || '?'}\` **${pct(g) > 0 ? '+' : ''}${pct(g).toFixed(2)}%**`).join('\n')
     }
     if (losers.length) {
       if (desc) desc += '\n\n'
       desc += '**🔴 Top Losers**\n'
-      desc += losers.map((l, i) => `${i + 1}. \`${l.symbol?.toUpperCase() || '?'}\` **${(l.changePercent ?? l.change_percent ?? 0).toFixed(2)}%**`).join('\n')
+      desc += losers.map((l, i) => `${i + 1}. \`${l.symbol?.toUpperCase() || '?'}\` **${pct(l).toFixed(2)}%**`).join('\n')
     }
     if (desc) e.setDescription(desc)
   }
@@ -105,7 +106,7 @@ export function buildAssetEmbed({ asset, price, change, market } = {}) {
   const slug = asset.slug || sym.toLowerCase()
   const priceVal = price ?? asset.price ?? 0
   const changeVal = change ?? asset.change ?? 0
-  const changePercentVal = asset.changePercent ?? asset.change_percent ?? 0
+  const changePercentVal = pct(asset)
   const isUp = changeVal >= 0
   const arrow = isUp ? '📈' : '📉'
   const color = isUp ? COLORS.positive : COLORS.negative

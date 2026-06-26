@@ -3,6 +3,7 @@
  * Uses same SSRF-safe fetch pattern as mcp-tradingview.js
  */
 import { validateFetchUrl } from './web-search.js'
+import { normalizeAsset, normalizeIndex, normalizeAssets } from './normalizer.js'
 
 const YAHOO_CHART = 'https://query1.finance.yahoo.com/v8/finance/chart'
 const YAHOO_QUOTE = 'https://query1.finance.yahoo.com/v7/finance/quote'
@@ -61,7 +62,7 @@ function parseChartResult(symbol, payload) {
   const change = (price != null && prev != null) ? price - prev : 0
   const changePercent = (price != null && prev != null && prev !== 0) ? ((price - prev) / prev) * 100 : 0
 
-  return {
+  return normalizeIndex({
     symbol: meta.symbol || symbol,
     price,
     change,
@@ -73,13 +74,13 @@ function parseChartResult(symbol, payload) {
     previousClose: prev,
     bars: bars.slice(-200),
     fetchedAt: new Date().toISOString()
-  }
+  })
 }
 
 /* ── Parse Yahoo Finance quote result ───────────────────────────────── */
 function parseQuoteResult(payload) {
   const rows = payload?.quoteResponse?.result || []
-  return rows.map(r => ({
+  return rows.map(r => normalizeAsset({
     symbol: r.symbol || '',
     price: r.regularMarketPrice ?? r.postMarketPrice ?? r.bid ?? r.ask,
     change: r.regularMarketChange,
@@ -118,7 +119,7 @@ export async function getIHSGData() {
     const chart = parseChartResult('^JKSE', chartJson)
     const quotes = quoteJson ? parseQuoteResult(quoteJson) : []
 
-    const out = {
+    const out = normalizeIndex({
       ok: true,
       index: '^JKSE',
       name: quotes[0]?.longName || 'IDX Composite (IHSG)',
@@ -132,7 +133,7 @@ export async function getIHSGData() {
       yearRange: quotes[0] ? { low: quotes[0].fiftyTwoWeekLow, high: quotes[0].fiftyTwoWeekHigh } : null,
       chart: chart.bars,
       fetchedAt: chart.fetchedAt
-    }
+    })
     cacheSet(cacheKey, out, 30_000)
     return out
   } catch (e) {
@@ -164,7 +165,7 @@ export async function getForexData() {
       })
     )
 
-    const pairs = FOREX_SYMBOLS.map((fx, i) => {
+    const pairs = normalizeAssets(FOREX_SYMBOLS.map((fx, i) => {
       const r = results[i]
       if (r.status !== 'fulfilled') {
         return { ...fx, error: r.reason?.message || 'fetch_failed', price: null }
@@ -180,7 +181,7 @@ export async function getForexData() {
         previousClose: data.previousClose,
         fetchedAt: data.fetchedAt
       }
-    })
+    }))
 
     const out = { ok: true, pairs, fetchedAt: new Date().toISOString() }
     cacheSet(cacheKey, out, 30_000)
