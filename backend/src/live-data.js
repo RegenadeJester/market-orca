@@ -7,6 +7,7 @@ const searchNewsUrl = (query) => `https://news.google.com/rss/search?q=${encodeU
 const yahooNewsUrl = (query) => `https://feeds.finance.yahoo.com/rss/2.0/headline?s=${encodeURIComponent(query)}&region=US&lang=en-US`
 // Indonesian financial news now fetched via SearXNG (see fetchIndoNewsSearxng)
 import { enrichNewsItem } from './news-enrich.js'
+import { normalizeAsset } from './normalizer.js'
 
 import { validateFetchUrl } from './web-search.js'
 
@@ -244,7 +245,8 @@ async function getCachedLiveAsset(asset) {
         .slice(0, 8)
       // Enrich only top 1 to protect RAM/network on laptop server.
       const news = await Promise.all(filteredNews.map((item, idx) => idx < 1 ? enrichNewsItem(item) : item))
-      const value = { asset: { ...asset, price: live.price, change_percent: live.change_percent, thesis: news[0]?.summary || asset.thesis, currency: live.currency, marketState: live.marketState, provider: live.provider }, candles: live.candles, news }
+      const normalizedLive = normalizeAsset(live)
+      const value = { asset: { ...asset, price: normalizedLive.price, changePercent: normalizedLive.changePercent, thesis: news[0]?.summary || asset.thesis, currency: normalizedLive.currency, marketState: normalizedLive.marketState, provider: normalizedLive.provider }, candles: live.candles, news }
       liveCache.set(key, { at: Date.now(), value })
       return value
     } catch (error) {
