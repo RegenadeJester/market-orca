@@ -14,6 +14,10 @@ import { validateFetchUrl } from './web-search.js'
 const liveCache = new Map()
 const requestLocks = new Map()
 
+/** Stagger configuration — tune via env for laptop server constraints */
+const STAGGER_DELAY_MS = Number(process.env.LIVE_DATA_STAGGER_MS || 150) // 150ms between requests
+const MAX_CONCURRENCY = Number(process.env.LIVE_DATA_CONCURRENCY || 3) // max 3 parallel fetches
+
 function decodeHtml(value = '') { return value.replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"').replace(/&#39;/g,"'").replace(/&nbsp;/g,' ') }
 function stripTags(value = '') { return decodeHtml(value).replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim() }
 function cleanTitle(value = '') { return stripTags(value).replace(/\s+[-–—]\s+[^-–—]+$/, '').replace(/\s{2,}/g, ' ').trim() }
@@ -266,6 +270,30 @@ export async function getLiveAsset(asset) {
 }
 
 export async function getLiveAssets(assets) {
-  const settled = await Promise.allSettled(assets.map((a) => getCachedLiveAsset(a)))
+  // ── Staggered batch: cap concurrency to prevent burst API calls ────
+  // On laptop server, 20+ simultaneous Yahoo/Binance calls → rate limits + TIME_WAIT.
+  // Split into small batches with delay between batches.
+  const settled = []
+  const t0 = Date.now()
+  let cacheHits = 0
+
+  for (let i = 0; i < assets.length; i += MAX_CONCURRENCY) {
+    const batch = assets.slice(i, i + MAX_CONCURRENCY)
+    const results = await Promise.allSettled(batch.map((a) => getCachedLiveAsset(a)))
+    settled.push(...results)
+
+    // Count cache hits (instant return from liveCache)
+    for (const r of results) {
+      if (r.status === 'fulfilled' && r.value?._cached) cacheHits++
+    }
+
+    // Stagger delay between batches (skip after last batch)
+    if (i + MAX_CONCURRENCY < assets.length && STAGGER_DELAY_MS > 0) {
+      await new Promise(r => setTimeout(r, STAGGER_DELAY_MS))
+    }
+  }
+
+  const elapsed = Date.now() - t0
+  console.log(`[live-data] getLiveAssets: ${assets.length} assets in ${elapsed}ms (concurrency=${MAX_CONCURRENCY}, stagger=${STAGGER_DELAY_MS}ms)`)
   return settled.map((result, index) => result.status === 'fulfilled' ? result.value : { asset: { ...assets[index], provider: 'fallback-error' }, candles: [], news: [], error: String(result.reason) })
 }
