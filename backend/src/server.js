@@ -20,6 +20,7 @@ import { createSession, getUserFromReq, hashPassword, requireUser, seedTestAccou
 import { auditExport, canExportReport, createSignedExport, getReportMeta, safeReportPath, verifySignedExport, watermark } from './report-export-permissions.js'
 import { initCanvasTables, getCanvas, saveCanvas, exportReport, cleanupExpiredExports } from './report-canvas.js'
 import { ingestDocument, ingestUrl, searchRag, runRagReport, generateJsonlDataset, exportRagRun, factCheckReport, getRagRun } from './rag-report.js'
+import { ragAsk } from './rag-ask.js'
 import { initRagSchema, ragSearch, ragHybridSearch, upsertRagDocument, buildRagContext, ragStorageStats, cleanupRagStore, vectorizeMissingChunks } from './rag.js'
 import { enqueueRagCrawl, runRagCrawlWorker, isAllowedSource } from './rag-crawler.js'
 import { webSearch, deepWebSearch, searchAndAnswer, fetchPageMarkdown, searchNews, webCacheStats, filterSearchForCrawl, TRUSTED_WEB_SOURCES, classifySearchResult, previewPublicPage } from './web-search.js'
@@ -588,7 +589,7 @@ app.post('/api/rag/vectorize-missing', (req, res) => {
 })
 
 // ── RAG Autolearn endpoints ─────────────────────────────────────────────
-import { ingestAllReports, searchByTopic, getCollectionStats, autoCreateCollections, ingestReport } from './rag-autolearn.js'
+import { ingestAllReports, searchByTopic, getCollectionStats, autoCreateCollections, ingestReport, ingestReportAsTemplate, ingestBestReportTemplates, searchReportTemplates, qaReport } from './rag-autolearn.js'
 
 app.get('/api/rag/autolearn/stats', (_req, res) => {
   try { res.json(getCollectionStats()) }
@@ -617,6 +618,50 @@ app.post('/api/rag/autolearn/search', (req, res) => {
   } catch (error) { res.status(500).json({ ok:false, error:String(error) }) }
 })
 
+
+// ── RAG Report QA & Templates ──────────────────────────────────────
+
+app.get('/api/rag/qa-report/:slug', (req, res) => {
+  try { res.json(qaReport(req.params.slug)) }
+  catch (error) { res.status(500).json({ ok:false, error:String(error) }) }
+})
+
+app.post('/api/rag/qa-report', (req, res) => {
+  try {
+    const slug = req.body?.slug
+    if (!slug) return res.status(400).json({ ok:false, error:"slug required" })
+    res.json(qaReport(slug))
+  } catch (error) { res.status(500).json({ ok:false, error:String(error) }) }
+})
+
+app.post('/api/rag/template/ingest', (req, res) => {
+  try {
+    const slug = req.body?.slug
+    if (slug) return res.json(ingestReportAsTemplate(slug))
+    res.json(ingestBestReportTemplates())
+  } catch (error) { res.status(500).json({ ok:false, error:String(error) }) }
+})
+
+app.post('/api/rag/template/search', (req, res) => {
+  try {
+    const query = req.body?.query || req.query?.q || ''
+    const limit = Number(req.body?.limit || req.query?.limit || 5)
+    res.json(searchReportTemplates(query, { limit }))
+  } catch (error) { res.status(500).json({ ok:false, error:String(error) }) }
+})
+
+app.post('/api/rag/ask', async (req, res) => {
+  try {
+    const query = req.body?.query || ''
+    if (!query) return res.status(400).json({ ok:false, error:"query required" })
+    const result = await ragAsk(query, {
+      limit: Number(req.body?.limit || 10),
+      topic: req.body?.topic || '',
+      model: req.body?.model || 'sonar'
+    })
+    res.json(result)
+  } catch (error) { res.status(500).json({ ok:false, error:String(error) }) }
+})
 
 function webSearchOptions(body={}, defaultLimit=10){
   return {
@@ -780,6 +825,37 @@ app.get('/api/news/search', async (req, res) => {
     if (!q) return res.status(400).json({ ok: false, error: 'query_required' })
     const out = await fetchIndonesianNews({ query: q, limit, timeRange, language })
     res.json(out)
+  } catch (e) { res.status(500).json({ ok: false, error: e.message }) }
+})
+
+// ── Market News → Discord ─────────────────────────────────────────
+app.get('/api/discord/market-news', async (req, res) => {
+  try {
+    const { sendDiscordNews } = await import('./discord.js')
+    // Fetch latest news from news-fetcher
+    const newsData = await fetchTrendingNews({ limit: 8, timeRange: 'day' })
+    const result = await sendDiscordNews(newsData.results || [])
+    res.json({ ok: true, discord: result, count: newsData.count })
+  } catch (e) { res.status(500).json({ ok: false, error: e.message }) }
+})
+
+app.post('/api/discord/market-news', async (req, res) => {
+  try {
+    const { sendDiscordNews } = await import('./discord.js')
+    const body = req.body || {}
+    // Accept custom embeds or raw news data
+    if (body.embeds) {
+      // Direct embed send
+      const channel = await (await import('./discord.js')).getBotClient()
+        ?.channels?.fetch('1517112059358220289')
+      if (channel) {
+        await channel.send({ embeds: body.embeds })
+        return res.json({ ok: true, sent: true })
+      }
+      return res.json({ ok: false, error: 'channel_not_found' })
+    }
+    const result = await sendDiscordNews(body.news || [])
+    res.json({ ok: true, discord: result })
   } catch (e) { res.status(500).json({ ok: false, error: e.message }) }
 })
 
@@ -1536,6 +1612,35 @@ async function generateAndSendDailyReport(reason = 'manual') {
   try { embed = buildDiscordEmbed(topics) } catch (_) { embed = null }
   await sendAiReportToUser(textReport, embed, topics)
   const { slug } = await saveReport(topics, textReport).catch(() => ({ slug: null }))
+
+  // ── RAG QA: auto-run quality checks after report generation ──
+  if (slug) {
+    try {
+      const qa = qaReport(slug)
+      console.log(`[QA] ${slug}: score=${qa.score} status=${qa.status}`)
+      // Send QA summary to Discord channel
+      if (qa.issues?.length > 0 || qa.score < 80) {
+        try {
+          const botClient = await getBotClient().catch(() => null)
+          const channelId = getDiscordSetting('report_channel_id')
+          if (botClient?.isReady() && channelId) {
+            const channel = await botClient.channels.fetch(channelId).catch(() => null)
+            if (channel) {
+              const issueSummary = qa.issues.map(i => `⚠️ ${i.type}: ${i.count || i.sections?.join(', ') || JSON.stringify(i)}`).join('\n')
+              await channel.send({
+                content: `**📊 Report QA: ${slug}** — Score: **${qa.score}/100** (${qa.status})\n${issueSummary || 'No major issues'}`
+              })
+            }
+          }
+        } catch (e) { console.warn('[QA] Discord notify failed:', e.message) }
+      }
+      // Auto-ingest as template if quality is high
+      if (qa.score >= 80) {
+        try { ingestReportAsTemplate(slug) } catch (e) { console.warn('[QA] Template ingest failed:', e.message) }
+      }
+    } catch (e) { console.error('[QA] Failed:', e.message) }
+  }
+
   return { slug, fallbackFrom, topics }
 }
 

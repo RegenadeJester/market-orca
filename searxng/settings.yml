@@ -1,8 +1,12 @@
 use_default_settings: true
 server:
-  secret_key: "market-orca-aroxng-2026"
+  secret_key: "market-orca-aroxng-2026-static"
+  base_url: "https://searxng.anomali.web.id/"
   limiter: false
   image_proxy: false
+ui:
+  static_use_hash: true
+  default_theme: simple
 search:
   safe_search: 0
   autocomplete: "duckduckgo"
@@ -21,16 +25,7 @@ engines:
     disabled: false
   - name: duckduckgo
     disabled: false
-  - name: duckduckgo news
-    disabled: false
-  - name: yahoo
+  - name: brave
     disabled: false
   - name: wikipedia
     disabled: false
-
-ui:
-  static_path: "/etc/searxng"
-  default_locale: ""
-general:
-  instance_name: "AROXNG"
-  debug: false

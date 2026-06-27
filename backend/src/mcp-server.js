@@ -2,6 +2,7 @@
 import { ingestUrl, ingestDocument, searchRag, runRagReport } from './rag-report.js'
 import { webSearch, deepWebSearch, searchAndAnswer, fetchPageMarkdown, searchNews, TRUSTED_WEB_SOURCES, WEB_SEARCH_CAPABILITIES, filterSearchForCrawl, previewPublicPage, classifySearchResult } from './web-search.js'
 import { enqueueRagCrawl } from './rag-crawler.js'
+import { ragAsk } from './rag-ask.js'
 import { ingestAllReports, searchByTopic, getCollectionStats, autoCreateCollections, ingestReport } from './rag-autolearn.js'
 import { db } from './db.js'
 import crypto from 'node:crypto'
@@ -27,7 +28,8 @@ export const tools = [
   { name:'market_orca_web_capabilities', description:'Explain web search engines, modes, operators, examples, and trusted-source count so AI agents can search well.', inputSchema:{ type:'object', properties:{} } },
   { name:'market_orca_profile_safe_search', description:'Privacy-safe public profile search. Searches exact name, separates open-doc/academic results from social results, never auto-crawls social/private pages. Use for public-source-only identity mentions.', inputSchema:{ type:'object', properties:{ name:{type:'string'}, limit:{type:'number'}, autoCrawlOpenDocs:{type:'boolean'}, enqueueLimit:{type:'number'} }, required:['name'] } },
   { name:'market_orca_trusted_domains', description:'List trusted/source-priority domains for ranking and crawl policy.', inputSchema:{ type:'object', properties:{ limit:{type:'number'} } } },
-  { name:'market_orca_decision_fingerprint', description:'Create stable decision context fingerprint for agent runs/reports.', inputSchema:{ type:'object', properties:{ intent:{type:'string'}, route:{type:'string'}, asset:{type:'string'}, horizon:{type:'string'}, risk:{type:'string'}, evidence_ids:{type:'array'} } } }
+  { name:'market_orca_decision_fingerprint', description:'Create stable decision context fingerprint for agent runs/reports.', inputSchema:{ type:'object', properties:{ intent:{type:'string'}, route:{type:'string'}, asset:{type:'string'}, horizon:{type:'string'}, risk:{type:'string'}, evidence_ids:{type:'array'} } } },
+  { name:'market_orca_rag_ask', description:'RAG Ask: search Market Orca RAG corpus + LLM synthesis (Perplexity-style). Returns answer with inline citations from local corpus. Use for market data, reports, and knowledge base questions.', inputSchema:{ type:'object', properties:{ query:{type:'string'}, limit:{type:'number'}, topic:{type:'string'}, model:{type:'string'} }, required:['query'] } }
 ]
 
 
@@ -71,6 +73,7 @@ export async function call(name,args={}){
   if(name==='market_orca_web_capabilities') return text({ ...WEB_SEARCH_CAPABILITIES, trustedSourceCount:TRUSTED_WEB_SOURCES.length, examples:[{mode:'journal',filetype:'pdf',exact:'stock market',after:'2022-01-01'},{mode:'coding',sites:['github.com','sqlite.org'],excludeSites:['medium.com']},{mode:'thesis',filetype:'pdf'}] })
   if(name==='market_orca_trusted_domains') return text(TRUSTED_WEB_SOURCES.slice(0,args.limit||TRUSTED_WEB_SOURCES.length))
   if(name==='market_orca_decision_fingerprint') { const context={...args, ts_bucket:new Date().toISOString().slice(0,10)}; const fingerprint=crypto.createHash('sha256').update(JSON.stringify(context,Object.keys(context).sort())).digest('hex').slice(0,24); return text({ fingerprint, context }) }
+  if(name==='market_orca_rag_ask') return text(await ragAsk(args.query, { limit:args.limit||10, topic:args.topic||'', model:args.model||'sonar' }))
   throw new Error('unknown_tool')
 }
 

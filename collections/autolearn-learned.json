@@ -178,5 +178,101 @@
     "title": "https://perbanas.org/uploads/pustaka/1765274057-Outlook%202026.pdf",
     "learnedAt": "2026-06-27T07:38:21.448Z",
     "collection": "usd-idr"
+  },
+  "https://www.nhis.co.id/usd-idr-cross/": {
+    "url": "https://www.nhis.co.id/usd-idr-cross/",
+    "title": "XA Market Update | USD/IDR Currency Cross &#8211; Is the Rupiah In Managed Decline? &#8211; NH Korindo Sekuritas Indonesia",
+    "learnedAt": "2026-06-27T10:31:51.288Z",
+    "collection": "usd-idr"
+  },
+  "https://www.tradingview.com/symbols/BTCUSD/": {
+    "url": "https://www.tradingview.com/symbols/BTCUSD/",
+    "title": "BTC USD — Bitcoin Price and Chart — TradingView",
+    "learnedAt": "2026-06-27T10:31:55.541Z",
+    "collection": "crypto"
+  },
+  "https://www.coingecko.com/en/coins/ethereum": {
+    "url": "https://www.coingecko.com/en/coins/ethereum",
+    "title": "Ethereum Price: ETH/USD Live Price Chart, Market Cap &amp; News Today | CoinGecko",
+    "learnedAt": "2026-06-27T10:31:59.355Z",
+    "collection": "crypto"
+  },
+  "https://farside.co.uk/btc/": {
+    "url": "https://farside.co.uk/btc/",
+    "title": "Bitcoin ETF Flow (US$m) &#8211; Farside Investors",
+    "learnedAt": "2026-06-27T10:32:02.785Z",
+    "collection": "crypto"
+  },
+  "https://www.discover.com/online-banking/banking-topics/how-does-the-federal-reserve-interest-rate-affect-me/": {
+    "url": "https://www.discover.com/online-banking/banking-topics/how-does-the-federal-reserve-interest-rate-affect-me/",
+    "title": "How does the Federal Reserve interest rate affect me? | Discover",
+    "learnedAt": "2026-06-27T10:32:05.792Z",
+    "collection": "global-macro"
+  },
+  "https://openai.com/": {
+    "url": "https://openai.com/",
+    "title": "OpenAI | Research &amp; Deployment",
+    "learnedAt": "2026-06-27T10:32:21.478Z",
+    "collection": "ai-tech"
+  },
+  "https://www.cnbc.com/2026/06/26/openai-anthropic-new-ai-spending-reality-as-users-shift-to-efficiency.html": {
+    "url": "https://www.cnbc.com/2026/06/26/openai-anthropic-new-ai-spending-reality-as-users-shift-to-efficiency.html",
+    "title": "OpenAI, Anthropic new AI spending reality as users shift to efficiency",
+    "learnedAt": "2026-06-27T10:32:23.090Z",
+    "collection": "ai-tech"
+  },
+  "https://www.linkedin.com/top-content/finance/venture-capital-funding/venture-capital-for-tech-startups/": {
+    "url": "https://www.linkedin.com/top-content/finance/venture-capital-funding/venture-capital-for-tech-startups/",
+    "title": "Venture Capital for Tech Startups",
+    "learnedAt": "2026-06-27T10:32:25.590Z",
+    "collection": "ai-tech"
+  },
+  "https://en.wikipedia.org/wiki/Venture_capital": {
+    "url": "https://en.wikipedia.org/wiki/Venture_capital",
+    "title": "Venture capital - Wikipedia",
+    "learnedAt": "2026-06-27T10:32:27.405Z",
+    "collection": "ai-tech"
+  },
+  "https://www.deloitte.com/us/en/what-we-do/capabilities/applied-artificial-intelligence/content/state-of-ai-in-the-enterprise.html": {
+    "url": "https://www.deloitte.com/us/en/what-we-do/capabilities/applied-artificial-intelligence/content/state-of-ai-in-the-enterprise.html",
+    "title": "The State of AI in the Enterprise - 2026 AI report  | Deloitte US",
+    "learnedAt": "2026-06-27T10:32:30.020Z",
+    "collection": "ai-tech"
+  },
+  "https://play.google.com/store/apps/details?id=com.google.android.youtube&hl=en": {
+    "url": "https://play.google.com/store/apps/details?id=com.google.android.youtube&hl=en",
+    "title": "YouTube - Apps on Google Play",
+    "learnedAt": "2026-06-27T10:32:31.332Z",
+    "collection": "ai-tech"
+  },
+  "https://id.investing.com/indices/idx-composite": {
+    "url": "https://id.investing.com/indices/idx-composite",
+    "title": "IHSG Hari Ini | Data IDX Real time- Investing.com",
+    "learnedAt": "2026-06-27T11:00:41.898Z",
+    "collection": "idx-market"
+  },
+  "https://truww.com/": {
+    "url": "https://truww.com/",
+    "title": "Best Interior Designers, Modular Kitchen in Bangalore, Pune and Hyderabad | Truww",
+    "learnedAt": "2026-06-27T11:00:54.900Z",
+    "collection": "usd-idr"
+  },
+  "https://home.treasury.gov/policy-issues/financing-the-government/interest-rate-statistics": {
+    "url": "https://home.treasury.gov/policy-issues/financing-the-government/interest-rate-statistics",
+    "title": "Interest Rate Statistics | U.S. Department of the Treasury",
+    "learnedAt": "2026-06-27T11:01:14.454Z",
+    "collection": "global-macro"
+  },
+  "https://technation.io/how-to-get-venture-capital-funding/": {
+    "url": "https://technation.io/how-to-get-venture-capital-funding/",
+    "title": "How To Get Venture Capital Funding For Your Startup | Tech Nation",
+    "learnedAt": "2026-06-27T11:01:19.035Z",
+    "collection": "ai-tech"
+  },
+  "https://support.microsoft.com/en-us/office/lifecycle/officeinstall/download-and-install-or-reinstall-office-2021-office-2019-or-office-2016": {
+    "url": "https://support.microsoft.com/en-us/office/lifecycle/officeinstall/download-and-install-or-reinstall-office-2021-office-2019-or-office-2016",
+    "title": "Download and install or reinstall Office 2021, Office 2019, or Office 2016 | Microsoft Support",
+    "learnedAt": "2026-06-27T11:01:21.217Z",
+    "collection": "ai-tech"
   }
 }

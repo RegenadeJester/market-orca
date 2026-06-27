@@ -7,7 +7,7 @@ import crypto from 'node:crypto'
 import { fileURLToPath } from 'node:url'
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 import { db, saveAssetSnapshot, getStoredCandles, getStoredNews, getIncidentStatusHistory, manualUpdateIncidentStatus, incidentTitleHash } from './db.js'
-import { sendDiscordAlert } from './discord.js'
+import { sendDiscordAlert, initDiscordBot } from './discord.js'
 import { getLiveAsset, getLiveAssets } from './live-data.js'
 import { buildArticle } from './article.js'
 import { runAlertScan } from './alert-engine.js'
@@ -740,6 +740,61 @@ app.get('/api/source-trust/check', (req, res) => {
   res.json({ ok: true, source, trust: scoreSourceTrust(source, url) })
 })
 
+// ── QA Gate: check report quality before publishing ────────────────────
+function runQA(slug) {
+  try {
+    const fp = path.join(__dirname, '..', '..', 'reports', `${slug}.json`)
+    if (!fs.existsSync(fp)) return { passed: false, errors: [`Report JSON not found: ${slug}`] }
+    const report = JSON.parse(fs.readFileSync(fp, 'utf8'))
+    const errors = []
+    const warnings = []
+
+    // 1. Empty sections check
+    report.topics?.forEach((t, i) => {
+      const items = t.items || []
+      if (items.length === 0) errors.push(`Empty section: "${t.title}" (0 items)`)
+      if (items.length < 2) warnings.push(`Low items in section "${t.title}": ${items.length}`)
+    })
+
+    // 2. Title coverage
+    report.topics?.forEach(t => {
+      t.items?.forEach((item, i) => {
+        if (!item.title || item.title.length < 3) warnings.push(`Item ${i} in "${t.title}" has missing/short title`)
+        if (!item.url && !item.snippet) warnings.push(`Item "${item.title?.slice(0,50)}" has no URL or snippet`)
+      })
+    })
+
+    // 3. Hallucination check — look for citations without corresponding source/url
+    const fullText = report.textReport || ''
+    const fakeCitationRe = /(?:menurut sebuah penelitian|menurut studi|sebuah studi dari|researchers at|according to a (?:study|report|analysis)|a recent (?:study|report|analysis) by)/gi
+    const fakeMatches = fullText.match(fakeCitationRe)
+    if (fakeMatches) fakeMatches.forEach(m => warnings.push(`Possible hallucinated/citation-gap: "${m.slice(0,80)}..."`))
+
+    // 4. Source attribution
+    let totalItems = 0
+    let itemsWithUrl = 0
+    report.topics?.forEach(t => t.items?.forEach(item => {
+      totalItems++
+      if (item.url) itemsWithUrl++
+    }))
+    const urlCoverage = totalItems > 0 ? itemsWithUrl / totalItems : 1
+    if (urlCoverage < 0.3) warnings.push(`Low URL coverage: ${Math.round(urlCoverage * 100)}% of items have source URL`)
+
+    // 5. Report freshness
+    const dateStr = report.date || report.slug || ''
+    if (dateStr && /^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+      const reportDate = new Date(dateStr + 'T23:59:59+07:00')
+      const now = new Date()
+      const daysOld = (now - reportDate) / 86400000
+      if (daysOld > 1.5) warnings.push(`Report is ${Math.round(daysOld)} days old`)
+    }
+
+    return { passed: errors.length === 0, errors, warnings }
+  } catch (e) {
+    return { passed: false, errors: [`QA error: ${e.message}`], warnings: [] }
+  }
+}
+
 // ── AI Daily Report ──────────────────────────────────────────────────────
 async function generateAndSendDailyReport(reason = 'manual') {
   let { topics } = await generateAiDailyReport()
@@ -755,8 +810,20 @@ async function generateAndSendDailyReport(reason = 'manual') {
   const textReport = buildTextReport(topics, { persona, personaPrompt })
   let embed
   try { embed = buildDiscordEmbed(topics) } catch (_) { embed = null }
-  await sendAiReportToUser(textReport, embed, topics)
   const { slug } = await saveReport(topics, textReport).catch(() => ({ slug: null }))
+
+  // ── QA Gate ──
+  if (slug) {
+    const qa = runQA(slug)
+    console.log(`[qa] ${slug}: ${qa.passed ? 'PASS' : 'FAIL'} (${qa.warnings.length} warnings, ${qa.errors.length} errors)`)
+    qa.warnings.forEach(w => console.warn(`[qa ⚠] ${w}`))
+    if (qa.errors.length > 0) {
+      console.error(`[qa ✗] Report ${slug} has QA failures — still delivering but flagged`)
+      db.prepare(`INSERT OR REPLACE INTO discord_settings (key, value, updated_at) VALUES ('qa_${slug}_errors', ?, datetime('now'))`).run(qa.errors.join('; '))
+    }
+  }
+
+  await sendAiReportToUser(textReport, embed, topics)
   return { slug, fallbackFrom, topics }
 }
 
@@ -1467,4 +1534,8 @@ app.use((err, _req, res, next) => {
 app.listen(PORT, '::', () => {
   console.log(`[report-server] listening on http://localhost:${PORT} (IPv4+IPv6)`)
   console.log(`[report-server] SPA dist: ${frontendDist} (exists: ${fs.existsSync(frontendDist)})`)
+  // Initialize Discord bot for report delivery
+  if (process.env.NO_DISCORD !== '1') {
+    initDiscordBot().catch(e => console.error('[report-server] Discord init failed:', e.message))
+  }
 })

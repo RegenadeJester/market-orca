@@ -1,5 +1,25 @@
 # Market Orca — Feature Log
 
+## 2026-06-27 — Feature #19: RAG-Improved Report Quality
+- **Pain point:** Report quality was only checked via manual `qa-report.js` CLI. No RAG-driven quality scoring, no template learning, no automated QA in the pipeline.
+- **Done:**
+  1. **RAG collection `report-template`** in `rag-autolearn.js` — auto-ingests reports ≥80 quality as templates. Stores structure, section count, item count, snippet lengths, quality metadata. Searchable via FTS.
+  2. **`qaReport(slug)`** — 7-check QA pipeline: empty sections, snippet length (<50 chars), broken citations (no URL), duplicate titles, source diversity (<4), item count (<10), template comparison against best reports.
+  3. **`/api/rag/qa-report/:slug`** endpoint — returns score, status, per-check breakdown, issues list, template comparison.
+  4. **`/api/rag/qa-report` (POST)** — same, with body `{slug}`.
+  5. **`/api/rag/template/ingest`** — ingest single or all best reports.
+  6. **`/api/rag/template/search`** — search templates by topic/structure.
+  7. **Pipeline integration** — `generateAndSendDailyReport()` now auto-runs QA after save, sends summary to Discord, and ingests high-quality reports as templates.
+- **Files:** `backend/src/rag-autolearn.js`, `backend/src/server.js`
+- **Deliverable:** QA endpoint returns quality score + issues. Pipeline auto-QA on every generate. Template collection with 3 reports (avg 100 quality).
+- **Issues Fixed:**
+  1. **No systemd service** — Report server (port 4568) crashed on restart. Added `deploy/report-server.service` with auto-restart, memory limit (512M), and structured logging.
+  2. **Inconsistent styling** — Added QA gate (`backend/src/qa-report.js`) checking empty sections, broken links, hallucinated citations, source attribution, and report freshness. Runs automatically in `generateAndSendDailyReport()` before publish.
+  3. **No quality gate** — Pre-publish QA validates: section item counts, URL coverage, fake citation patterns, required fields, link health (concurrent HEAD checks). Outputs pass/fail + warnings.
+  4. **Discord delivery unreliable** — Bot now initializes in report-server (was only in main server). Added webhook fallback (`sendViaWebhook`) when bot unavailable. Both paths log delivery status to `delivery_log` table.
+- **Files:** `deploy/report-server.service`, `deploy/install-systemd.sh`, `backend/src/qa-report.js`, `backend/src/report-server.js`, `backend/src/ai-daily-report.js`
+- **Deliverable:** Report server survives restart, QA pipeline runs on every generation, Discord delivery works via bot or webhook.
+
 ## 2026-06-27 — Feature #15: Today's Report Card on HomePage
 - **Branch:** `feat/homepage-today-report-card` → PR #1 (frontend repo)
 - **Pain point:** Backend returns `todayReport` in `/api/overview` but frontend ignores it. Users can't see if today's report is ready without navigating to `/report` page.

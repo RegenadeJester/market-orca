@@ -5,8 +5,15 @@
     {
       "id": "idx-market",
       "name": "IHSG / IDX Market Overview",
-      "queries": ["IHSG hari ini idx.co.id", "IHSG outlook market Indonesia", "saham aktif volume tinggi IDX"],
-      "assetTags": ["JKSE", "IDX"],
+      "queries": [
+        "IHSG hari ini idx.co.id",
+        "IHSG outlook market Indonesia",
+        "saham aktif volume tinggi IDX"
+      ],
+      "assetTags": [
+        "JKSE",
+        "IDX"
+      ],
       "maxResults": 3,
       "schedule": "every 6h",
       "enabled": true
@@ -14,8 +21,15 @@
     {
       "id": "usd-idr",
       "name": "USD/IDR & Rupiah",
-      "queries": ["kurs rupiah hari ini bank indonesia", "USD IDR forecast BI", "rupiah outlook 2026"],
-      "assetTags": ["USDIDR", "BI"],
+      "queries": [
+        "kurs rupiah hari ini bank indonesia",
+        "USD IDR forecast BI",
+        "rupiah outlook 2026"
+      ],
+      "assetTags": [
+        "USDIDR",
+        "BI"
+      ],
       "maxResults": 3,
       "schedule": "every 6h",
       "enabled": true
@@ -23,8 +37,15 @@
     {
       "id": "crypto",
       "name": "Bitcoin & Crypto",
-      "queries": ["bitcoin price today", "crypto market news ethereum", "bitcoin etf flows"],
-      "assetTags": ["BTC", "CRYPTO"],
+      "queries": [
+        "bitcoin price today",
+        "crypto market news ethereum",
+        "bitcoin etf flows"
+      ],
+      "assetTags": [
+        "BTC",
+        "CRYPTO"
+      ],
       "maxResults": 3,
       "schedule": "every 6h",
       "enabled": true
@@ -32,8 +53,15 @@
     {
       "id": "global-macro",
       "name": "Global Macro & Central Banks",
-      "queries": ["fed rate decision impact", "global inflation data CPI", "US treasury yield curve"],
-      "assetTags": ["MACRO", "FED"],
+      "queries": [
+        "fed rate decision impact",
+        "global inflation data CPI",
+        "US treasury yield curve"
+      ],
+      "assetTags": [
+        "MACRO",
+        "FED"
+      ],
       "maxResults": 3,
       "schedule": "every 12h",
       "enabled": true
@@ -41,10 +69,34 @@
     {
       "id": "ai-tech",
       "name": "AI & Technology",
-      "queries": ["AI news openai anthropic", "technology startup funding venture capital", "generative AI enterprise adoption"],
-      "assetTags": ["AI", "TECH"],
+      "queries": [
+        "AI news openai anthropic",
+        "technology startup funding venture capital",
+        "generative AI enterprise adoption"
+      ],
+      "assetTags": [
+        "AI",
+        "TECH"
+      ],
       "maxResults": 3,
       "schedule": "every 12h",
+      "enabled": true
+    },
+    {
+      "id": "commodities",
+      "name": "Komoditas Indonesia",
+      "queries": [
+        "harga emas hari ini",
+        "minyak mentah brent",
+        "nickel price Indonesia",
+        "CPO harga sawit"
+      ],
+      "assetTags": [
+        "COMM",
+        "COMMODITY"
+      ],
+      "maxResults": 3,
+      "schedule": "every 6h",
       "enabled": true
     }
   ]
