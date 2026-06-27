@@ -1,6 +1,16 @@
 # Market Orca — Feature Log
 
-## 2026-06-27 — Feature #19: RAG-Improved Report Quality
+## 2026-06-28 — Feature #20: Alert Dashboard Summary Endpoint
+- **Pain point:** `AlertSummaryWidget.vue` (frontend) calls `/api/market/alerts-summary` but backend had no such endpoint → widget always loaded empty/404.
+- **Done:**
+  1. New **`GET /api/market/alerts-summary`** endpoint returning aggregated alert dashboard data.
+  2. **`summary`** object: `critical`, `warning`, `triggered`, `suggested` counts.
+  3. **`threshold_alerts`**: all assets with breach detection (up/down/none) + severity (critical/warning) based on asset_settings thresholds.
+  4. **`triggered`**: 10 latest fired alerts from `alerts` table.
+  5. **`suggested`**: pending `suggested_alerts` from reports with computed `distance_pct`.
+- **Files:** `backend/src/server.js`
+- **Deliverable:** Frontend AlertSummaryWidget now renders with live data. 16 critical breaches, 4 warning, 10 triggered alerts detected.
+- **Branch:** `feat/alerts-summary-endpoint` → PR #12 ✅ merged
 - **Pain point:** Report quality was only checked via manual `qa-report.js` CLI. No RAG-driven quality scoring, no template learning, no automated QA in the pipeline.
 - **Done:**
   1. **RAG collection `report-template`** in `rag-autolearn.js` — auto-ingests reports ≥80 quality as templates. Stores structure, section count, item count, snippet lengths, quality metadata. Searchable via FTS.
