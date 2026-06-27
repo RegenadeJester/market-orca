@@ -274,5 +274,541 @@
     "title": "Download and install or reinstall Office 2021, Office 2019, or Office 2016 | Microsoft Support",
     "learnedAt": "2026-06-27T11:01:21.217Z",
     "collection": "ai-tech"
+  },
+  "https://www.idx.co.id/": {
+    "url": "https://www.idx.co.id/",
+    "title": "PT Bursa Efek Indonesia",
+    "learnedAt": "2026-06-27T18:01:12.713Z",
+    "collection": "idx-market",
+    "assetTags": [
+      "JKSE",
+      "IDX"
+    ],
+    "summary": "PT Bursa Efek Indonesia Masuk Daftar Ayo berpartisipasi! Survei Awareness Perubahan Kode Saham Isi di sini IDXBell Edisi 43 - Juni 2026 Selengkapnya Panggilan Penyelenggaraan RUPST BEI Selengkapnya Ef",
+    "image": "/icon.png",
+    "credibility": 95
+  },
+  "https://www.bi.go.id/id/statistik/informasi-kurs/transaksi-bi/kalkulator-kurs.aspx": {
+    "url": "https://www.bi.go.id/id/statistik/informasi-kurs/transaksi-bi/kalkulator-kurs.aspx",
+    "title": "Kurs Transaksi BI",
+    "learnedAt": "2026-06-27T18:01:32.367Z",
+    "collection": "usd-idr",
+    "assetTags": [
+      "USDIDR",
+      "BI"
+    ],
+    "summary": "Kurs Transaksi BI You may be trying to access this site from a secured browser on the server. Please enable scripts and reload this page. Turn on more accessible mode Turn off more accessible mode Ski",
+    "image": "/Style Library/biweb/img/flag-indo.png",
+    "credibility": 95
+  },
+  "https://fiskal.kemenkeu.go.id/informasi-publik/kurs-pajak": {
+    "url": "https://fiskal.kemenkeu.go.id/informasi-publik/kurs-pajak",
+    "title": "Direktorat Jenderal Strategi Ekonomi dan Fiskal - Kurs Pajak",
+    "learnedAt": "2026-06-27T18:01:35.341Z",
+    "collection": "usd-idr",
+    "assetTags": [
+      "USDIDR",
+      "BI"
+    ],
+    "summary": "Direktorat Jenderal Strategi Ekonomi dan Fiskal - Kurs Pajak Lewati ke konten utama Jl. Notohamiprodjo, Jakarta Pusat 10710 134 Tampilkan atau sembunyikan info kontak Informasi Publik Kurs Pajak Infor",
+    "image": "/images/logo-djsef-horizontal-black.png",
+    "credibility": 86
+  },
+  "https://id.investing.com/currencies/usd-idr": {
+    "url": "https://id.investing.com/currencies/usd-idr",
+    "title": "Kurs Dollar ke Rupiah Hari Ini - Investing.com",
+    "learnedAt": "2026-06-27T18:01:44.379Z",
+    "collection": "usd-idr",
+    "assetTags": [
+      "USDIDR",
+      "BI"
+    ],
+    "summary": "Kurs Dollar ke Rupiah Hari Ini - Investing.com Investing.com - Pasar Finansial Seluruh Dunia Buka App Pencarian Populer Silakan coba pencarian lain Ambil Diskon 50% Masuk Daftar Gratis English (USA) E",
+    "image": "https://i-invdn-com.investing.com/redesign/images/seo/investing_300X300.png",
+    "credibility": 95
+  },
+  "https://www.xe.com/currencyconverter/": {
+    "url": "https://www.xe.com/currencyconverter/",
+    "title": "Currency Converter - Currency Exchange | Xe",
+    "learnedAt": "2026-06-27T18:01:48.518Z",
+    "collection": "usd-idr",
+    "assetTags": [
+      "USDIDR",
+      "BI"
+    ],
+    "summary": "Currency Converter - Currency Exchange | Xe Get the App Toggle menu Exchange Rate and Currency Converter Tool Check live foreign currency exchange rates From From 1 $ USD - US Dollar To To 0.87 € EUR ",
+    "image": "https://images.ctfassets.net/izij9rskv5y1/1aqbDa0nay8CVodSY9ZANt/bd3e8480e9426b38b5bb9d8f843dc64e/xe_consumer_logo.jpg",
+    "credibility": 10
+  },
+  "https://id.wikipedia.org/wiki/Rupiah": {
+    "url": "https://id.wikipedia.org/wiki/Rupiah",
+    "title": "Rupiah - Wikipedia bahasa Indonesia, ensiklopedia bebas",
+    "learnedAt": "2026-06-27T18:02:02.057Z",
+    "collection": "usd-idr",
+    "assetTags": [
+      "USDIDR",
+      "BI"
+    ],
+    "summary": "Rupiah - Wikipedia bahasa Indonesia, ensiklopedia bebas Lompat ke isi Pencarian Cari Sumbangi Buat akun baru Masuk log Perkakas pribadi Sumbangi Buat akun baru Masuk log Rupiah 75 bahasa العربية مصرى ",
+    "image": "/static/images/icons/wikipedia.png",
+    "credibility": 10
+  },
+  "https://www.coindesk.com/id/price/bitcoin": {
+    "url": "https://www.coindesk.com/id/price/bitcoin",
+    "title": "Bitcoin harga hari ini, BTC harga live USD, kapitalisasi pasar, dan grafik | CoinDesk",
+    "learnedAt": "2026-06-27T18:02:10.986Z",
+    "collection": "crypto",
+    "assetTags": [
+      "BTC",
+      "CRYPTO"
+    ],
+    "summary": "Bitcoin harga hari ini, BTC harga live USD, kapitalisasi pasar, dan grafik | CoinDesk Berita Video Harga Riset Acara Data &amp; Indeks Bersponsor id CD20 $1.634,86 CD20 up 0.40 percent 0.40% BTC $60.3",
+    "image": "https://resources.cryptocompare.com/asset-management/1/1743698755140.png",
+    "credibility": 59
+  },
+  "https://www.federalreserve.gov/aboutthefed.htm": {
+    "url": "https://www.federalreserve.gov/aboutthefed.htm",
+    "title": "Federal Reserve Board - About the Fed",
+    "learnedAt": "2026-06-27T18:02:44.124Z",
+    "collection": "global-macro",
+    "assetTags": [
+      "MACRO",
+      "FED"
+    ],
+    "summary": "Federal Reserve Board - About the Fed Skip to main content An official website of the United States Government Here&#x27;s how you know Official websites use .gov A .gov website belongs to an official",
+    "image": "https://www.federalreserve.gov/images/social-media/social-default-image-twitter.jpg",
+    "credibility": 94
+  },
+  "https://en.wikipedia.org/wiki/S": {
+    "url": "https://en.wikipedia.org/wiki/S",
+    "title": "S - Wikipedia",
+    "learnedAt": "2026-06-27T18:09:20.405Z",
+    "collection": "us-market",
+    "assetTags": [
+      "USMARKET"
+    ],
+    "summary": "S - Wikipedia Jump to content Search Search Donate Create account Log in Personal tools Donate Create account Log in S 150 languages Acèh Afrikaans Alemannisch አማርኛ Aragonés Ænglisc العربية ܐܪܡܝܐ Astu",
+    "image": "//upload.wikimedia.org/wikipedia/en/thumb/1/1b/Semi-protection-shackle.svg/20px-Semi-protection-shackle.svg.png",
+    "credibility": 10
+  },
+  "https://langeek.co/en/grammar/course/906/the-letter-s": {
+    "url": "https://langeek.co/en/grammar/course/906/the-letter-s",
+    "title": "The Letter &quot;S&quot; in the English Alphabet 🇬🇧 LanGeek",
+    "learnedAt": "2026-06-27T18:09:22.910Z",
+    "collection": "us-market",
+    "assetTags": [
+      "USMARKET"
+    ],
+    "summary": "The Letter &quot;S&quot; in the English Alphabet 🇬🇧 LanGeek Dictionary | Mobile App | Premium EN Leaderboard Learn Expressions Grammar Vocabulary Pronunciation Reading Mobile App Premium Dictionary ",
+    "image": "/assets/img/share.png",
+    "credibility": 10
+  },
+  "https://www.investing.com/indices/nasdaq-composite%20": {
+    "url": "https://www.investing.com/indices/nasdaq-composite%20",
+    "title": "NASDAQ Composite Index Today (IXIC) - Investing.com",
+    "learnedAt": "2026-06-27T18:09:32.702Z",
+    "collection": "us-market",
+    "assetTags": [
+      "USMARKET"
+    ],
+    "summary": "NASDAQ Composite Index Today (IXIC) - Investing.com Investing.com - Financial Markets Worldwide Open in App Popular Searches Please try another search Get 50% Off Sign In Free Sign Up English (UK) Eng",
+    "image": "https://i-invdn-com.investing.com/redesign/images/seo/investing_300X300.png",
+    "credibility": 95
+  },
+  "https://www.investing.com/indices/us-30": {
+    "url": "https://www.investing.com/indices/us-30",
+    "title": "Dow Jones Today | DJIA Index Live - Investing.com",
+    "learnedAt": "2026-06-27T18:10:13.650Z",
+    "collection": "us-market",
+    "assetTags": [
+      "USMARKET"
+    ],
+    "summary": "Dow Jones Today | DJIA Index Live - Investing.com Investing.com - Financial Markets Worldwide Open in App Popular Searches Please try another search Get 50% Off Sign In Free Sign Up English (UK) Engli",
+    "image": "https://i-invdn-com.investing.com/redesign/images/seo/investing_300X300.png",
+    "credibility": 95
+  },
+  "https://markets.businessinsider.com/index/dow_jones": {
+    "url": "https://markets.businessinsider.com/index/dow_jones",
+    "title": "Dow Jones INDEX TODAY | DJIA LIVE TICKER | Dow Jones QUOTE &amp; CHART | Markets Insider",
+    "learnedAt": "2026-06-27T18:10:20.151Z",
+    "collection": "us-market",
+    "assetTags": [
+      "USMARKET"
+    ],
+    "summary": "Dow Jones INDEX TODAY | DJIA LIVE TICKER | Dow Jones QUOTE &amp; CHART | Markets Insider Business Insider My Markets Watchlist Markets Indices Dow Jones 30 Industrial Index , DJIA 51,876.11 -44.51 -0.",
+    "image": "",
+    "credibility": 10
+  },
+  "https://id.dow.com/en-us.html": {
+    "url": "https://id.dow.com/en-us.html",
+    "title": "Home",
+    "learnedAt": "2026-06-27T18:10:21.908Z",
+    "collection": "us-market",
+    "assetTags": [
+      "USMARKET"
+    ],
+    "summary": "Home --> --> Indonesia Visit Dow.com Corporate Locations Indonesia Visit Dow.com Corporate What are you looking for? Markets &amp; Products Global Citizenship Careers Science &amp; Sustainability News",
+    "image": "/en-us/_jcr_content/root/container/image_band/image.coreimg.jpeg/1778763847525/indonesia-hero-band.jpeg",
+    "credibility": 10
+  },
+  "https://www.dow.com/en-us.html": {
+    "url": "https://www.dow.com/en-us.html",
+    "title": "Materials Science &amp; Chemical Manufacturing | Dow Inc.",
+    "learnedAt": "2026-06-27T18:10:23.774Z",
+    "collection": "us-market",
+    "assetTags": [
+      "USMARKET"
+    ],
+    "summary": "Materials Science &amp; Chemical Manufacturing | Dow Inc. --> Cart Contact Us Sign In / Register My Account BACK ACCOUNT Logout Can&#39;t find what you&#39;re looking for? Try smart search Application",
+    "image": "/content/dam/images/public-images/icons/icon-product-sustainability.png",
+    "credibility": 10
+  },
+  "https://en.wikipedia.org/wiki/China": {
+    "url": "https://en.wikipedia.org/wiki/China",
+    "title": "China - Wikipedia",
+    "learnedAt": "2026-06-27T18:10:36.171Z",
+    "collection": "china",
+    "assetTags": [
+      "CHINA"
+    ],
+    "summary": "China - Wikipedia Jump to content Search Search Donate Create account Log in Personal tools Donate Create account Log in China 316 languages Аԥсшәа Acèh Адыгабзэ Afrikaans Alemannisch አማርኛ Pangcah Ara",
+    "image": "//upload.wikimedia.org/wikipedia/en/thumb/8/8c/Extended-protection-shackle.svg/20px-Extended-protection-shackle.svg.png",
+    "credibility": 10
+  },
+  "https://www.scmp.com/news/china": {
+    "url": "https://www.scmp.com/news/china",
+    "title": "China Breaking News &amp; Headlines | South China Morning Post",
+    "learnedAt": "2026-06-27T18:10:38.187Z",
+    "collection": "china",
+    "assetTags": [
+      "CHINA"
+    ],
+    "summary": "China Breaking News &amp; Headlines | South China Morning Post Advertisement Advertisement China + FOLLOW Military Diplomacy Politics Science China Future Tech Science ‘Unhealthy environment’: Arctic ",
+    "image": "https://cdn.i-scmp.com/sites/default/files/d8/images/canvas/2026/06/27/409b3f22-a598-4c07-a214-995bccdcb6f3_21884335.jpg",
+    "credibility": 10
+  },
+  "https://www.chinadaily.com.cn/": {
+    "url": "https://www.chinadaily.com.cn/",
+    "title": "China Daily Website - Connecting China Connecting the World",
+    "learnedAt": "2026-06-27T18:10:40.244Z",
+    "collection": "china",
+    "assetTags": [
+      "CHINA"
+    ],
+    "summary": "China Daily Website - Connecting China Connecting the World --> Search HOME CHINA WORLD BUSINESS LIFESTYLE --> CULTURE TRAVEL VIDEO SPORTS OPINION REGIONAL SERVICE NEWSPAPER MOBILE Site Search Sogou S",
+    "image": "https://www.chinadaily.com.cn/image_e/2017/logo.png",
+    "credibility": 10
+  },
+  "https://en.wikipedia.org/wiki/Shanghai": {
+    "url": "https://en.wikipedia.org/wiki/Shanghai",
+    "title": "Shanghai - Wikipedia",
+    "learnedAt": "2026-06-27T18:10:50.884Z",
+    "collection": "china",
+    "assetTags": [
+      "CHINA"
+    ],
+    "summary": "Shanghai - Wikipedia Jump to content Search Search Donate Create account Log in Personal tools Donate Create account Log in Shanghai 209 languages Acèh Afrikaans Alemannisch አማርኛ Aragonés अंगिका العرب",
+    "image": "//upload.wikimedia.org/wikipedia/en/thumb/9/94/Symbol_support_vote.svg/20px-Symbol_support_vote.svg.png",
+    "credibility": 10
+  },
+  "https://www.chinahighlights.com/shanghai/top-things-to-do.htm": {
+    "url": "https://www.chinahighlights.com/shanghai/top-things-to-do.htm",
+    "title": "The Top 20 Things to Do in Shanghai",
+    "learnedAt": "2026-06-27T18:10:52.557Z",
+    "collection": "china",
+    "assetTags": [
+      "CHINA"
+    ],
+    "summary": "The Top 20 Things to Do in Shanghai Start Your Journey Home Destinations Shanghai The Top 20 Things to Do in Shanghai Shanghai, China's largest and most prosperous city, exudes an atmosphere of self-c",
+    "image": "https://images.chinahighlights.com/allpicture/2025/10/a3a4095ed29345cbb391c5e122ca8b2c.jpg",
+    "credibility": 10
+  },
+  "https://www.chinahighlights.com/shanghai/": {
+    "url": "https://www.chinahighlights.com/shanghai/",
+    "title": "Shanghai Travel Guide: Things to Do, Best Time to Visit",
+    "learnedAt": "2026-06-27T18:10:54.113Z",
+    "collection": "china",
+    "assetTags": [
+      "CHINA"
+    ],
+    "summary": "Shanghai Travel Guide: Things to Do, Best Time to Visit Start Your Journey Home Destinations Shanghai Travel Guide Shanghai, a vibrant city situated on the Yangtze River Delta, has a fascinating past ",
+    "image": "https://images.chinahighlights.com/allpicture/2025/10/a3a4095ed29345cbb391c5e122ca8b2c.jpg",
+    "credibility": 10
+  },
+  "https://www.lonelyplanet.com/articles/top-things-to-do-in-shanghai-china": {
+    "url": "https://www.lonelyplanet.com/articles/top-things-to-do-in-shanghai-china",
+    "title": "The 16 best things to do in Shanghai, China - Lonely Planet",
+    "learnedAt": "2026-06-27T18:10:57.527Z",
+    "collection": "china",
+    "assetTags": [
+      "CHINA"
+    ],
+    "summary": "The 16 best things to do in Shanghai, China - Lonely Planet Our Favorite Places Where to Go This Spring Where to Go This Summer Iceland Alaska Albania Italy Bali Bermuda Japan The Azores Croatia Londo",
+    "image": "https://d2vbr83hnyiux1.cloudfront.net/image/975050285728/image_403ig957jl64t3f2trt0i6j753/-FWEBP-Ro:5,w:1200,h:630,n:default",
+    "credibility": 10
+  },
+  "https://id.investing.com/currencies/idr-cny": {
+    "url": "https://id.investing.com/currencies/idr-cny",
+    "title": "Kurs IDR ke CNY hari Ini | Rupiah Indonesia Yuan China - Investing.com",
+    "learnedAt": "2026-06-27T18:11:14.091Z",
+    "collection": "china",
+    "assetTags": [
+      "CHINA"
+    ],
+    "summary": "Kurs IDR ke CNY hari Ini | Rupiah Indonesia Yuan China - Investing.com Investing.com - Pasar Finansial Seluruh Dunia Buka App Pencarian Populer Silakan coba pencarian lain Ambil Diskon 50% Masuk Dafta",
+    "image": "https://i-invdn-com.investing.com/redesign/images/seo/investing_300X300.png",
+    "credibility": 95
+  },
+  "https://wise.com/id/currency-converter/cny-to-idr-rate?amount=1": {
+    "url": "https://wise.com/id/currency-converter/cny-to-idr-rate?amount=1",
+    "title": "Nilai Tukar 1 yuan rmb Tiongkok ke rupiah Indonesia. Konversi CNY/IDR - Wise",
+    "learnedAt": "2026-06-27T18:11:16.621Z",
+    "collection": "china",
+    "assetTags": [
+      "CHINA"
+    ],
+    "summary": "Nilai Tukar 1 yuan rmb Tiongkok ke rupiah Indonesia. Konversi CNY/IDR - Wise Langsung ke konten utama 1 yuan rmb Tiongkok ke rupiah Indonesia Konversi CNY ke IDR dengan nilai tukar tengah pasar. Wise ",
+    "image": "https://wise.com/web-art/assets/illustrations/plane-small@2x.webp",
+    "credibility": 10
+  },
+  "https://wise.com/id/currency-converter/idr-to-cny-rate": {
+    "url": "https://wise.com/id/currency-converter/idr-to-cny-rate",
+    "title": "Nilai Tukar rupiah Indonesia ke yuan rmb Tiongkok. Konversi IDR/CNY - Wise",
+    "learnedAt": "2026-06-27T18:11:18.523Z",
+    "collection": "china",
+    "assetTags": [
+      "CHINA"
+    ],
+    "summary": "Nilai Tukar rupiah Indonesia ke yuan rmb Tiongkok. Konversi IDR/CNY - Wise Langsung ke konten utama rupiah Indonesia ke yuan rmb Tiongkok Konversi IDR ke CNY dengan nilai tukar tengah pasar. Wise adal",
+    "image": "https://wise.com/web-art/assets/illustrations/plane-small@2x.webp",
+    "credibility": 10
+  },
+  "https://cny.id.currencyrate.today/idr": {
+    "url": "https://cny.id.currencyrate.today/idr",
+    "title": "Kurs  Yuan Tiongkok ke Rupiah Indonesia - Hari Ini ¥ 1 CNY/IDR",
+    "learnedAt": "2026-06-27T18:11:20.715Z",
+    "collection": "china",
+    "assetTags": [
+      "CHINA"
+    ],
+    "summary": "Kurs Yuan Tiongkok ke Rupiah Indonesia - Hari Ini ¥ 1 CNY/IDR Rumah CNY IDR 1 Yuan Tiongkok ke Rupiah Indonesia Per pukul 18:00PM UTC , satu Yuan Tiongkok 🇨🇳 sama dengan Rp2,627.25 (🇮🇩 dua ribu en",
+    "image": "",
+    "credibility": 10
+  },
+  "https://www.bi.go.id/en/publikasi/ruang-media/news-release/Pages/sp_2711825.aspx": {
+    "url": "https://www.bi.go.id/en/publikasi/ruang-media/news-release/Pages/sp_2711825.aspx",
+    "title": "People’s Bank of China and Bank Indonesia Sign Memorandum of Understanding for the establishment of a Framework for Cooperation to Promote Bilateral Transactions in Local Currencies",
+    "learnedAt": "2026-06-27T18:11:35.931Z",
+    "collection": "china",
+    "assetTags": [
+      "CHINA"
+    ],
+    "summary": "People’s Bank of China and Bank Indonesia Sign Memorandum of Understanding for the establishment of a Framework for Cooperation to Promote Bilateral Transactions in Local Currencies You may be trying ",
+    "image": "/Style Library/biweb/img/flag-indo.png",
+    "credibility": 95
+  },
+  "https://en.wikipedia.org/wiki/People%27s_Bank_of_China": {
+    "url": "https://en.wikipedia.org/wiki/People%27s_Bank_of_China",
+    "title": "People's Bank of China - Wikipedia",
+    "learnedAt": "2026-06-27T18:11:38.021Z",
+    "collection": "china",
+    "assetTags": [
+      "CHINA"
+    ],
+    "summary": "People's Bank of China - Wikipedia Jump to content Search Search Donate Create account Log in Personal tools Donate Create account Log in People's Bank of China 46 languages العربية Asturianu Azərbayc",
+    "image": "//upload.wikimedia.org/wikipedia/en/thumb/d/dd/People%27s_Bank_of_China_logo.png/250px-People%27s_Bank_of_China_logo.png",
+    "credibility": 10
+  },
+  "https://geekzag.com/guides/computers/how-to-get-help-in-windows-11-10/": {
+    "url": "https://geekzag.com/guides/computers/how-to-get-help-in-windows-11-10/",
+    "title": "How to Get Help in Windows 11 &amp; 10 (Fast Way)",
+    "learnedAt": "2026-06-27T18:11:49.041Z",
+    "collection": "oil-energy",
+    "assetTags": [
+      "OILENERGY"
+    ],
+    "summary": "How to Get Help in Windows 11 &amp; 10 (Fast Way) Skip to content Search for... Computers Security Programming Web Smartphone Accessories Softwares MobileApp Site About Us Contact Us Privacy Policy Ho",
+    "image": "https://geekzag.com/wp-content/uploads/2025/05/how-to-get-help-in-windows-ft.png",
+    "credibility": 10
+  },
+  "https://www.whatsapp.com/": {
+    "url": "https://www.whatsapp.com/",
+    "title": "WhatsApp | Secure and Reliable Free Private Messaging and Calling",
+    "learnedAt": "2026-06-27T18:11:51.827Z",
+    "collection": "oil-energy",
+    "assetTags": [
+      "OILENERGY"
+    ],
+    "summary": "WhatsApp | Secure and Reliable Free Private Messaging and Calling Features Calling Messaging Groups Channels Meta AI Status Security WhatsApp Plus Privacy Blog Apps Help Center For Business Log In Dow",
+    "image": "",
+    "credibility": 10
+  },
+  "https://www.kompas.com/tren/read/2026/04/29/111500565/apa-itu-opec-dan-opec-lalu-mengapa-uea-keluar-": {
+    "url": "https://www.kompas.com/tren/read/2026/04/29/111500565/apa-itu-opec-dan-opec-lalu-mengapa-uea-keluar-",
+    "title": "Apa Itu OPEC dan OPEC+, lalu Mengapa UEA Keluar?",
+    "learnedAt": "2026-06-27T18:11:57.187Z",
+    "collection": "oil-energy",
+    "assetTags": [
+      "OILENERGY"
+    ],
+    "summary": "Apa Itu OPEC dan OPEC+, lalu Mengapa UEA Keluar? --> Koin --> Login Voucher Ada voucher buat kamu --> Gabung KOMPAS.com+ Konten yang disimpan Konten yang disukai Atur Minat Berikan Masukanmu Otomatis ",
+    "image": "https://asset.kompas.com/crops/5HujL1zsEaCw8PcIiVGmy79mEJ0=/0x0:1260x840/1200x675/filters:watermark(data/photo/2026/01/30/697c818d0ca91.png,0,-0,1)/data/photo/2026/01/02/69573ba9c9ff0.jpg",
+    "credibility": 66
+  },
+  "https://www.detik.com/edu/detikpedia/d-7608357/mengenal-opec-sejarah-dan-tujuan-organisasi-negara-pengekspor-minyak": {
+    "url": "https://www.detik.com/edu/detikpedia/d-7608357/mengenal-opec-sejarah-dan-tujuan-organisasi-negara-pengekspor-minyak",
+    "title": "Mengenal OPEC: Sejarah dan Tujuan Organisasi Negara Pengekspor Minyak",
+    "learnedAt": "2026-06-27T18:11:59.201Z",
+    "collection": "oil-energy",
+    "assetTags": [
+      "OILENERGY"
+    ],
+    "summary": "Mengenal OPEC: Sejarah dan Tujuan Organisasi Negara Pengekspor Minyak Mengenal OPEC: Sejarah dan Tujuan Organisasi Negara Pengekspor Minyak 0 komentar BAGIKAN &nbsp; Tautan telah disalin MENU detikcom",
+    "image": "https://akcdn.detik.net.id/api/wm/2024/07/24/dorong-produksi-migas-untuk-penuhi-kebutuhan-nasional-10_169.jpeg?wid=60&w=1200&v=1&t=jpeg",
+    "credibility": 87
+  },
+  "https://en.wikipedia.org/wiki/OPEC": {
+    "url": "https://en.wikipedia.org/wiki/OPEC",
+    "title": "OPEC - Wikipedia",
+    "learnedAt": "2026-06-27T18:12:00.900Z",
+    "collection": "oil-energy",
+    "assetTags": [
+      "OILENERGY"
+    ],
+    "summary": "OPEC - Wikipedia Jump to content Search Search Donate Create account Log in Personal tools Donate Create account Log in OPEC 136 languages Afrikaans Alemannisch አማርኛ Aragonés अंगिका العربية الدارجة مص",
+    "image": "//upload.wikimedia.org/wikipedia/en/thumb/9/94/Symbol_support_vote.svg/20px-Symbol_support_vote.svg.png",
+    "credibility": 10
+  },
+  "https://www.opec.org/": {
+    "url": "https://www.opec.org/",
+    "title": "Organization of the Petroleum Exporting Countries",
+    "learnedAt": "2026-06-27T18:12:03.275Z",
+    "collection": "oil-energy",
+    "assetTags": [
+      "OILENERGY"
+    ],
+    "summary": "Organization of the Petroleum Exporting Countries &nbsp; &nbsp; About Us Our Mission OPEC Statute Brief History Solemn Declarations Declaration of Cooperation Charter of Cooperation Member Countries O",
+    "image": "https://www.opec.org/assets/img/opec-byline.png",
+    "credibility": 10
+  },
+  "https://en.wikipedia.org/wiki/Energy": {
+    "url": "https://en.wikipedia.org/wiki/Energy",
+    "title": "Energy - Wikipedia",
+    "learnedAt": "2026-06-27T18:12:10.701Z",
+    "collection": "oil-energy",
+    "assetTags": [
+      "OILENERGY"
+    ],
+    "summary": "Energy - Wikipedia Jump to content Search Search Donate Create account Log in Personal tools Donate Create account Log in Energy 177 languages Acèh Afrikaans Alemannisch አማርኛ Aragonés العربية ܐܪܡܝܐ ال",
+    "image": "//upload.wikimedia.org/wikipedia/en/thumb/1/1b/Semi-protection-shackle.svg/20px-Semi-protection-shackle.svg.png",
+    "credibility": 10
+  },
+  "https://www.iea.org/": {
+    "url": "https://www.iea.org/",
+    "title": "IEA – International Energy Agency",
+    "learnedAt": "2026-06-27T18:12:12.554Z",
+    "collection": "oil-energy",
+    "assetTags": [
+      "OILENERGY"
+    ],
+    "summary": "IEA – International Energy Agency IEA Close Search Search Sign In Flyout close You are connecting via IP recognition from . If you wish to proceed, click on Connect . If you prefer to log into your pe",
+    "image": "https://iea.org/assets/front/images/iea_open_graph.jpg",
+    "credibility": 10
+  },
+  "https://www.geireki.net/lists/combi/mm": {
+    "url": "https://www.geireki.net/lists/combi/mm",
+    "title": "【2026年最新】男性コンビ一覧｜所属事務所・結成年・プロフィール付き | 芸歴.net",
+    "learnedAt": "2026-06-27T18:12:21.179Z",
+    "collection": "oil-energy",
+    "assetTags": [
+      "OILENERGY"
+    ],
+    "summary": "【2026年最新】男性コンビ一覧｜所属事務所・結成年・プロフィール付き | 芸歴.net 解散済みを含める 検索 芸歴0年目 芸歴1年目 芸歴2年目 芸歴3年目 芸歴4年目 芸歴5年目 芸歴6年目 芸歴7年目 芸歴8年目 芸歴9年目 芸歴10年目 芸歴11年目 芸歴12年目 芸歴13年目 芸歴14年目 芸歴15年目 芸歴16年目 芸歴17年目 芸歴18年目 芸歴19年目 芸歴20年目 芸歴21年目",
+    "image": "https://www.geireki.net/img/ogp/combi-mm.png",
+    "credibility": 10
+  },
+  "https://techcult.com/how-to-get-help-in-windows-11/": {
+    "url": "https://techcult.com/how-to-get-help-in-windows-11/",
+    "title": "How to Get Help in Windows 11 &#8211; TechCult",
+    "learnedAt": "2026-06-27T18:12:23.332Z",
+    "collection": "oil-energy",
+    "assetTags": [
+      "OILENERGY"
+    ],
+    "summary": "How to Get Help in Windows 11 &#8211; TechCult Skip to content Search for: Search Search Home » Windows How to Get Help in Windows 11 By Henry Quill | January 16, 2026 Microsoft’s Windows 11 is known ",
+    "image": "https://techcult.com/wp-content/uploads/2023/02/techcultlogoblack.png",
+    "credibility": 10
+  },
+  "https://www.ecb.europa.eu/stats/policy_and_exchange_rates/euro_reference_exchange_rates/html/index.en.html": {
+    "url": "https://www.ecb.europa.eu/stats/policy_and_exchange_rates/euro_reference_exchange_rates/html/index.en.html",
+    "title": "Euro foreign exchange reference rates",
+    "learnedAt": "2026-06-27T18:12:36.087Z",
+    "collection": "forex",
+    "assetTags": [
+      "FOREX"
+    ],
+    "summary": "Euro foreign exchange reference rates Skip to: Skip to navigation Skip to content Skip to footer EN Български Čeština Dansk Deutsch Eλληνικά English Español Eesti keel Suomi Français Gaeilge Hrvatski ",
+    "image": "/press/tvservices/html/index/ECB press conference place holder new_2560x1440.jpg",
+    "credibility": 92
+  },
+  "https://en.wikipedia.org/wiki/Euro": {
+    "url": "https://en.wikipedia.org/wiki/Euro",
+    "title": "Euro - Wikipedia",
+    "learnedAt": "2026-06-27T18:12:38.900Z",
+    "collection": "forex",
+    "assetTags": [
+      "FOREX"
+    ],
+    "summary": "Euro - Wikipedia Jump to content Search Search Donate Create account Log in Personal tools Donate Create account Log in Euro 214 languages Afrikaans Alemannisch አማርኛ Aragonés العربية ܐܪܡܝܐ الدارجة مصر",
+    "image": "//upload.wikimedia.org/wikipedia/commons/thumb/f/f5/Euro_Series_Banknotes_%282019%29_-_centered.png/250px-Euro_Series_Banknotes_%282019%29_-_centered.png",
+    "credibility": 10
+  },
+  "https://wise.com/id/currency-converter/eur-to-idr-rate": {
+    "url": "https://wise.com/id/currency-converter/eur-to-idr-rate",
+    "title": "Nilai Tukar euro ke rupiah Indonesia. Konversi EUR/IDR - Wise",
+    "learnedAt": "2026-06-27T18:12:41.058Z",
+    "collection": "forex",
+    "assetTags": [
+      "FOREX"
+    ],
+    "summary": "Nilai Tukar euro ke rupiah Indonesia. Konversi EUR/IDR - Wise Langsung ke konten utama euro ke rupiah Indonesia Konversi EUR ke IDR dengan nilai tukar tengah pasar. Wise adalah akun internasional untu",
+    "image": "https://wise.com/web-art/assets/illustrations/plane-small@2x.webp",
+    "credibility": 10
+  },
+  "https://jpy.id.currencyrate.today/idr": {
+    "url": "https://jpy.id.currencyrate.today/idr",
+    "title": "Kurs  Yen Jepang ke Rupiah Indonesia - Hari Ini ¥ 1 JPY/IDR",
+    "learnedAt": "2026-06-27T18:12:49.821Z",
+    "collection": "forex",
+    "assetTags": [
+      "FOREX"
+    ],
+    "summary": "Kurs Yen Jepang ke Rupiah Indonesia - Hari Ini ¥ 1 JPY/IDR Rumah JPY IDR 1 Yen Jepang ke Rupiah Indonesia Per pukul 18:00PM UTC , satu Yen Jepang 💴 sama dengan Rp110.42 (🇮🇩 seratus sepuluh Rupiah I",
+    "image": "https://cdn2.currencyrate.today/f/sources/icons/png/128/id-mmc.png",
+    "credibility": 10
+  },
+  "https://wise.com/id/currency-converter/jpy-to-idr-rate?amount=1": {
+    "url": "https://wise.com/id/currency-converter/jpy-to-idr-rate?amount=1",
+    "title": "Nilai Tukar 1 yen Jepang ke rupiah Indonesia. Konversi JPY/IDR - Wise",
+    "learnedAt": "2026-06-27T18:12:51.964Z",
+    "collection": "forex",
+    "assetTags": [
+      "FOREX"
+    ],
+    "summary": "Nilai Tukar 1 yen Jepang ke rupiah Indonesia. Konversi JPY/IDR - Wise Langsung ke konten utama 1 yen Jepang ke rupiah Indonesia Konversi JPY ke IDR dengan nilai tukar tengah pasar. Wise adalah akun in",
+    "image": "https://wise.com/web-art/assets/illustrations/plane-small@2x.webp",
+    "credibility": 10
+  },
+  "https://id.investing.com/currencies/gbp-idr": {
+    "url": "https://id.investing.com/currencies/gbp-idr",
+    "title": "Kurs GBP ke IDR hari Ini | Pound Inggris Rupiah Indonesia - Investing.com",
+    "learnedAt": "2026-06-27T18:12:56.257Z",
+    "collection": "forex",
+    "assetTags": [
+      "FOREX"
+    ],
+    "summary": "Kurs GBP ke IDR hari Ini | Pound Inggris Rupiah Indonesia - Investing.com Investing.com - Pasar Finansial Seluruh Dunia Buka App Pencarian Populer Silakan coba pencarian lain Ambil Diskon 50% Masuk Da",
+    "image": "https://i-invdn-com.investing.com/redesign/images/seo/investing_300X300.png",
+    "credibility": 95
   }
 }

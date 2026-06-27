@@ -98,6 +98,168 @@
       "maxResults": 3,
       "schedule": "every 6h",
       "enabled": true
+    },
+    {
+      "id": "indonesia",
+      "name": "Indonesia",
+      "queries": [
+        "indonesia market outlook 2026",
+        "IDX market outlook 2026",
+        "IHSG market outlook 2026",
+        "jokowi market outlook 2026"
+      ],
+      "assetTags": [
+        "INDONESIA"
+      ],
+      "maxResults": 5,
+      "enabled": true,
+      "schedule": "every 6h",
+      "_auto_added": true,
+      "_priority": 9
+    },
+    {
+      "id": "gold",
+      "name": "Gold & Commodities",
+      "queries": [
+        "gold price market outlook 2026",
+        "emas market outlook 2026",
+        "silver market outlook 2026",
+        "copper market outlook 2026"
+      ],
+      "assetTags": [
+        "GOLD"
+      ],
+      "maxResults": 5,
+      "enabled": true,
+      "schedule": "every 6h",
+      "_auto_added": true,
+      "_priority": 8
+    },
+    {
+      "id": "us-market",
+      "name": "US Markets",
+      "queries": [
+        "S&P 500 market outlook 2026",
+        "Nasdaq market outlook 2026",
+        "Dow Jones market outlook 2026",
+        "Fed rate market outlook 2026"
+      ],
+      "assetTags": [
+        "USMARKET"
+      ],
+      "maxResults": 5,
+      "enabled": true,
+      "schedule": "every 6h",
+      "_auto_added": true,
+      "_priority": 6
+    },
+    {
+      "id": "china",
+      "name": "China Economy",
+      "queries": [
+        "China market outlook 2026",
+        "Shanghai market outlook 2026",
+        "yuan market outlook 2026",
+        "PBOC market outlook 2026"
+      ],
+      "assetTags": [
+        "CHINA"
+      ],
+      "maxResults": 5,
+      "enabled": true,
+      "schedule": "every 6h",
+      "_auto_added": true,
+      "_priority": 6
+    },
+    {
+      "id": "oil-energy",
+      "name": "Oil & Energy",
+      "queries": [
+        "crude oil market outlook 2026",
+        "OPEC market outlook 2026",
+        "energy crisis market outlook 2026",
+        "renewable market outlook 2026"
+      ],
+      "assetTags": [
+        "OILENERGY"
+      ],
+      "maxResults": 5,
+      "enabled": true,
+      "schedule": "every 6h",
+      "_auto_added": true,
+      "_priority": 6
+    },
+    {
+      "id": "forex",
+      "name": "Forex",
+      "queries": [
+        "USD/IDR market outlook 2026",
+        "EUR/USD market outlook 2026",
+        "JPY market outlook 2026",
+        "GBP market outlook 2026"
+      ],
+      "assetTags": [
+        "FOREX"
+      ],
+      "maxResults": 5,
+      "enabled": true,
+      "schedule": "every 6h",
+      "_auto_added": true,
+      "_priority": 6
+    },
+    {
+      "id": "geopolitics",
+      "name": "Geopolitics",
+      "queries": [
+        "war market outlook 2026",
+        "sanctions market outlook 2026",
+        "tariff market outlook 2026",
+        "trade war market outlook 2026"
+      ],
+      "assetTags": [
+        "GEOPOLITICS"
+      ],
+      "maxResults": 5,
+      "enabled": true,
+      "schedule": "every 6h",
+      "_auto_added": true,
+      "_priority": 5
+    },
+    {
+      "id": "indonesia-politics",
+      "name": "Indonesia Politics & Policy",
+      "queries": [
+        "pemilu market outlook 2026",
+        "kabinet market outlook 2026",
+        "DPR market outlook 2026",
+        "APBN market outlook 2026"
+      ],
+      "assetTags": [
+        "INDONESIAPOLITICS"
+      ],
+      "maxResults": 5,
+      "enabled": true,
+      "schedule": "every 6h",
+      "_auto_added": true,
+      "_priority": 7
+    },
+    {
+      "id": "startup",
+      "name": "Startups & Unicorns",
+      "queries": [
+        "startup market outlook 2026",
+        "unicorn market outlook 2026",
+        "GoTo market outlook 2026",
+        "Bukalapak market outlook 2026"
+      ],
+      "assetTags": [
+        "STARTUP"
+      ],
+      "maxResults": 5,
+      "enabled": true,
+      "schedule": "every 6h",
+      "_auto_added": true,
+      "_priority": 5
     }
   ]
 }

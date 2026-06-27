@@ -70,7 +70,7 @@ async function searxngSearch(query, limit = 5) {
 
 async function deepSearchMCP(query, maxResults = 5) {
   try {
-    const res = await mcpPost('web.deep_search', { q: query, maxResults, depth: 2 })
+    const res = await mcpPost('web.deep_search', { query, maxResults, depth: 2 })
     const allResults = []
     for (const bucket of res.buckets || []) {
       for (const r of bucket.results || []) {
@@ -99,6 +99,28 @@ async function mcpPost(tool, input, timeoutMs = 60000) {
   })
   if (!res.ok) throw new Error(`MCP ${tool} ${res.status}`)
   return res.json()
+}
+
+async function restSearch(query, limit = 5) {
+  try {
+    const res = await fetch(`${MCP_BASE}/api/search/web`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query, engines: ['bing', 'duckduckgo'], limit }),
+      signal: AbortSignal.timeout(20000)
+    })
+    if (!res.ok) throw new Error(`REST search ${res.status}`)
+    const data = await res.json()
+    return (data.results || []).map(r => ({
+      title: r.title,
+      url: r.url,
+      snippet: r.snippet,
+      source: r.source,
+      domain: r.domain,
+      trust: r.trust || 50,
+      quality: r.quality || 0
+    })).slice(0, limit)
+  } catch { return [] }
 }
 
 async function fetchPageContent(url) {
@@ -159,8 +181,19 @@ async function processTopic(topic) {
 
   for (const query of topic.queries) {
     try {
-      log(`  🔍 SearXNG: "${query}"`)
-      let results = await searxngSearch(query, topic.maxResults || 3)
+      log(`  🔍 Search: "${query}"`)
+      // Prefer REST API (goes through backend's multi-engine search)
+      let results = await restSearch(query, topic.maxResults || 3)
+      // Fallback to SearXNG direct if REST fails
+      if (!results.length) {
+        log(`  ⚠️ REST empty, trying SearXNG direct...`)
+        results = await searxngSearch(query, topic.maxResults || 3)
+      }
+      // Fallback to MCP deep search
+      if (!results.length) {
+        log(`  ⚠️ SearXNG empty, trying MCP deep...`)
+        results = await deepSearchMCP(query, topic.maxResults || 3)
+      }
       log(`  📊 Found ${results.length} results`)
 
       if (deepSearch && results.length < (topic.maxResults || 3)) {
@@ -172,6 +205,8 @@ async function processTopic(topic) {
       for (const r of results) {
         const url = r.url
         if (!url || url.includes('youtube.com') || url.includes('facebook.com') || url.includes('instagram.com') || url.includes('twitter.com') || url.includes('x.com')) continue
+        // Skip Bing redirect URLs that can't be crawled
+        if (url.includes('bing.com/ck/a') || url.includes('bing.com/cc/a')) continue
 
         const urlHash = url.slice(0, 200)
         if (learnedStore[urlHash]) {
