@@ -9,7 +9,9 @@ import { ragStorageStats } from './rag.js'
 import { getCollectionStats } from './rag-autolearn.js'
 import fs from 'node:fs'
 import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const REPORTS_DIR = path.join(__dirname, '..', '..', 'reports')
 
 // ─── Individual Checks ────────────────────────────────────────────────────
@@ -127,7 +129,7 @@ export async function runHealthChecks() {
   
   return {
     ok: allOk,
-    name: 'market-orcafe name: 'market-orca-backend',
+    name: 'market-orca-backend',
     version: '1.2.0',
     port: Number(process.env.PORT || 4567),
     allOk,

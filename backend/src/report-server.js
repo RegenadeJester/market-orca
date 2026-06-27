@@ -1523,6 +1523,58 @@ app.use('/api', (req, res, next) => {
   req.pipe(proxyReq)
 })
 
+// ── APM Status Endpoint ──────────────────────────────────────────────────
+app.get('/api/apm/status', async (_req, res) => {
+  try {
+    const { parseFeatures, calculateStats } = await import('./apm/apm-dashboard.js')
+    // Fallback CJS module loader
+    const fsMod = await import('node:fs')
+    const pathMod = await import('node:path')
+    const MMd_PATH = pathMod.default.resolve(__dirname, '../../MMd.md')
+    
+    // Try to import the CJS dashboard module
+    let stats = { totalFeatures: 0, totalFiles: 0, totalBranches: 0, totalPRs: 0, uniqueDates: 0, dailyAverage: '0' }
+    try { stats = require('../scripts/apm/apm-dashboard.cjs')?.calculateStats?.(require('../scripts/apm/apm-dashboard.cjs')?.parseFeatures?.()) } catch {}
+    
+    const dailyBriefPath = pathMod.default.resolve(__dirname, '../daily-brief.md')
+    const briefExists = fsMod.default.existsSync(dailyBriefPath)
+    const briefMtime = briefExists ? fsMod.default.statSync(dailyBriefPath).mtime.toISOString() : null
+    
+    // Pain point counts from latest scan
+    let painPointStats = { total: 0, p1: 0, p2: 0, p3: 0 }
+    if (briefExists) {
+      const briefContent = fsMod.default.readFileSync(dailyBriefPath, 'utf8')
+      const totalMatch = briefContent.match(/Total pain points:\s*(\d+)/)
+      const p1Match = briefContent.match(/P1\s*\(critical\):\s*(\d+)/i)
+      const p2Match = briefContent.match(/P2\s*\(important\):\s*(\d+)/i)
+      painPointStats = {
+        total: totalMatch ? parseInt(totalMatch[1]) : 0,
+        p1: p1Match ? parseInt(p1Match[1]) : 0,
+        p2: p2Match ? parseInt(p2Match[1]) : 0
+      }
+    }
+    
+    res.json({
+      ok: true,
+      project: 'Market Orca',
+      environment: process.env.NODE_ENV || 'development',
+      pipeline: {
+        version: '2.0',
+        lastRun: briefMtime,
+        status: briefMtime ? 'active' : 'idle',
+        featuresShipped: stats.totalFeatures || 0,
+        dailyAverage: stats.dailyAverage || '0',
+        branchesCreated: stats.totalBranches || 0,
+        prsMerged: stats.totalPRs || 0
+      },
+      painPoints: painPointStats,
+      uptime: process.uptime()
+    })
+  } catch (e) {
+    res.status(500).json({ ok: false, error: String(e.message || e) })
+  }
+})
+
 // ── Error handler ────────────────────────────────────────────────────────
 app.use((err, _req, res, next) => {
   if (err?.type === 'entity.too.large') return res.status(413).json({ ok: false, error: 'payload_too_large', maxBytes: 512000 })
