@@ -875,6 +875,54 @@ app.get('/api/market/overview', async (req, res) => {
   catch (e) { res.status(500).json({ ok: false, error: e.message }) }
 })
 
+// ── Alert Dashboard Summary ──────────────────────────────────
+app.get('/api/market/alerts-summary', (_req, res) => {
+  try {
+    const triggered = db.prepare(`
+      SELECT a.*, n.link AS news_link, n.title AS news_title
+      FROM alerts a
+      LEFT JOIN news n ON n.id = (SELECT id FROM news WHERE asset_slug = a.asset_slug ORDER BY id DESC LIMIT 1)
+      ORDER BY a.id DESC LIMIT 10
+    `).all()
+
+    const suggested = db.prepare(
+      "SELECT s.*, a.symbol, a.name, a.price AS current_price, a.change_percent FROM suggested_alerts s LEFT JOIN assets a ON a.slug = s.asset_slug WHERE s.status = 'pending' ORDER BY s.id DESC LIMIT 10"
+    ).all()
+    suggested.forEach(s => {
+      s.distance_pct = s.current_price ? Number((((s.target_price - s.current_price) / s.current_price) * 100).toFixed(2)) : 0
+      s.asset_symbol = s.asset_symbol || s.symbol
+    })
+
+    const assets = db.prepare('SELECT * FROM assets').all()
+    const threshold_alerts = assets.map(a => {
+      const t = db.prepare('SELECT * FROM asset_settings WHERE asset_slug = ?').get(a.slug) || {}
+      const upTh = t.threshold_up ?? a.threshold_up ?? (a.market === 'CRYPTO' ? 3 : a.market === 'IDX' ? 1.5 : 2)
+      const downTh = t.threshold_down ?? a.threshold_down ?? -upTh
+      const change = a.change_percent || 0
+      let breach = 'none'
+      if (change >= upTh) breach = 'up'
+      else if (change <= downTh) breach = 'down'
+      return {
+        asset_slug: a.slug, symbol: a.symbol, name: a.name, market: a.market,
+        current_price: a.price, change_percent: change,
+        threshold_up: upTh, threshold_down: downTh, breach,
+        severity: breach !== 'none' ? (Math.abs(change) >= upTh * 1.5 ? 'critical' : 'warning') : 'none'
+      }
+    }).filter(a => a.breach !== 'none' || a.market)
+
+    const summary = {
+      critical: threshold_alerts.filter(a => a.severity === 'critical').length,
+      warning: threshold_alerts.filter(a => a.severity === 'warning').length,
+      triggered: triggered.length,
+      suggested: suggested.length
+    }
+
+    res.json({ summary, triggered, suggested, threshold_alerts })
+  } catch (e) {
+    res.status(500).json({ ok: false, error: e.message })
+  }
+})
+
 // ── Health Check Endpoint ───────────────────────────────────────
 app.get('/api/health', async (_req, res) => {
   const checks = {}
