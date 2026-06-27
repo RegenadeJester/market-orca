@@ -1,5 +1,11 @@
 # Market Orca — Feature Log
 
+## 2026-06-27 — Feature #15: Today's Report Card on HomePage
+- **Branch:** `feat/homepage-today-report-card` → PR #1 (frontend repo)
+- **Pain point:** Backend returns `todayReport` in `/api/overview` but frontend ignores it. Users can't see if today's report is ready without navigating to `/report` page.
+- **Fix:** HomePage now displays a prominent banner showing today's report status — title, topic count, generation time, incident badge — with direct link to report. Shows "generate via Report Editor" CTA when no report exists.
+- **Files:** `frontend/src/pages/HomePage.vue`
+
 ## 2026-06-27 — Feature #14: Today's Report on Overview
 - **Branch:** `feat/overview-today-report` → PR #11
 - **Pain point:** HomePage fetches `/api/overview` for assets/news but needs separate `/api/reports` call to check if today's daily report is ready.
