@@ -1,14 +1,19 @@
 /**
  * RAG Ask — RAG retrieval + LLM synthesis (Perplexity-style)
- * PRIMARY: use runRagReport (local FTS + semantic + query rewrite + relevance gate)
+ * PRIMARY: use expanded query → rerank → runRagReport (local FTS + semantic + query rewrite)
  * OPTIONAL: Perplexity API for enhanced synthesis (if PERPLEXITY_API_KEY set)
  */
 
 import { db } from './db.js'
 import { searchByTopic } from './rag-autolearn.js'
 import { runRagReport, searchRag } from './rag-report.js'
+import { expandQuery } from './rag-query-expansion.js'
+import { rerankDocs } from './rag-rerank.js'
 
-const PERPLEXITY_KEY = process.env.PERPLEXITY_API_KEY || ''
+// Load .env for Perplexity key (systemd EnvironmentFile already loads it)
+const PERPLEXITY_KEY = process.env.PERPLEXITY_API_KEY || (() => {
+  try { return require('fs').readFileSync(new URL('../.env', import.meta.url), 'utf8').match(/PERPLEXITY_API_KEY=(.+)/)?.[1]?.trim() || '' } catch { return '' }
+})()
 const PERPLEXITY_URL = 'https://api.perplexity.ai/chat/completions'
 const MODEL = 'sonar'
 
@@ -39,12 +44,30 @@ function formatLocalAnswer(report) {
   }
 }
 
-export async function ragAsk(query, { limit=10, topic='', model=MODEL, enhanceWithLLM=false } = {}) {
-  // 1. Local RAG retrieval + synthesis (fast, no API)
-  const localResult = runRagReport(query, Math.min(limit, 12))
+export async function ragAsk(query, { limit=10, topic='', model=MODEL, enhanceWithLLM=false, mode='full' } = {}) {
+  // 1. Query expansion (synonyms, ticker aliases, Bahasa/English)
+  const expanded = expandQuery(query, { 
+    maxQueries: mode === 'quick' ? 3 : mode === 'full' ? 6 : 10,
+    includeSynonyms: true,
+    includeTickerAliases: true,
+    includeBahasaEnglish: true
+  })
+  
+  // 2. Run local RAG report with expanded queries
+  const localResult = runRagReport(expanded.join(' | '), Math.min(limit * 2, 16))
+  
+  // 3. Rerank results for better precision
+  const reranked = rerankDocs(localResult.docs || [], query, { 
+    limit
+  })
+  
+  // Update localResult with reranked docs
+  localResult.docs = reranked
+  
+  // 4. Format local answer
   const formatted = formatLocalAnswer(localResult)
   
-  // 2. If Perplexity key available AND enhanceWithLLM requested, enhance answer
+  // 5. If Perplexity key available AND enhanceWithLLM requested, enhance answer
   if (PERPLEXITY_KEY && enhanceWithLLM) {
     try {
       const context = formatted.citations.map(c => `[${c.n}] ${c.title}: ${c.quote}`).join('\n\n')
@@ -80,11 +103,12 @@ export async function ragAsk(query, { limit=10, topic='', model=MODEL, enhanceWi
   return {
     ok: true,
     query,
+    expandedQueries: expanded,
     answer: formatted.answer,
     citations: formatted.citations,
     confidence: formatted.confidence,
     evidence: formatted.evidence,
-    sources: localResult.docs?.map(d => ({ title: d.title, url: d.source_url, score: d.score, domain: d.domain })) || [],
+    sources: reranked.map(d => ({ title: d.title, url: d.source_url, score: d.score, domain: d.domain, rerankScore: d.rerankScore })) || [],
     method: formatted.method,
     factCheck: localResult.factCheck
   }

@@ -28,6 +28,8 @@ import { getMarketCalendarStatus } from './market-calendar.js'
 import { scoreSourceTrust, initSourceReliabilityTable, seedSourceReliability, listSourceReliability, getSourcesTrust } from './source-reliability.js'
 import { initPersonaTable, getPersona, upsertPersona, inferPersonaFromActivity, buildContextPrompt } from './persona.js'
 import { getTradingViewScreener, getTradingViewChart, getTradingViewTechnical, getTradingViewNews, getTradingViewPopular } from './mcp-tradingview.js'
+import { startPipelineRun, logPipelineEvent, completePipelineRun, getLatestPipelineStatus, getRecentPipelineEvents, getPipelineRun, getPipelineStats, getStageBreakdown } from './pipeline-monitor.js'
+import { runHealthChecks } from './health.js'
 import { fetchIndonesianNews, fetchTrendingNews, INDONESIAN_NEWS_SOURCES } from './news-fetcher.js'
 import { getIHSGData, getForexData, getMarketOverview, FOREX_SYMBOLS } from './market-data.js'
 import indonesiaRoutes from './indonesia/indonesia-router.js'
@@ -925,88 +927,12 @@ app.get('/api/market/alerts-summary', (_req, res) => {
 
 // ── Health Check Endpoint ───────────────────────────────────────
 app.get('/api/health', async (_req, res) => {
-  const checks = {}
-  async function check(name, fn) {
-    try { const out = await fn(); checks[name] = { ok: true, ...out } }
-    catch (e) { checks[name] = { ok: false, error: String(e.message || e) } }
+  try {
+    const health = await runHealthChecks()
+    res.json(health)
+  } catch (error) {
+    res.status(500).json({ ok: false, error: String(error) })
   }
-
-  // DB health
-  check('database', () => {
-    const count = db.prepare('SELECT count(*) AS n FROM assets').get()?.n || 0
-    const fts5 = db.prepare(`SELECT sqlite_compileoption_used('ENABLE_FTS5') AS enabled`).get()?.enabled === 1
-    return { assets: count, fts5 }
-  })
-
-  // RAG health
-  check('rag', () => {
-    const docs = db.prepare('SELECT count(*) AS n FROM rag_evidence_documents').get()?.n || 0
-    const chunks = db.prepare('SELECT count(*) AS n FROM rag_evidence_chunks').get()?.n || 0
-    return { documents: docs, chunks }
-  })
-
-  // SearXNG health
-  check('searxng', async () => {
-    const base = process.env.SEARXNG_URL || process.env.SEARX_URL || 'http://localhost:18080'
-    const r = await fetch(`${base.replace(/\/$/, '')}/search?q=test&format=json&language=all&safesearch=0&categories=general`, {
-      headers: { 'user-agent': 'MarketOrcaHealth/1.0', 'accept': 'application/json' },
-      signal: AbortSignal.timeout(5000)
-    })
-    if (!r.ok) throw new Error(`HTTP ${r.status}`)
-    const j = await r.json()
-    return { results: (j.results || []).length }
-  })
-
-  // MCP server health
-  check('mcp', () => {
-    return { version: '1.2.0', tools: MCP_TOOLS.length, rateLimited: MCP_METRICS.rateLimited, uptime: new Date() - new Date(MCP_METRICS.startedAt) }
-  })
-
-  // Yahoo Finance availability (light check)
-  check('yahoo_finance', async () => {
-    const url = 'https://query1.finance.yahoo.com/v7/finance/quote?symbols=%5EJKSE'
-    const v = await import('./web-search.js').then(m => m.validateFetchUrl(url))
-    if (!v.ok) throw new Error(`blocked: ${v.error}`)
-    const r = await fetch(url, { headers: { 'User-Agent': 'Mozilla/5.0' }, signal: AbortSignal.timeout(5000) })
-    if (!r.ok) throw new Error(`HTTP ${r.status}`)
-    return { reachable: true }
-  })
-
-  // Discord bot health
-  check('discord', () => {
-    const hasToken = !!process.env.DISCORD_BOT_TOKEN
-    const hasWebhook = !!process.env.DISCORD_WEBHOOK_URL
-    return { configured: hasToken || hasWebhook, token: hasToken, webhook: hasWebhook }
-  })
-
-  // Cache stats
-  check('cache', () => {
-    return webCacheStats()
-  })
-
-  // Report status
-  check('report', () => {
-    const rd = path.join(__dirname, '..', '..', 'reports')
-    const files = fs.existsSync(rd) ? fs.readdirSync(rd).filter(f => f.endsWith('.json')).sort().reverse() : []
-    const latest = files[0]?.replace('.json', '') || null
-    return { reports: files.length, latest }
-  })
-
-  // Wait for all checks
-  await Promise.allSettled(Object.keys(checks).map(k => checks[k]))
-  const allOk = Object.values(checks).every(c => c.ok)
-
-  res.json({
-    ok: allOk,
-    name: 'market-orca-backend',
-    version: '1.2.0',
-    port: PORT,
-    allOk,
-    services: checks,
-    uptime: process.uptime(),
-    memory: process.memoryUsage().rss,
-    timestamp: new Date().toISOString()
-  })
 })
 
 const MCP_TOOLS = [
