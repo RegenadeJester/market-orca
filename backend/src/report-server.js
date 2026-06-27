@@ -1486,55 +1486,21 @@ app.post('/api/dm-delivery/cleanup', (req, res) => {
   } catch (e) { res.status(500).json({ ok: false, error: String(e) }) }
 })
 
-// ── Catch-all: serve SPA for client-side routing ─────────────────────────
-app.get('*', (req, res) => {
-  if (req.path.startsWith('/api/') || req.path.startsWith('/mcp/')) {
-    return res.status(404).json({ ok: false, error: 'not_found' })
-  }
-  const indexPath = path.join(frontendDist, 'index.html')
-  if (fs.existsSync(indexPath)) {
-    res.setHeader('Content-Type', 'text/html; charset=utf-8')
-    res.sendFile(indexPath)
-  } else {
-    res.status(404).send('Not found')
-  }
-})
-
-// ── API proxy: forward unknown /api/* to main backend (:4567) ──────────────
-import http from 'node:http'
-const PROXY_TARGET = `http://localhost:${APP_CONFIG?.port || 4567}`
-
-app.use('/api', (req, res, next) => {
-  // If this report-server already handled the route, Express would have sent a response.
-  // Only hit this middleware for routes NOT defined above.
-  // But Express doesn't work that way — all app.use('/api') routes above are matched first.
-  // We need a catch-all that fires after all explicit routes.
-  // Trick: forward only if res hasn't been sent.
-  if (res.headersSent) return next()
-  const targetUrl = new URL(req.originalUrl, PROXY_TARGET)
-  const proxyReq = http.request(targetUrl, {
-    method: req.method,
-    headers: { ...req.headers, host: `localhost:${APP_CONFIG?.port || 4567}` },
-  }, (proxyRes) => {
-    res.writeHead(proxyRes.statusCode, proxyRes.headers)
-    proxyRes.pipe(res)
-  })
-  proxyReq.on('error', () => { if (!res.headersSent) res.status(502).json({ ok: false, error: 'proxy_error' }) })
-  req.pipe(proxyReq)
-})
-
-// ── APM Status Endpoint ──────────────────────────────────────────────────
+// ── APM Status Endpoint (must be before catch-all) ───────────────────────
 app.get('/api/apm/status', async (_req, res) => {
   try {
-    const { parseFeatures, calculateStats } = await import('./apm/apm-dashboard.js')
-    // Fallback CJS module loader
     const fsMod = await import('node:fs')
     const pathMod = await import('node:path')
     const MMd_PATH = pathMod.default.resolve(__dirname, '../../MMd.md')
     
     // Try to import the CJS dashboard module
     let stats = { totalFeatures: 0, totalFiles: 0, totalBranches: 0, totalPRs: 0, uniqueDates: 0, dailyAverage: '0' }
-    try { stats = require('../scripts/apm/apm-dashboard.cjs')?.calculateStats?.(require('../scripts/apm/apm-dashboard.cjs')?.parseFeatures?.()) } catch {}
+    try { 
+      const { createRequire } = await import('node:module');
+      const mod = createRequire(import.meta.url)('../scripts/apm/apm-dashboard.cjs');
+      const features = mod.parseFeatures();
+      stats = mod.calculateStats(features);
+    } catch {}
     
     const dailyBriefPath = pathMod.default.resolve(__dirname, '../daily-brief.md')
     const briefExists = fsMod.default.existsSync(dailyBriefPath)
@@ -1573,6 +1539,38 @@ app.get('/api/apm/status', async (_req, res) => {
   } catch (e) {
     res.status(500).json({ ok: false, error: String(e.message || e) })
   }
+})
+
+// ── Catch-all: serve SPA for client-side routing ─────────────────────────
+app.get('*', (req, res) => {
+  if (req.path.startsWith('/api/') || req.path.startsWith('/mcp/')) {
+    return res.status(404).json({ ok: false, error: 'not_found' })
+  }
+  const indexPath = path.join(frontendDist, 'index.html')
+  if (fs.existsSync(indexPath)) {
+    res.setHeader('Content-Type', 'text/html; charset=utf-8')
+    res.sendFile(indexPath)
+  } else {
+    res.status(404).send('Not found')
+  }
+})
+
+// ── API proxy: forward unknown /api/* to main backend (:4567) ──────────────
+import http from 'node:http'
+const PROXY_TARGET = `http://localhost:${APP_CONFIG?.port || 4567}`
+
+app.use('/api', (req, res, next) => {
+  if (res.headersSent) return next()
+  const targetUrl = new URL(req.originalUrl, PROXY_TARGET)
+  const proxyReq = http.request(targetUrl, {
+    method: req.method,
+    headers: { ...req.headers, host: `localhost:${APP_CONFIG?.port || 4567}` },
+  }, (proxyRes) => {
+    res.writeHead(proxyRes.statusCode, proxyRes.headers)
+    proxyRes.pipe(res)
+  })
+  proxyReq.on('error', () => { if (!res.headersSent) res.status(502).json({ ok: false, error: 'proxy_error' }) })
+  req.pipe(proxyReq)
 })
 
 // ── Error handler ────────────────────────────────────────────────────────

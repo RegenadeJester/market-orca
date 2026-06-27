@@ -1,5 +1,40 @@
 # Market Orca — Feature Log
 
+## 2026-06-28 — Feature #23: APM Status Dashboard Endpoint
+- **Pain point:** No visibility into APM pipeline health — ops had no way to see features shipped, pain point trends, or pipeline status.
+- **Done:**
+  1. New **`GET /api/apm/status`** endpoint on report-server returning pipeline metrics, feature stats, pain point counts.
+  2. **`scripts/apm/apm-dashboard.cjs`** — MMd.md parser with feature analytics (shipped count, daily average, files touched).
+  3. Response includes: `featuresShipped`, `dailyAverage`, `branchesCreated`, `prsMerged`, `painPoints` (total/P1/P2).
+- **Files:** `backend/src/report-server.js`, `backend/scripts/apm/apm-dashboard.cjs`
+- **Deliverable:** Ops dashboard now shows live APM pipeline status.
+- **Branch:** `feat/apm-status-endpoint` → PR #23 ✅ merged
+
+## 2026-06-28 — Feature #22: APM PM Agent Pain Point Scanner (Noise Reduction)
+- **Pain point:** PM scanner (`apm-pm.cjs`) reported 340+ pain points with many false positives (Vue template `.then()`, duplicate silent catches), making daily briefs unactionable.
+- **Done:**
+  1. Added **deduplication** within 5-line windows — same file+type grouped.
+  2. **Vue template filter** — `.then()` detector skips lines with `v-if`, `@click`, `v-for`, `:class`, `:style`.
+  3. **Silent catch context check** — skips `catch {}` if `console.error` in same block.
+  4. Results: P1 issues dropped from 313 → 251 (62 fewer false alarms).
+- **Files:** `backend/scripts/apm/apm-pm.cjs`
+- **Deliverable:** Daily brief now surfaces real pain points, not template noise.
+- **Branch:** `feat/apm-pm-scanner-fix` → PR #22 ✅ merged
+
+## 2026-06-28 — Feature #21: Silent Error Swallowing Fixes (5 modules)
+- **Pain point:** 5+ silent `catch {}` blocks in `ai-daily-report.js`, `config.js`, `alert-engine.js`, `discord-dm.js` lost DB failures, config load errors, Discord send failures without logging.
+- **Done:**
+  1. `ai-daily-report.js`: 5 DB query catches now log `[ai-report] DB query failed: <msg>`
+  2. `config.js`: 3 config loads now log `[config] load failed: <msg>`
+  3. `alert-engine.js`: alert scan failure logs `[alert-engine] scan failed: <msg>`
+  4. `discord-dm.js`: DM send failure logs `[discord-dm] send failed: <msg>`
+  4. `logDelivery()` in `ai-daily-report.js`: both catches now surface errors
+- **Files:** `backend/src/ai-daily-report.js`, `backend/src/config.js`, `backend/src/alert-engine.js`, `backend/src/discord-dm.js`
+- **Deliverable:** Errors no longer vanish; visible in logs for debugging.
+- **Branch:** `feat/silent-catch-fixes` → PR #21 ✅ merged
+
+# Market Orca — Feature Log
+
 ## 2026-06-28 — Feature #20: Alert Dashboard Summary Endpoint
 - **Pain point:** `AlertSummaryWidget.vue` (frontend) calls `/api/market/alerts-summary` but backend had no such endpoint → widget always loaded empty/404.
 - **Done:**

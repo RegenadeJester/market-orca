@@ -1,40 +1,108 @@
 /**
  * APM Dashboard Parser — CJS module for report-server.js
  * Parses MMd.md feature log into structured stats
+ * 
+ * Handles format: ## YYYY-MM-DD — Feature #N: Title
+ * Multiple features per date are delimited by "- **Pain point:**" blocks
  */
 const fs = require('fs');
 const path = require('path');
 
-const BACKEND = path.resolve(__dirname, '..');
-const MMd_PATH = path.resolve(BACKEND, 'MMd.md');
+const BACKEND = path.resolve(__dirname, '..', '..');
+const MMd_PATH = path.resolve(BACKEND, '..', 'MMd.md');
 
-function parseFeatures() {
+function readLines() {
   if (!fs.existsSync(MMd_PATH)) return [];
   const content = fs.readFileSync(MMd_PATH, 'utf8');
+  return content.split('\n');
+}
+
+function parseFeatures() {
+  const lines = readLines();
+  if (!lines.length) return [];
+
   const features = [];
-  const dateSections = content.split(/^## (\d{4}-\d{2}-\d{2}) — Feature #(\d+): (.+)$/m);
-  
-  for (let i = 1; i < dateSections.length; i += 4) {
-    const date = dateSections[i];
-    const num = dateSections[i + 1];
-    const title = dateSections[i + 2];
-    const body = dateSections[i + 3] || '';
-    
-    const branchMatch = body.match(/Branch:\s*`?(\S+)`?/);
-    const prMatch = body.match(/PR #(\d+)/);
-    const filesMatch = body.match(/Files:\s*`?([^`]+)`?/);
-    const agentsMatch = body.match(/Agents:\s*(.+)/);
-    
-    features.push({
-      date,
-      number: parseInt(num),
-      title: title.trim(),
-      branch: branchMatch ? branchMatch[1].replace(/→.*$/, '').trim() : null,
-      pr: prMatch ? parseInt(prMatch[1]) : null,
-      files: filesMatch ? filesMatch[1].split(',').map(f => f.trim().replace(/`/g, '')) : [],
-      agents: agentsMatch ? parseAgents(agentsMatch[1]) : {}
-    });
+  let currentDate = null;
+  let currentFeature = null;
+  let inFeature = false;
+
+  for (const rawLine of lines) {
+    const line = rawLine.trimEnd();
+
+    // Date header: ## YYYY-MM-DD — Feature #N: Title
+    const dateMatch = line.match(/^##\s*(\d{4}-\d{2}-\d{2})\s*[—–-]?\s*(?:(?:Feature\s*#?(\d+))?[:\s]*)?(.+)?$/);
+    if (dateMatch) {
+      // Save previous feature
+      if (currentFeature) features.push(currentFeature);
+
+      currentDate = dateMatch[1];
+      currentFeature = {
+        date: currentDate,
+        number: dateMatch[2] ? parseInt(dateMatch[2]) : null,
+        title: (dateMatch[3] || 'Untitled').trim(),
+        painPoints: [],
+        files: [],
+        deliverables: [],
+        branch: null,
+        pr: null,
+        agents: {},
+        sections: []
+      };
+      inFeature = true;
+      continue;
+    }
+
+    if (!inFeature || !currentFeature) continue;
+
+    // Branch: `feat/xxx` → PR #N ✅ merged
+    const branchMatch = line.match(/`?(\S+?)`?\s*→\s*PR\s*#?(\d+)/);
+    if (branchMatch && !line.match(/^- `/)) {
+      currentFeature.branch = branchMatch[1].trim();
+      currentFeature.pr = parseInt(branchMatch[2]);
+      continue;
+    }
+
+    // Files:
+    const filesMatch = line.match(/^\s*-\s*\*\*Files?:?\*\*\s*`?(.+?)`?$/);
+    if (filesMatch) {
+      currentFeature.files.push(
+        ...filesMatch[1].split(',').map(f => f.trim().replace(/`/g, ''))
+      );
+      continue;
+    }
+
+    // Pain point:
+    const painMatch = line.match(/^\s*-\s*\*\*Pain point:\*\*\s*(.+)/);
+    if (painMatch) {
+      currentFeature.painPoints.push(painMatch[1]);
+      continue;
+    }
+
+    // Deliverable:
+    const delMatch = line.match(/^\s*-\s*\*\*Deliverable:\*\*\s*(.+)/);
+    if (delMatch) {
+      currentFeature.deliverables.push(delMatch[1]);
+      continue;
+    }
+
+    // Branch: (standalone)
+    const branchOnly = line.match(/^\s*-\s*\*\*Branch:\*\*\s*`?(\S+?)`?/);
+    if (branchOnly && !currentFeature.branch) {
+      currentFeature.branch = branchOnly[1].trim();
+      continue;
+    }
+
+    // Section headers inside feature
+    const subSection = line.match(/^\s*##\s+/);
+    if (subSection) {
+      currentFeature = null;
+      inFeature = false;
+    }
   }
+
+  // Save last feature
+  if (currentFeature) features.push(currentFeature);
+
   return features;
 }
 
@@ -54,24 +122,21 @@ function calculateStats(features) {
   if (!features.length) {
     return { totalFeatures: 0, totalFiles: 0, totalBranches: 0, totalPRs: 0, uniqueDates: 0, dailyAverage: '0', dailyCounts: {}, agentParticipation: { pm: 0, arch: 0, dev: 0, qa: 0, review: 0 } };
   }
-  
+
   const dates = [...new Set(features.map(f => f.date))].sort();
-  const totalFiles = new Set(features.flatMap(f => f.files || [])).size;
+  const filesSet = new Set();
+  features.filter(f => f.files).forEach(f => (f.files || []).forEach(ff => filesSet.add(ff.replace(/`/g, ''))));
+  const totalFiles = filesSet.size;
   const totalBranches = features.filter(f => f.branch).length;
   const totalPRs = features.filter(f => f.pr).length;
-  
+
   const dailyCounts = {};
   for (const f of features) {
     dailyCounts[f.date] = (dailyCounts[f.date] || 0) + 1;
   }
-  
+
   const agentCount = { pm: 0, arch: 0, dev: 0, qa: 0, review: 0 };
-  for (const f of features) {
-    for (const [role, val] of Object.entries(f.agents || {})) {
-      if (val) agentCount[role]++;
-    }
-  }
-  
+
   return {
     totalFeatures: features.length,
     totalFiles,
@@ -79,9 +144,14 @@ function calculateStats(features) {
     totalPRs,
     uniqueDates: dates.length,
     dateRange: dates.length >= 2 ? `${dates[0]} → ${dates[dates.length - 1]}` : dates[0] || 'unknown',
-    dailyAverage: (features.length / dates.length).toFixed(1),
+    dailyAverage: dates.length ? (features.length / dates.length).toFixed(1) : '0',
     dailyCounts,
-    agentParticipation: agentCount
+    agentParticipation: agentCount,
+    featuresByDate: dates.map(d => ({
+      date: d,
+      count: dailyCounts[d] || 0,
+      features: features.filter(f => f.date === d).map(f => ({ number: f.number, title: f.title, branch: f.branch, pr: f.pr }))
+    }))
   };
 }
 
