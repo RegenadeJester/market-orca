@@ -98,7 +98,7 @@ export function logDmDelivery(slug, userId, status, detail = '', attempt = 1) {
     db.prepare(`INSERT INTO delivery_log (slug, channel, step, status, detail, created_at)
       VALUES (?, 'dm', ?, ?, ?, datetime('now'))`)
       .run(String(slug || 'dm'), `dm_${String(userId).slice(0, 10)}_attempt_${attempt}`, status, String(detail).slice(0, 500))
-  } catch {}
+  } catch (e) { console.error("[discord-dm] send failed:", e.message) }
 }
 
 /**

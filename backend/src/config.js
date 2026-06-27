@@ -13,7 +13,7 @@ function findLanIP() {
     const out = execSync('hostname -I 2>/dev/null || true', { timeout: 3000, encoding: 'utf8' }).trim()
     const ips = out.split(/\s+/).filter(ip => ip.startsWith('192.168.'))
     if (ips.length) return ips[0]
-  } catch {}
+  } catch (e) { console.error("[config] load failed:", e.message) }
   return '192.168.x.x'
 }
 
@@ -21,7 +21,7 @@ function findTailscaleIP() {
   try {
     const out = execSync('tailscale ip -4 2>/dev/null || true', { timeout: 3000, encoding: 'utf8' }).trim()
     if (out && out.startsWith('100.')) return out
-  } catch {}
+  } catch (e) { console.error("[config] load failed:", e.message) }
   try {
     const nets = networkInterfaces()
     for (const name of Object.keys(nets)) {
@@ -29,7 +29,7 @@ function findTailscaleIP() {
         if (net.family === 'IPv4' && net.address.startsWith('100.')) return net.address
       }
     }
-  } catch {}
+  } catch (e) { console.error("[config] load failed:", e.message) }
   return '100.x.x.x'
 }
 

@@ -105,11 +105,19 @@ function loadEnv() {
 }
 
 function logDelivery(slug, step, status, detail = '') {
-  try { db.prepare(`INSERT INTO delivery_log (slug,channel,step,status,detail) VALUES (?,?,?,?,?)`).run(slug || 'unknown', 'discord', step, status, String(detail).slice(0,500)) } catch {}
+  try { 
+    db.prepare(`INSERT INTO delivery_log (slug,channel,step,status,detail) VALUES (?,?,?,?,?)`)
+      .run(slug || 'unknown', 'discord', step, status, String(detail).slice(0,500)) 
+  } catch (e) {
+    console.error('[delivery-log] Failed to write delivery log:', e.message)
+  }
   if (status === 'fail') {
     try {
-      db.prepare(`INSERT INTO send_queue (slug,channel,step,payload,status,attempts,last_error,next_attempt_at,updated_at) VALUES (?,?,?,?, 'pending', 0, ?, datetime('now', '+15 minutes'), datetime('now'))`).run(slug || 'unknown', 'discord', step, JSON.stringify({ step, slug: slug || 'unknown' }), String(detail).slice(0,500))
-    } catch {}
+      db.prepare(`INSERT INTO send_queue (slug,channel,step,payload,status,attempts,last_error,next_attempt_at,updated_at) VALUES (?,?,?,?, 'pending', 0, ?, datetime('now', '+15 minutes'), datetime('now'))`)
+        .run(slug || 'unknown', 'discord', step, JSON.stringify({ step, slug: slug || 'unknown' }), String(detail).slice(0,500))
+    } catch (e) {
+      console.error('[delivery-log] Failed to queue retry:', e.message)
+    }
   }
 }
 
@@ -609,7 +617,7 @@ function reliabilityIncidentQaPack(topics=[]) {
   const incidents = items.filter(i=>/outage|incident|blackout|gangguan|down|pemadaman|breach|hack/i.test(`${i.title||''} ${i.snippet||''}`)).slice(0,5)
   const trust = [...new Map(items.map(i=>[i.source||'unknown', sourceReliabilityScore(i.source)])).values()].sort((a,b)=>b.score-a.score)
   const sentiment = scoreMarketSentiment(topics), qa = runReportQA(topics), comparison = buildHistoricalComparison(topics)
-  let assets=[]; try { assets = db.prepare(`SELECT * FROM assets ORDER BY abs(change_percent) DESC LIMIT 10`).all() } catch {}
+  let assets=[]; try { assets = db.prepare(`SELECT * FROM assets ORDER BY abs(change_percent) DESC LIMIT 10`).all() } catch (e) { console.error("[ai-report] DB query failed:", e.message) }
   const heatmap = buildRiskHeatmap(assets, incidents), clusters = clusterDuplicateNews(topics), tasks = generateFollowUpTasks({qa})
   return `## Reliability / Incident / QA Add-on Batch 3\n`+
 `| Feature | Status | Output |\n|---|---:|---|\n`+
@@ -680,7 +688,7 @@ function sourceDiversityBlock(topics=[]) {
 function marketRegimeBlock(topics=[]) {
   try {
     let assets = []
-    try { assets = db.prepare('SELECT * FROM assets ORDER BY abs(change_percent) DESC LIMIT 24').all() } catch {}
+    try { assets = db.prepare('SELECT * FROM assets ORDER BY abs(change_percent) DESC LIMIT 24').all() } catch (e) { console.error("[ai-report] DB query failed:", e.message) }
     const up = assets.filter(a => Number(a.change_percent||0) > 1).length
     const down = assets.filter(a => Number(a.change_percent||0) < -1).length
     const totalMov = assets.filter(a => Math.abs(Number(a.change_percent||0)) > 0.5).length
@@ -713,7 +721,7 @@ export function extractAlertCandidates(topics) {
       assetMap.set(r.slug.toLowerCase(), r)
       assetMap.set(r.symbol.toLowerCase(), r)
     }
-  } catch {}
+  } catch (e) { console.error("[ai-report] DB query failed:", e.message) }
 
   const textItems = topics.flatMap(t => (t.items || []).map(i => ({ ...i, section: t.title }))).filter(i => i.title)
 
@@ -829,7 +837,7 @@ export function buildTextReport(topics, opts = {}) {
     }
   }
   let assets = []
-  try { assets = db.prepare('SELECT * FROM assets ORDER BY abs(change_percent) DESC LIMIT 24').all() } catch {}
+  try { assets = db.prepare('SELECT * FROM assets ORDER BY abs(change_percent) DESC LIMIT 24').all() } catch (e) { console.error("[ai-report] DB query failed:", e.message) }
   const dataStatusBlock = buildDataStatusBlock(assets)
   const dataFreshnessQa = dataFreshnessQA(assets)
   let text = `# ${heroTitle}\n${dateStr}\n\n> Vibe check: **${vibeTag(hero)}**\n> ${heroWhy}\n> Why it matters: ${whyItMatters(hero)}\n${hero?.url ? `> <${hero.url}>\n` : ''}\n\n${dotline}\n\n${userContext}\n\n${personaSection ? personaSection + '\n' : ''}${dotline}\n\n## TL;DR buat yang males baca\n\n${buildSummary(topics)}\n\n${dotline}\n\n## Report Quality\n- **Score:** ${quality.score}/100 (${quality.status})\n- **Sources:** ${quality.sources} · Items: ${quality.items} · Duplicates: ${quality.dupes} · Stale: ${quality.stale}\n- **Source rotation:** ${sourceRotationHint()}\n\n${dotline}\n\n${dataStatusBlock}\n${dataFreshnessQa.warning ? `\n> ⚠️ ${dataFreshnessQa.warning}\n` : ''}\n${dotline}\n\n## What Changed Today\n${changed}\n\n${dotline}\n\n${buildAnomalyReportBlock()}\n\n${dotline}\n\n${buildSuggestedAlertsBlock(extractAlertCandidates(topics))}\n\n${dotline}\n\n${ragMarkdown}\n\n${dotline}\n\n${impact.markdown}\n\n${dotline}\n\n${quality.score < 80 ? featureImprovementPack(topics) + `\n\n${dotline}\n\n` : ''}${quality.score < 80 ? reliabilityIncidentQaPack(topics) + `\n\n${dotline}\n\n` : ''}## Actionable Watchlist\n${thesis}\n\n## Red Flags\n${flags}\n\n${dotline}\n\n${(() => { try { return buildDataValidationBlock() } catch { return '' } })()}\n\n${dotline}\n\n# Full Drop — AI DAILY REPORT\n\n`
@@ -1874,7 +1882,7 @@ function buildReportHtml(data, summary, funFacts, textReport) {
   const heroWhy = whyItMatters(hero)
   const heroImg = hero?.imageUrl || hero?.image || fallbackImageFor(hero)
   let assets = []
-  try { assets = db.prepare('SELECT * FROM assets ORDER BY abs(change_percent) DESC LIMIT 24').all() } catch {}
+  try { assets = db.prepare('SELECT * FROM assets ORDER BY abs(change_percent) DESC LIMIT 24').all() } catch (e) { console.error("[ai-report] DB query failed:", e.message) }
   const dataStatusBlock = buildDataStatusBlock(assets)
   const dataFreshnessQa = dataFreshnessQA(assets)
 
