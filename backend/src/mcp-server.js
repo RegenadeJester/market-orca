@@ -2,6 +2,7 @@
 import { ingestUrl, ingestDocument, searchRag, runRagReport } from './rag-report.js'
 import { webSearch, deepWebSearch, searchAndAnswer, fetchPageMarkdown, searchNews, TRUSTED_WEB_SOURCES, WEB_SEARCH_CAPABILITIES, filterSearchForCrawl, previewPublicPage, classifySearchResult } from './web-search.js'
 import { enqueueRagCrawl } from './rag-crawler.js'
+import { ingestAllReports, searchByTopic, getCollectionStats, autoCreateCollections, ingestReport } from './rag-autolearn.js'
 import { db } from './db.js'
 import crypto from 'node:crypto'
 
@@ -10,6 +11,11 @@ export const tools = [
   { name:'market_orca_crawl_url', description:'Crawl URL with crawl4ai-lite fetch/clean-html and ingest into RAG.', inputSchema:{ type:'object', properties:{ url:{type:'string'} }, required:['url'] } },
   { name:'market_orca_ingest_text', description:'Ingest text/document into Market Orca RAG.', inputSchema:{ type:'object', properties:{ title:{type:'string'}, content:{type:'string'}, sourceUrl:{type:'string'}, sourceType:{type:'string'} }, required:['title','content'] } },
   { name:'market_orca_rag_report', description:'Generate citation-grounded RAG report from corpus.', inputSchema:{ type:'object', properties:{ question:{type:'string'}, limit:{type:'number'} }, required:['question'] } },
+  { name:'market_orca_rag_search_by_topic', description:'Cari RAG corpus berdasarkan query + topic collection.', inputSchema:{ type:'object', properties:{ query:{type:'string'}, topic:{type:'string'}, limit:{type:'number'} }, required:['query'] } },
+  { name:'market_orca_rag_collections', description:'Lihat semua topik collection + statistik RAG.', inputSchema:{ type:'object', properties:{} } },
+  { name:'market_orca_rag_ingest_report', description:'Ingest satu report ke RAG.', inputSchema:{ type:'object', properties:{ slug:{type:'string'} }, required:['slug'] } },
+  { name:'market_orca_rag_ingest_all', description:'Ingest semua report yang ada ke RAG.', inputSchema:{ type:'object', properties:{ limit:{type:'number'} } } },
+
   { name:'market_orca_report_qa', description:'Inspect report block evidence quality by slug.', inputSchema:{ type:'object', properties:{ slug:{type:'string'} }, required:['slug'] } },
   { name:'market_orca_web_search', description:'Dedicated Market Orca web search. Supports modes and operators: site, exclude site, filetype PDF, intitle, exact phrase, after/before dates. Use for fresh public web evidence before RAG ingest.', inputSchema:{ type:'object', properties:{ query:{type:'string'}, mode:{type:'string',enum:['forum','blog','official','market','security','research','marketing','coding','journal','thesis','data','docs','person']}, engines:{type:'array',items:{type:'string',enum:['duckduckgo','bing','yahoo','yandex']}}, limit:{type:'number'}, sites:{type:'array',items:{type:'string'}}, excludeSites:{type:'array',items:{type:'string'}}, filetype:{type:'string'}, intitle:{type:'string'}, exact:{type:'string'}, after:{type:'string'}, before:{type:'string'}, mustHave:{type:'array',items:{type:'string'}}, preferTrusted:{type:'boolean'}, autoPreview:{type:'boolean'}, previewLimit:{type:'number'} }, required:['query'] } },
   { name:'market_orca_deep_web_search', description:'Run many web searches across multiple modes/engines, then merge/dedupe/rank/cluster results. Use when user wants more/broader search.', inputSchema:{ type:'object', properties:{ query:{type:'string'}, limit:{type:'number'}, engines:{type:'array',items:{type:'string'}}, modes:{type:'array',items:{type:'string'}}, filetypes:{type:'array',items:{type:'string'}}, autoPreview:{type:'boolean'}, previewLimit:{type:'number'} }, required:['query'] } },
@@ -45,6 +51,11 @@ export async function call(name,args={}){
   if(name==='market_orca_crawl_url') return text(await ingestUrl(args.url))
   if(name==='market_orca_ingest_text') return text(ingestDocument({ sourceType:args.sourceType||'mcp', sourceUrl:args.sourceUrl||'', title:args.title, content:args.content, metadata:{ via:'mcp' } }))
   if(name==='market_orca_rag_report') return reportOut(runRagReport(args.question, args.limit||8))
+  if(name==='market_orca_rag_search_by_topic') return text(JSON.stringify(searchByTopic(args.query, { limit:args.limit||8, topic:args.topic||'' })))
+  if(name==='market_orca_rag_collections') return text(JSON.stringify(getCollectionStats()))
+  if(name==='market_orca_rag_ingest_report') return text(JSON.stringify(ingestReport(args.slug)))
+  if(name==='market_orca_rag_ingest_all') return text(JSON.stringify(ingestAllReports()))
+
   if(name==='market_orca_report_qa') {
     const rows=db.prepare('SELECT block_key,claim_type,confidence,evidence_ids,edit_suggestion,hidden,locked FROM report_blocks WHERE report_slug=? ORDER BY block_key').all(args.slug)
     return text({ slug:args.slug, blocks:rows.length, rows })

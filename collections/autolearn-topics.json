@@ -1,0 +1,51 @@
+{
+  "_doc": "Market Orca Autolearn — define topics, search queries, and assetTags (collections). Cron job researches each topic periodically and ingests into RAG.",
+  "_usage": "Add a topic below. 'queries' = what to search. 'assetTags' = collection name for filtering. 'maxResults' = how many URLs to fetch per query.",
+  "topics": [
+    {
+      "id": "idx-market",
+      "name": "IHSG / IDX Market Overview",
+      "queries": ["IHSG hari ini idx.co.id", "IHSG outlook market Indonesia", "saham aktif volume tinggi IDX"],
+      "assetTags": ["JKSE", "IDX"],
+      "maxResults": 3,
+      "schedule": "every 6h",
+      "enabled": true
+    },
+    {
+      "id": "usd-idr",
+      "name": "USD/IDR & Rupiah",
+      "queries": ["kurs rupiah hari ini bank indonesia", "USD IDR forecast BI", "rupiah outlook 2026"],
+      "assetTags": ["USDIDR", "BI"],
+      "maxResults": 3,
+      "schedule": "every 6h",
+      "enabled": true
+    },
+    {
+      "id": "crypto",
+      "name": "Bitcoin & Crypto",
+      "queries": ["bitcoin price today", "crypto market news ethereum", "bitcoin etf flows"],
+      "assetTags": ["BTC", "CRYPTO"],
+      "maxResults": 3,
+      "schedule": "every 6h",
+      "enabled": true
+    },
+    {
+      "id": "global-macro",
+      "name": "Global Macro & Central Banks",
+      "queries": ["fed rate decision impact", "global inflation data CPI", "US treasury yield curve"],
+      "assetTags": ["MACRO", "FED"],
+      "maxResults": 3,
+      "schedule": "every 12h",
+      "enabled": true
+    },
+    {
+      "id": "ai-tech",
+      "name": "AI & Technology",
+      "queries": ["AI news openai anthropic", "technology startup funding venture capital", "generative AI enterprise adoption"],
+      "assetTags": ["AI", "TECH"],
+      "maxResults": 3,
+      "schedule": "every 12h",
+      "enabled": true
+    }
+  ]
+}

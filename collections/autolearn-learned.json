@@ -1,0 +1,182 @@
+{
+  "https://id.tradingview.com/symbols/IDX-COMPOSITE/": {
+    "url": "https://id.tradingview.com/symbols/IDX-COMPOSITE/",
+    "title": "Chart dan Kutipan Indeks COMPOSITE — TradingView",
+    "learnedAt": "2026-06-26T16:59:03.517Z",
+    "collection": "idx-market"
+  },
+  "https://id.tradingeconomics.com/indonesia/stock-market": {
+    "url": "https://id.tradingeconomics.com/indonesia/stock-market",
+    "title": "Pasar Saham Indonesia (JCI) - Harga - Grafik - Data Historis - Berita",
+    "learnedAt": "2026-06-26T16:59:05.483Z",
+    "collection": "idx-market"
+  },
+  "https://www.bloombergtechnoz.com/detail-news/110741/ihsg-ambles-5-usai-rupiah-lanjut-melorot-outlook-moody-s": {
+    "url": "https://www.bloombergtechnoz.com/detail-news/110741/ihsg-ambles-5-usai-rupiah-lanjut-melorot-outlook-moody-s",
+    "title": "IHSG Ambles 5% Usai Rupiah Lanjut Melorot &amp; Outlook Moody&#039;s - Market",
+    "learnedAt": "2026-06-26T16:59:07.016Z",
+    "collection": "idx-market"
+  },
+  "https://id.tradingview.com/markets/stocks-indonesia/market-movers-active/": {
+    "url": "https://id.tradingview.com/markets/stocks-indonesia/market-movers-active/",
+    "title": "Saham Indonesia Paling Aktif, Paling Banyak Diperdagangkan — TradingView",
+    "learnedAt": "2026-06-26T16:59:10.100Z",
+    "collection": "idx-market"
+  },
+  "https://www.idx.co.id/id/data-pasar/ringkasan-perdagangan/ringkasan-saham/": {
+    "url": "https://www.idx.co.id/id/data-pasar/ringkasan-perdagangan/ringkasan-saham/",
+    "title": "Ringkasan Saham",
+    "learnedAt": "2026-06-26T16:59:11.455Z",
+    "collection": "idx-market"
+  },
+  "https://pluang.com/explore/indo-market/stocks": {
+    "url": "https://pluang.com/explore/indo-market/stocks",
+    "title": "Daftar Saham Indonesia dengan Harga, Tren Pasar dan Insight Hari Ini [1/90] | Pluang – Kripto, Saham, Emas &amp; Reksa Dana",
+    "learnedAt": "2026-06-26T17:06:34.375Z",
+    "collection": "idx-market"
+  },
+  "https://www.bi.go.id/id/statistik/informasi-kurs/transaksi-bi/default.aspx": {
+    "url": "https://www.bi.go.id/id/statistik/informasi-kurs/transaksi-bi/default.aspx",
+    "title": "Kurs Transaksi BI",
+    "learnedAt": "2026-06-26T17:06:36.785Z",
+    "collection": "usd-idr"
+  },
+  "https://perpajakan.ddtc.co.id/id/data-informasi/kurs-pajak/kurs-bank-indonesia": {
+    "url": "https://perpajakan.ddtc.co.id/id/data-informasi/kurs-pajak/kurs-bank-indonesia",
+    "title": "Kurs Bank Indonesia (BI) | Perpajakan DDTC",
+    "learnedAt": "2026-06-26T17:06:38.323Z",
+    "collection": "usd-idr"
+  },
+  "https://tradingeconomics.com/indonesia/currency": {
+    "url": "https://tradingeconomics.com/indonesia/currency",
+    "title": "Indonesian Rupiah - Quote - Chart - Historical Data - News",
+    "learnedAt": "2026-06-26T17:06:40.728Z",
+    "collection": "usd-idr"
+  },
+  "https://www.bca.co.id/id/informasi/kurs": {
+    "url": "https://www.bca.co.id/id/informasi/kurs",
+    "title": "Kurs Dollar Hari Ini dan Kalkulator Kurs - BCA",
+    "learnedAt": "2026-06-26T17:06:42.094Z",
+    "collection": "usd-idr"
+  },
+  "https://new.gbgindonesia.com/?p=2472": {
+    "url": "https://new.gbgindonesia.com/?p=2472",
+    "title": "In-depth Analysis; The Indonesian Rupiah Performance and Outlook &#8211; GBG Indonesia",
+    "learnedAt": "2026-06-26T17:06:54.018Z",
+    "collection": "usd-idr"
+  },
+  "https://www.id.crifasia.com/resources/industry-insights/the-great-tension-era-navigating-indonesia-s-economic-outlook-for-2026/": {
+    "url": "https://www.id.crifasia.com/resources/industry-insights/the-great-tension-era-navigating-indonesia-s-economic-outlook-for-2026/",
+    "title": "The Great Tension Era: Navigating Indonesia&#x2019;s Economic Outlook for 2026",
+    "learnedAt": "2026-06-26T17:06:55.911Z",
+    "collection": "usd-idr"
+  },
+  "https://www.coindesk.com/price/bitcoin": {
+    "url": "https://www.coindesk.com/price/bitcoin",
+    "title": "Bitcoin price today, BTC to USD live price, marketcap and chart | CoinDesk",
+    "learnedAt": "2026-06-26T17:06:59.091Z",
+    "collection": "crypto"
+  },
+  "https://www.coindesk.com/": {
+    "url": "https://www.coindesk.com/",
+    "title": "CoinDesk: Bitcoin, Ethereum, XRP, Crypto News and Price Data",
+    "learnedAt": "2026-06-26T17:07:01.791Z",
+    "collection": "crypto"
+  },
+  "https://www.coinglass.com/etf/bitcoin": {
+    "url": "https://www.coinglass.com/etf/bitcoin",
+    "title": "Bitcoin ETF Fund Flows | Spot BTC Net Inflow &amp; Holdings | CoinGlass",
+    "learnedAt": "2026-06-26T17:07:04.850Z",
+    "collection": "crypto"
+  },
+  "https://www.federalreserve.gov/": {
+    "url": "https://www.federalreserve.gov/",
+    "title": "Federal Reserve Board - Home",
+    "learnedAt": "2026-06-26T17:07:08.535Z",
+    "collection": "global-macro"
+  },
+  "https://www.federalreserve.gov/aboutthefed/fedexplained/monetary-policy.htm": {
+    "url": "https://www.federalreserve.gov/aboutthefed/fedexplained/monetary-policy.htm",
+    "title": "The Fed Explained - Monetary Policy",
+    "learnedAt": "2026-06-26T17:07:09.885Z",
+    "collection": "global-macro"
+  },
+  "https://www.aol.com/finance/article/what-does-fed-rate-cut-mean-130714139.html": {
+    "url": "https://www.aol.com/finance/article/what-does-fed-rate-cut-mean-130714139.html",
+    "title": "What Fed rate decisions mean for your wallet: 5 key changes to savings, debt and investments - AOL",
+    "learnedAt": "2026-06-26T17:07:12.634Z",
+    "collection": "global-macro"
+  },
+  "https://data.worldbank.org/indicator/FP.CPI.TOTL.ZG": {
+    "url": "https://data.worldbank.org/indicator/FP.CPI.TOTL.ZG",
+    "title": "Inflation, consumer prices (annual %) | Data",
+    "learnedAt": "2026-06-26T17:07:15.500Z",
+    "collection": "global-macro"
+  },
+  "https://data.imf.org/en/datasets/IMF.STA:CPI": {
+    "url": "https://data.imf.org/en/datasets/IMF.STA:CPI",
+    "title": "CPI",
+    "learnedAt": "2026-06-26T17:07:19.602Z",
+    "collection": "global-macro"
+  },
+  "https://www.ustreasuryyieldcurve.com/": {
+    "url": "https://www.ustreasuryyieldcurve.com/",
+    "title": "US Treasury Yield Curve",
+    "learnedAt": "2026-06-26T17:07:26.931Z",
+    "collection": "global-macro"
+  },
+  "https://www.editiongroup.com/insights/venture-capital-guide-to-tech-startup-funding": {
+    "url": "https://www.editiongroup.com/insights/venture-capital-guide-to-tech-startup-funding",
+    "title": "Venture Capital: 2025 Guide to Tech Startup Funding",
+    "learnedAt": "2026-06-26T17:07:32.530Z",
+    "collection": "ai-tech"
+  },
+  "https://en.wikipedia.org/wiki/Technology": {
+    "url": "https://en.wikipedia.org/wiki/Technology",
+    "title": "Technology - Wikipedia",
+    "learnedAt": "2026-06-26T17:07:33.688Z",
+    "collection": "ai-tech"
+  },
+  "https://menlovc.com/perspective/2025-the-state-of-generative-ai-in-the-enterprise/": {
+    "url": "https://menlovc.com/perspective/2025-the-state-of-generative-ai-in-the-enterprise/",
+    "title": "2025: The State of Generative AI in the Enterprise | Menlo Ventures",
+    "learnedAt": "2026-06-26T17:07:36.576Z",
+    "collection": "ai-tech"
+  },
+  "https://en.wikipedia.org/wiki/Generative_AI": {
+    "url": "https://en.wikipedia.org/wiki/Generative_AI",
+    "title": "Generative AI - Wikipedia",
+    "learnedAt": "2026-06-26T17:07:38.631Z",
+    "collection": "ai-tech"
+  },
+  "https://www.stackai.com/blog/state-of-generative-ai-in-the-enterprise": {
+    "url": "https://www.stackai.com/blog/state-of-generative-ai-in-the-enterprise",
+    "title": "Enterprise AI Adoption: State of Generative AI in 2026",
+    "learnedAt": "2026-06-26T17:07:40.223Z",
+    "collection": "ai-tech"
+  },
+  "https://www.idx.id/": {
+    "url": "https://www.idx.id/",
+    "title": "PT Bursa Efek Indonesia",
+    "learnedAt": "2026-06-27T07:38:04.436Z",
+    "collection": "idx-market"
+  },
+  "https://www.dbs.id/id/treasures/aics/archive/templatedata/article/generic/data/en/GR/macro_strategy/082025/250821_indonesia.xml": {
+    "url": "https://www.dbs.id/id/treasures/aics/archive/templatedata/article/generic/data/en/GR/macro_strategy/082025/250821_indonesia.xml",
+    "title": "Indonesia rates: BI cuts; markets eye 2026 Budget targets",
+    "learnedAt": "2026-06-27T07:38:08.429Z",
+    "collection": "usd-idr"
+  },
+  "https://wise.com/id/currency-converter/usd-to-idr-rate": {
+    "url": "https://wise.com/id/currency-converter/usd-to-idr-rate",
+    "title": "Nilai Tukar dolar AS ke rupiah Indonesia. Konversi USD/IDR - Wise",
+    "learnedAt": "2026-06-27T07:38:18.206Z",
+    "collection": "usd-idr"
+  },
+  "https://perbanas.org/uploads/pustaka/1765274057-Outlook%202026.pdf": {
+    "url": "https://perbanas.org/uploads/pustaka/1765274057-Outlook%202026.pdf",
+    "title": "https://perbanas.org/uploads/pustaka/1765274057-Outlook%202026.pdf",
+    "learnedAt": "2026-06-27T07:38:21.448Z",
+    "collection": "usd-idr"
+  }
+}

@@ -183,17 +183,19 @@ export async function publishChannel(slug, channel, editedText) {
 
   const report = JSON.parse(fs.readFileSync(jsonFp, 'utf8'))
 
+  const updated = ['json']
+
   if (channel === 'editor' && typeof editedText === 'string') {
     report.textReport = editedText
     fs.writeFileSync(jsonFp, JSON.stringify(report, null, 2), 'utf8')
+    // Regenerate HTML only when textReport changed (editor channel)
+    const htmlFp = path.join(reportDir, `${slug}.html`)
+    const html = buildHtmlFromReport(report)
+    fs.writeFileSync(htmlFp, html, 'utf8')
+    updated.push('html')
   }
 
-  // Regenerate HTML from updated textReport
-  const htmlFp = path.join(reportDir, `${slug}.html`)
-  const html = buildHtmlFromReport(report)
-  fs.writeFileSync(htmlFp, html, 'utf8')
-
-  const result = { ok: true, slug, channel, updated: ['json', 'html'] }
+  const result = { ok: true, slug, channel, updated }
 
   // Send to Discord if channel is 'discord'
   if (channel === 'discord') {

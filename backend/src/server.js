@@ -266,7 +266,24 @@ app.get('/api/overview', async (_req, res) => {
     live.forEach(saveAssetSnapshot)
     const assets = live.map((x) => ({ ...x.asset, sparkline: (x.candles || []).slice(-12).map((c) => c.close ?? c.value) }))
     const latestNews = live.flatMap((x) => (x.news || []).slice(0, 3).map((n) => ({ ...n, name: x.asset.name, symbol: x.asset.symbol, slug: x.asset.slug }))).slice(0, 20)
-    res.json({ assets, latestNews })
+    const todaySlug = todayReportSlug()
+    const hasTodayReport = todayReportExists()
+    let todayReport = null
+    if (hasTodayReport) {
+      try {
+        const fp = path.join(reportDir, `${todaySlug}.json`)
+        const d = JSON.parse(fs.readFileSync(fp, 'utf8'))
+        todayReport = {
+          slug: todaySlug,
+          generatedAt: d.generatedAt || null,
+          title: d.executiveBrief?.split('\n')[0] || d.topics?.[0]?.title || todaySlug,
+          topicCount: (d.topics || []).length,
+          hasIncidents: !!(d.incidents || []).length,
+          incidentCount: (d.incidents || []).length
+        }
+      } catch {}
+    }
+    res.json({ assets, latestNews, todayReport })
   } catch (error) {
     res.status(500).json({ error: String(error) })
   }
@@ -570,6 +587,36 @@ app.post('/api/rag/vectorize-missing', (req, res) => {
   catch (error) { res.status(500).json({ ok:false, error:String(error) }) }
 })
 
+// ── RAG Autolearn endpoints ─────────────────────────────────────────────
+import { ingestAllReports, searchByTopic, getCollectionStats, autoCreateCollections, ingestReport } from './rag-autolearn.js'
+
+app.get('/api/rag/autolearn/stats', (_req, res) => {
+  try { res.json(getCollectionStats()) }
+  catch (error) { res.status(500).json({ ok:false, error:String(error) }) }
+})
+
+app.get('/api/rag/autolearn/collections', (_req, res) => {
+  try { res.json({ ok:true, collections:autoCreateCollections() }) }
+  catch (error) { res.status(500).json({ ok:false, error:String(error) }) }
+})
+
+app.post('/api/rag/autolearn/ingest', (req, res) => {
+  try {
+    const slug = req.body?.slug
+    if (slug) return res.json(ingestReport(slug))
+    res.json(ingestAllReports())
+  } catch (error) { res.status(500).json({ ok:false, error:String(error) }) }
+})
+
+app.post('/api/rag/autolearn/search', (req, res) => {
+  try {
+    const query = req.body?.query || req.query?.q || ''
+    const topic = req.body?.topic || req.query?.topic || ''
+    const limit = Number(req.body?.limit || req.query?.limit || 8)
+    res.json(searchByTopic(query, { limit, topic }))
+  } catch (error) { res.status(500).json({ ok:false, error:String(error) }) }
+})
+
 
 function webSearchOptions(body={}, defaultLimit=10){
   return {
@@ -858,7 +905,11 @@ const MCP_TOOLS = [
   {name:'tradingview.chart', description:'OHLCV chart data from TradingView/Yahoo/Binance for any symbol.', input:{symbol:'BTCUSDT', timeframe:'D|W|M'}},
   {name:'tradingview.technical', description:'Full technical analysis: RSI, MACD, SMA, Bollinger, ATR, VWAP + signals.', input:{symbol:'BTCUSDT', timeframe:'D'}},
   {name:'tradingview.news', description:'Latest news for a crypto/stock symbol from CryptoCompare.', input:{symbol:'BTC', limit:15}},
-  {name:'tradingview.popular', description:'Popular/trending tickers by market cap from TradingView screener.', input:{market:'crypto'}}
+  {name:'tradingview.popular', description:'Popular/trending tickers by market cap from TradingView screener.', input:{market:'crypto'}},
+  {name:'rag.autolearn.stats', description:'RAG autolearn stats — documents, chunks, collections.', input:{}},
+  {name:'rag.autolearn.collections', description:'List all topic collections with counts.', input:{}},
+  {name:'rag.autolearn.search', description:'Topic-aware RAG search (Perplexity-style). Returns chunks with topic classification.', input:{query:'string', topic:'idx|forex|crypto|commodity|macro|global|tech|energy', limit:8}},
+  {name:'rag.autolearn.ingest', description:'Ingest reports into RAG autolearn. Pass slug for one report, empty for all.', input:{slug:'YYYY-MM-DD'}}
 ]
 
 const MCP_METRICS = { startedAt:new Date().toISOString(), total:0, ok:0, fail:0, byTool:{}, rateLimited:0 }
@@ -916,6 +967,10 @@ app.post('/mcp/tool/:tool', mcpRateLimit, mcpRequire, async (req, res) => {
     if (tool === 'rag.vectorize_missing') return res.json({ ok:true, tool, ...vectorizeMissingChunks({ limit:Number(input.limit||100) }) })
     if (tool === 'rag.cleanup') return res.json({ ok:true, tool, ...cleanupRagStore({ maxAgeDays:Number(input.maxAgeDays||60), maxChunks:Number(input.maxChunks||20000) }) })
     if (tool === 'rag.storage') return res.json({ ok:true, tool, stats:ragStorageStats() })
+    if (tool === 'rag.autolearn.stats') return res.json({ ok:true, tool, ...getCollectionStats() })
+    if (tool === 'rag.autolearn.collections') return res.json({ ok:true, tool, collections:autoCreateCollections() })
+    if (tool === 'rag.autolearn.search') return res.json({ ok:true, tool, ...searchByTopic(String(input.query||''), { limit:Number(input.limit||8), topic:String(input.topic||'') }) })
+    if (tool === 'rag.autolearn.ingest') return res.json({ ok:true, tool, ...(input.slug ? ingestReport(input.slug) : ingestAllReports()) })
     if (tool === 'report.get') {
       const slug=String(input.slug||new Date().toISOString().slice(0,10)); const fp=safeReportPath(reportDir, slug, 'json'); if(!fp||!fs.existsSync(fp)) return res.status(404).json({ ok:false,error:'report_not_found' }); return res.json({ ok:true, tool, report:JSON.parse(fs.readFileSync(fp,'utf8')) })
     }
@@ -1319,6 +1374,12 @@ app.get('/api/alerts/suggested/block', (_req, res) => {
 })
 
 const reportDir = path.join(__dirname, '..', '..', 'reports')
+function todayReportSlug() {
+  return new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Jakarta', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date())
+}
+function todayReportExists() {
+  return fs.existsSync(path.join(reportDir, `${todayReportSlug()}.json`))
+}
 function usableTopics(topics) { return Array.isArray(topics) && topics.reduce((s,t)=>s+(t.items?.length||0),0) >= 20 }
 function latestSavedReport() {
   if (!fs.existsSync(reportDir)) return null
