@@ -1,0 +1,21 @@
+[Unit]
+Description=Market Orca Report Server (port 4568)
+After=network.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=dicky
+WorkingDirectory=/home/dicky/.openclaw/workspace/market-orca/backend
+Environment=NODE_ENV=production
+Environment=REPORT_PORT=4568
+ExecStart=/usr/bin/node src/report-server.js
+Restart=always
+RestartSec=5
+StandardOutput=append:/home/dicky/.openclaw/workspace/market-orca/logs/report-server.log
+StandardError=append:/home/dicky/.openclaw/workspace/market-orca/logs/report-server-error.log
+LimitNOFILE=65536
+MemoryMax=512M
+
+[Install]
+WantedBy=multi-user.target

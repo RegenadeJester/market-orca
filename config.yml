@@ -1,0 +1,15 @@
+tunnel: c402ea49-2595-4410-956d-3ae02900d61d
+credentials-file: /home/dicky/.openclaw/workspace/market-orca/c402ea49-2595-4410-956d-3ae02900d61d.json
+
+ingress:
+  - hostname: market-orca.anomali.web.id
+    service: http://localhost:4567
+  - hostname: report.anomali.web.id
+    service: http://localhost:4568
+  - hostname: mcp.anomali.web.id
+    service: http://localhost:1788
+  - hostname: searxng.anomali.web.id
+    service: http://localhost:18080
+  - hostname: n8n.anomali.web.id
+    service: http://localhost:5678
+  - service: http_status:404
