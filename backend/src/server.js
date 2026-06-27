@@ -587,6 +587,36 @@ app.post('/api/rag/vectorize-missing', (req, res) => {
   catch (error) { res.status(500).json({ ok:false, error:String(error) }) }
 })
 
+// ── RAG Autolearn endpoints ─────────────────────────────────────────────
+import { ingestAllReports, searchByTopic, getCollectionStats, autoCreateCollections, ingestReport } from './rag-autolearn.js'
+
+app.get('/api/rag/autolearn/stats', (_req, res) => {
+  try { res.json(getCollectionStats()) }
+  catch (error) { res.status(500).json({ ok:false, error:String(error) }) }
+})
+
+app.get('/api/rag/autolearn/collections', (_req, res) => {
+  try { res.json({ ok:true, collections:autoCreateCollections() }) }
+  catch (error) { res.status(500).json({ ok:false, error:String(error) }) }
+})
+
+app.post('/api/rag/autolearn/ingest', (req, res) => {
+  try {
+    const slug = req.body?.slug
+    if (slug) return res.json(ingestReport(slug))
+    res.json(ingestAllReports())
+  } catch (error) { res.status(500).json({ ok:false, error:String(error) }) }
+})
+
+app.post('/api/rag/autolearn/search', (req, res) => {
+  try {
+    const query = req.body?.query || req.query?.q || ''
+    const topic = req.body?.topic || req.query?.topic || ''
+    const limit = Number(req.body?.limit || req.query?.limit || 8)
+    res.json(searchByTopic(query, { limit, topic }))
+  } catch (error) { res.status(500).json({ ok:false, error:String(error) }) }
+})
+
 
 function webSearchOptions(body={}, defaultLimit=10){
   return {
@@ -875,7 +905,11 @@ const MCP_TOOLS = [
   {name:'tradingview.chart', description:'OHLCV chart data from TradingView/Yahoo/Binance for any symbol.', input:{symbol:'BTCUSDT', timeframe:'D|W|M'}},
   {name:'tradingview.technical', description:'Full technical analysis: RSI, MACD, SMA, Bollinger, ATR, VWAP + signals.', input:{symbol:'BTCUSDT', timeframe:'D'}},
   {name:'tradingview.news', description:'Latest news for a crypto/stock symbol from CryptoCompare.', input:{symbol:'BTC', limit:15}},
-  {name:'tradingview.popular', description:'Popular/trending tickers by market cap from TradingView screener.', input:{market:'crypto'}}
+  {name:'tradingview.popular', description:'Popular/trending tickers by market cap from TradingView screener.', input:{market:'crypto'}},
+  {name:'rag.autolearn.stats', description:'RAG autolearn stats — documents, chunks, collections.', input:{}},
+  {name:'rag.autolearn.collections', description:'List all topic collections with counts.', input:{}},
+  {name:'rag.autolearn.search', description:'Topic-aware RAG search (Perplexity-style). Returns chunks with topic classification.', input:{query:'string', topic:'idx|forex|crypto|commodity|macro|global|tech|energy', limit:8}},
+  {name:'rag.autolearn.ingest', description:'Ingest reports into RAG autolearn. Pass slug for one report, empty for all.', input:{slug:'YYYY-MM-DD'}}
 ]
 
 const MCP_METRICS = { startedAt:new Date().toISOString(), total:0, ok:0, fail:0, byTool:{}, rateLimited:0 }
@@ -933,6 +967,10 @@ app.post('/mcp/tool/:tool', mcpRateLimit, mcpRequire, async (req, res) => {
     if (tool === 'rag.vectorize_missing') return res.json({ ok:true, tool, ...vectorizeMissingChunks({ limit:Number(input.limit||100) }) })
     if (tool === 'rag.cleanup') return res.json({ ok:true, tool, ...cleanupRagStore({ maxAgeDays:Number(input.maxAgeDays||60), maxChunks:Number(input.maxChunks||20000) }) })
     if (tool === 'rag.storage') return res.json({ ok:true, tool, stats:ragStorageStats() })
+    if (tool === 'rag.autolearn.stats') return res.json({ ok:true, tool, ...getCollectionStats() })
+    if (tool === 'rag.autolearn.collections') return res.json({ ok:true, tool, collections:autoCreateCollections() })
+    if (tool === 'rag.autolearn.search') return res.json({ ok:true, tool, ...searchByTopic(String(input.query||''), { limit:Number(input.limit||8), topic:String(input.topic||'') }) })
+    if (tool === 'rag.autolearn.ingest') return res.json({ ok:true, tool, ...(input.slug ? ingestReport(input.slug) : ingestAllReports()) })
     if (tool === 'report.get') {
       const slug=String(input.slug||new Date().toISOString().slice(0,10)); const fp=safeReportPath(reportDir, slug, 'json'); if(!fp||!fs.existsSync(fp)) return res.status(404).json({ ok:false,error:'report_not_found' }); return res.json({ ok:true, tool, report:JSON.parse(fs.readFileSync(fp,'utf8')) })
     }

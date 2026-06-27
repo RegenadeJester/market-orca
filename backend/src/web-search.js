@@ -314,23 +314,101 @@ export async function fetchPageMarkdown(url,{maxChars=12000, cacheTtlMs=900000}=
   const md=[`# ${p.title||url}`, p.description?`\n> ${p.description}`:'', `\nSource: ${url}`, '\n## Content\n', p.text||''].join('\n')
   return cacheSet(cacheKey,{ok:true,url,title:p.title,description:p.description,markdown:md.slice(0,maxChars),chars:Math.min(md.length,maxChars)},cacheTtlMs)
 }
+// ─── JS-gated page detector ─────────────────────────────────────────────
+function isJSGated(text='') {
+  const patterns = [
+    /please enable scripts/i, /please enable javascript/i,
+    /your browser does not have javascript/i, /turn on javascript/i,
+    /this site requires javascript/i, /javascript is required/i,
+    /enable javascript to continue/i, /browser does not support javascript/i,
+    /you need to enable javascript/i, /javascript must be enabled/i,
+    /skip to main content/i, /turn off animations/i, /standard browser navigation/i,
+  ]
+  return text && patterns.some(p => p.test(text))
+}
+
 function sentenceSplit(s=''){ return String(s).replace(/\s+/g,' ').split(/(?<=[.!?])\s+/).filter(x=>x.length>30).slice(0,80) }
+
 function answerFromSources(query, sources=[]){
   const qterms=String(query).toLowerCase().split(/[^a-z0-9]+/).filter(x=>x.length>2)
-  const bullets=[]
-  sources.forEach((src,i)=>{
-    const sentences=sentenceSplit(src.text||src.markdown||src.description||'')
-      .map(x=>({x,score:qterms.reduce((n,t)=>n+(x.toLowerCase().includes(t)?1:0),0)}))
-      .sort((a,b)=>b.score-a.score).slice(0,3).map(o=>o.x)
-    for(const x of sentences) bullets.push(`- ${x} [${i+1}]`)
+  
+  // Filter out JS-gated or empty sources
+  const validSources = sources.filter(s => {
+    const text = (s.text||s.markdown||s.description||'')
+    return !isJSGated(text) && text.length > 50 && s.ok !== false
   })
-  return `# Jawaban Web Research\n\n**Pertanyaan:** ${query}\n\n## Ringkasan\n${bullets.slice(0,8).join('\n') || '- Belum cukup konten terbaca dari sumber.'}\n\n## Sumber\n${sources.map((s,i)=>`[${i+1}] ${s.title||s.url} — ${s.url}`).join('\n')}`
+  
+  if (!validSources.length) return `# Jawaban Web Research\n\n**Pertanyaan:** ${query}\n\n## Ringkasan\n- Maaf, belum bisa membaca konten dari sumber yang ditemukan. Sebagian besar situs memblokir akses otomatis. Coba ulangi dengan domain sumber yang lebih spesifik.\n\n## Hasil Pencarian\n${sources.map((s,i)=>`- [${i+1}] ${s.title||s.url} — ${s.url}`).join('\n')}`
+  
+  const bullets = []
+  const usedSources = new Set()
+  
+  validSources.forEach((src,i)=>{
+    const text = src.text||src.markdown||src.description||''
+    const sentences = sentenceSplit(text)
+      .map(x=>({x, score: qterms.reduce((n,t)=>n+(x.toLowerCase().includes(t)?1:0),0)}))
+      .sort((a,b)=>b.score-a.score)
+      .slice(0, Math.max(2, Math.min(4, Math.ceil(sentences.length/3))))
+    
+    for(const s of sentences) {
+      bullets.push({ text: s, sourceIdx: i + 1, sourceLabel: src.title || src.url })
+      usedSources.add(i)
+    }
+  })
+  
+  const summary = bullets.slice(0, 12)
+    .map((b, i) => `${b.text} — [${b.sourceIdx}]`)
+    .join('\n\n')
+  
+  return `# Jawaban Web Research — Perplexity-Style
+
+**Pertanyaan:** ${query}
+**Sumber:** ${validSources.length} halaman terbaca dari ${sources.length} ditemukan
+
+## Ringkasan
+${summary || '- Konten yang relevan belum cukup.'}
+
+## Sumber
+${validSources.map((s,i)=>`[${i+1}] **${s.title||'Tanpa judul'}** — ${s.url}\n    ${s.description?.slice(0,120)||''}`).join('\n')}
+
+---
+> Riset otomatis oleh Market Orca. Verifikasi mandiri sebelum digunakan.
+> ${validSources.filter(s => {
+    const t = s.text||s.markdown||''
+    return !/^(https?:\/\/)/.test(t?.trim?.())
+  }).length ? `${validSources.filter(s => {
+    const t = s.text||s.markdown||''
+    return !/^(https?:\/\/)/.test(t?.trim?.())
+  }).length}/${validSources.length} sumber mungkin JS-gated — jika ringkasan kurang memuaskan, coba ulangi dengan domain spesifik.` : 'Semua sumber terbaca dengan baik.'}`
 }
-export async function searchAndAnswer(query,{limit=6,readLimit=3,engines=['bing','yahoo','duckduckgo'],modes=['','official','market','coding','journal','forum','blog'],time_range='',domains=[],sites=[]}={}){
+
+function cleanContent(text='') {
+  // Remove JS-gated noise
+  return text
+    .replace(/please enable scripts and reload this page\.?/gi, '')
+    .replace(/turn on (more accessible mode|animations)/gi, '')
+    .replace(/skip ribbon commands|skip to main content/gi, '')
+    .replace(/to navigate through the ribbon[^.]*\./gi, '')
+    .replace(/it looks like your browser does not have javascript/i, '')
+    .replace(/you may be trying to access this site from a secured browser/i, '')
+    .trim()
+}
+
+export async function searchAndAnswer(query,{limit=6,readLimit=4,engines=['searxng','bing','duckduckgo'],modes=['','official','market','coding','journal','forum','blog'],time_range='',domains=[],sites=[]}={}){
   const search=await deepWebSearch(query,{limit,engines,modes,autoPreview:false})
   const sources=[]
   for(const r of (search.results||[]).slice(0,readLimit)){
-    try{ const p=await previewPublicPage(r.url); sources.push({...p,rank:sources.length+1,searchResult:r}) }catch(e){ sources.push({ok:false,url:r.url,title:r.title,error:String(e.message||e),text:r.snippet||''}) }
+    try{ 
+      const p=await previewPublicPage(r.url)
+      const text = cleanContent(p.text||'')
+      if (isJSGated(text) || text.length < 30) {
+        sources.push({ok:false,url:r.url,title:r.title,error:'JS-gated page', text: r.snippet||''})
+      } else {
+        sources.push({...p, text, rank:sources.length+1,searchResult:r})
+      }
+    } catch(e){ 
+      sources.push({ok:false,url:r.url,title:r.title,error:String(e.message||e).slice(0,100),text:r.snippet||''}) 
+    }
   }
   const answer=answerFromSources(query,sources)
   return {ok:true,query,answer,sources:sources.map((s,i)=>({n:i+1,url:s.url,title:s.title,description:s.description,ok:s.ok!==false,error:s.error||''})),search:{results:search.results?.slice(0,limit)||[],clusters:search.clusters||[],errors:search.errors||[]}}
