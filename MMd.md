@@ -1,5 +1,17 @@
 # Market Orca — Feature Log
 
+## 2026-06-29 — Feature #24: Pipeline Monitor API Routes
+- **Pain point:** `pipeline-monitor.js` module fully built (188 lines, 10 functions) but zero routes exposed pipeline data. All pipeline stats, runs, and events locked inside SQLite.
+- **Done:**
+  1. `GET /api/pipeline/stats` — aggregated stats (success rate, averages, last run)
+  2. `GET /api/pipeline/latest` — latest run with full event timeline
+  3. `GET /api/pipeline/recent` — recent events (`?limit=N`, default 20)
+  4. `GET /api/pipeline/run/:id` — run details by ID
+  5. `GET /api/pipeline/run/:id/stages` — stage breakdown for a run
+- **Files:** `backend/src/server.js` (5 new GET routes, +29 lines)
+- **Deliverable:** Pipeline data now queryable from frontend, MCP, Discord. Ops dashboard can display pipeline health.
+- **Branch:** `feat/pipeline-api-routes` → PR #13
+
 ## 2026-06-28 — Feature #23: APM Status Dashboard Endpoint
 - **Pain point:** No visibility into APM pipeline health — ops had no way to see features shipped, pain point trends, or pipeline status.
 - **Done:**

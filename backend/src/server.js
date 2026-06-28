@@ -935,6 +935,35 @@ app.get('/api/health', async (_req, res) => {
   }
 })
 
+// ── Pipeline Monitor Routes ──────────────────────────────────────
+app.get('/api/pipeline/stats', (_req, res) => {
+  try { res.json(getPipelineStats()) }
+  catch (error) { res.status(500).json({ ok: false, error: String(error) }) }
+})
+
+app.get('/api/pipeline/latest', (_req, res) => {
+  try { res.json(getLatestPipelineStatus()) }
+  catch (error) { res.status(500).json({ ok: false, error: String(error) }) }
+})
+
+app.get('/api/pipeline/recent', (req, res) => {
+  try { res.json(getRecentPipelineEvents(Number(req.query.limit || 20))) }
+  catch (error) { res.status(500).json({ ok: false, error: String(error) }) }
+})
+
+app.get('/api/pipeline/run/:id', (req, res) => {
+  try {
+    const run = getPipelineRun(Number(req.params.id))
+    if (!run.ok) return res.status(404).json(run)
+    res.json(run)
+  } catch (error) { res.status(500).json({ ok: false, error: String(error) }) }
+})
+
+app.get('/api/pipeline/run/:id/stages', (req, res) => {
+  try { res.json(getStageBreakdown(Number(req.params.id))) }
+  catch (error) { res.status(500).json({ ok: false, error: String(error) }) }
+})
+
 const MCP_TOOLS = [
   {name:'web.search', description:'Focused web search with modes/filters. No LLM token required.', input:{query:'string', mode:'market|official|coding|journal|forum|blog|person|...', engines:['bing','yahoo','duckduckgo'], limit:5, time_range:'day|week|month|year', domains:['example.com']}},
   {name:'web.deep_search', description:'Broad multi-mode/multi-engine search; merge/dedupe/rank/cluster.', input:{query:'string', modes:['market','official'], engines:['bing','yahoo'], limit:20, autoPreview:false}},
