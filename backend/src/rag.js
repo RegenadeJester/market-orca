@@ -91,13 +91,24 @@ export function ragSemanticSearch(query,{limit=8, minScore=0.08}={}){
   initRagSchema(); const qv=embedText(query); const rows=db.prepare(`SELECT c.id chunk_id,c.document_id,c.title,c.source,c.url,c.content,c.asset_tags,v.vector_json FROM rag_evidence_vectors v JOIN rag_evidence_chunks c ON c.id=v.chunk_id LIMIT 2000`).all()
   return rows.map(r=>({ ...r, score:cosine(qv, JSON.parse(r.vector_json||'[]')), snippet:clean(r.content).slice(0,420) })).filter(r=>r.score>=minScore).sort((a,b)=>b.score-a.score).slice(0,limit)
 }
-export function ragHybridSearch(query,{section='',limit=8}={}){
+export function ragHybridSearch(query,{section='',limit=8,assetTags=[]}={}){
   const fts=ragSearch(query,{section,limit:Math.max(limit,12)})
   const sem=ragSemanticSearch(query,{limit:Math.max(limit,12)})
   const map=new Map()
   for(const r of fts) map.set(r.chunk_id,{...r, retrieval:'fts', hybridScore:(r.score||0)/100})
   for(const r of sem){ const old=map.get(r.chunk_id); map.set(r.chunk_id,{...(old||r), ...r, retrieval:old?'hybrid':'semantic', hybridScore:(old?.hybridScore||0)+Number(r.score||0)}) }
-  return [...map.values()].sort((a,b)=>(b.hybridScore||0)-(a.hybridScore||0)).slice(0,limit)
+  let results=[...map.values()].sort((a,b)=>(b.hybridScore||0)-(a.hybridScore||0)).slice(0,limit*2)
+  
+  // Post-filter by assetTags if provided
+  if(assetTags && assetTags.length>0){
+    const tags=assetTags.map(t=>t.toLowerCase())
+    results=results.filter(r=>{
+      const at=(r.asset_tags||'').toLowerCase()
+      return tags.some(t=>at.includes(t))
+    })
+  }
+  
+  return results.slice(0,limit)
 }
 
 export function upsertRagDocument({url,title,source='',publishedAt='',content='',assetTags=[]}){

@@ -1004,7 +1004,7 @@ app.post('/mcp/tool/:tool', mcpRateLimit, mcpRequire, async (req, res) => {
   res.on('finish',()=>mcpMetric(tool,res.statusCode<500,Date.now()-__mcpStart))
   try {
     const input = req.body || {}
-    if (tool === 'rag.search') return res.json({ ok:true, tool, results:ragHybridSearch(String(input.query || ''), { limit:Number(input.limit || 8), section:String(input.section || 'mcp') }) })
+    if (tool === 'rag.search') return res.json({ ok:true, tool, results:ragHybridSearch(String(input.query || ''), { limit:Number(input.limit || 8), section:String(input.section || 'mcp'), assetTags:Array.isArray(input.assetTags) ? input.assetTags : [] }) })
     if (tool === 'rag.ingest') return res.json({ ok:true, tool, document:upsertRagDocument({ url:String(input.url||''), title:String(input.title||'Manual MCP source'), source:String(input.source||'mcp'), publishedAt:String(input.publishedAt||''), content:String(input.content||''), assetTags:Array.isArray(input.assetTags)?input.assetTags:[] }) })
     if (tool === 'web.search') return res.json({ ok:true, tool, ...(await withTimeout(webSearch(String(input.query||''), webSearchOptions(input,10)), Number(input.timeoutMs||45000))) })
     if (tool === 'web.fetch_page') return res.json({ ok:true, tool, ...(await withTimeout(fetchPageMarkdown(String(input.url||''), { maxChars:Number(input.maxChars||12000) }), Number(input.timeoutMs||45000))) })

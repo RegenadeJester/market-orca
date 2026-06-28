@@ -232,12 +232,93 @@ def to_searxng_format(data: dict) -> dict:
         "unresponsive_engines": []
     }
 
+SEARCH_UI_HTML = """<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Market Orca Search</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#0f0f0f;color:#e0e0e0;min-height:100vh;display:flex;flex-direction:column;align-items:center}
+.hero{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;max-width:720px;padding:2rem}
+.hero h1{font-size:2rem;font-weight:600;margin-bottom:.25rem;background:linear-gradient(135deg,#60a5fa,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero p{color:#888;font-size:.9rem;margin-bottom:2rem}
+.search-box{width:100%;position:relative}
+.search-box input{width:100%;padding:1rem 3.5rem 1rem 1.25rem;font-size:1rem;background:#1a1a1a;border:1px solid #333;border-radius:12px;color:#fff;outline:none;transition:border .2s}
+.search-box input:focus{border-color:#60a5fa}
+.search-box button{position:absolute;right:.75rem;top:50%;transform:translateY(-50%);background:none;border:none;color:#60a5fa;cursor:pointer;font-size:1.25rem}
+.engines{margin-top:1.5rem;display:flex;gap:.75rem;flex-wrap:wrap;justify-content:center}
+.engines label{font-size:.8rem;color:#999;cursor:pointer;display:flex;align-items:center;gap:.35rem}
+.engines input{accent-color:#60a5fa}
+.results{width:100%;max-width:720px;padding:1rem 2rem 3rem}
+.result{margin-bottom:1.5rem;padding:1rem;background:#1a1a1a;border-radius:10px;border:1px solid #222}
+.result h3{font-size:1rem;margin-bottom:.35rem}
+.result h3 a{color:#60a5fa;text-decoration:none}
+.result h3 a:hover{text-decoration:underline}
+.result .url{font-size:.75rem;color:#666;margin-bottom:.4rem}
+.result .snippet{font-size:.875rem;color:#bbb;line-height:1.5}
+.result .engine-tag{display:inline-block;font-size:.65rem;padding:2px 6px;border-radius:4px;background:#222;color:#888;margin-top:.5rem}
+.status{text-align:center;padding:2rem;color:#666}
+.spinner{display:none;text-align:center;padding:3rem;color:#888}
+.spinner::after{content:'';display:inline-block;width:24px;height:24px;border:3px solid #333;border-top-color:#60a5fa;border-radius:50%;animation:spin .6s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media(max-width:600px){.hero h1{font-size:1.5rem}.results{padding:1rem}}
+</style>
+</head>
+<body>
+<div class="hero">
+  <h1>🔍 Market Orca Search</h1>
+  <p>Multi-engine search — DuckDuckGo, Bing, Yahoo, Yandex</p>
+  <form class="search-box" onsubmit="doSearch(event)">
+    <input id="q" type="text" placeholder="Ask anything..." autofocus autocomplete="off">
+    <button type="submit">→</button>
+  </form>
+  <div class="engines">
+    <label><input type="checkbox" name="e" value="duckduckgo" checked>DuckDuckGo</label>
+    <label><input type="checkbox" name="e" value="bing" checked>Bing</label>
+    <label><input type="checkbox" name="e" value="yahoo">Yahoo</label>
+    <label><input type="checkbox" name="e" value="yandex">Yandex</label>
+  </div>
+</div>
+<div class="spinner" id="spinner"></div>
+<div class="results" id="results"></div>
+<script>
+const input=document.getElementById('q'),results=document.getElementById('results'),spinner=document.getElementById('spinner');
+const params=new URLSearchParams(location.search);
+if(params.get('q')){input.value=params.get('q');doSearch()}
+async function doSearch(e){
+  if(e)e.preventDefault();
+  const q=input.value.trim();if(!q)return;
+  history.replaceState(null,'','/?q='+encodeURIComponent(q));
+  spinner.style.display='block';results.innerHTML='';
+  const eng=[...document.querySelectorAll('input[name=e]:checked')].map(c=>c.value);
+  try{
+    const r=await fetch('/search?q='+encodeURIComponent(q)+'&engines='+(eng.join(',')||'duckduckgo')+'&limit=20');
+    const data=await r.json();
+    spinner.style.display='none';
+    if(!data.results||!data.results.length){results.innerHTML='<div class="status">No results found.</div>';return}
+    results.innerHTML=data.results.map(r=>'<div class="result"><h3><a href="'+r.url+'" target="_blank" rel="noopener">'+esc(r.title)+'</a></h3><div class="url">'+esc(r.url)+'</div><div class="snippet">'+esc(r.content)+'</div><span class="engine-tag">'+esc(r.engine)+'</span></div>').join('');
+  }catch(err){spinner.style.display='none';results.innerHTML='<div class="status">Search failed: '+esc(err.message)+'</div>'}
+}
+function esc(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML}
+input.addEventListener('keydown',e=>{if(e.key==='Enter')doSearch(e)});
+</script>
+</body></html>"""
+
+from fastapi.responses import HTMLResponse
+
 @app.get("/")
 async def root():
+    q = None
+    return HTMLResponse(content=SEARCH_UI_HTML)
+
+@app.get("/api")
+async def api_root():
     return {
         "name": "Market Orca Search",
         "version": "1.0",
-"description": "Lightweight SearXNG-compatible search API",
+        "description": "Lightweight SearXNG-compatible search API",
         "engines": list(ENGINES.keys()),
         "endpoints": {
             "search": "/search?q=query&engines=duckduckgo,yahoo&limit=10&format=json|searxng",

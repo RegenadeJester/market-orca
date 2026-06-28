@@ -1,0 +1,34 @@
+{
+  "runs": [
+    {
+      "topicId": "idx-market",
+      "ingested": 13,
+      "fetched": 25,
+      "quality": 62,
+      "timestamp": "2026-06-28T02:06:13.545Z"
+    },
+    {
+      "topicId": "usd-idr",
+      "ingested": 17,
+      "fetched": 25,
+      "quality": 66,
+      "timestamp": "2026-06-28T02:08:36.973Z"
+    }
+  ],
+  "topicStats": {
+    "idx-market": {
+      "totalIngested": 13,
+      "totalFetched": 25,
+      "avgQuality": 62,
+      "runs": 1,
+      "lastRun": "2026-06-28T02:06:13.545Z"
+    },
+    "usd-idr": {
+      "totalIngested": 17,
+      "totalFetched": 25,
+      "avgQuality": 66,
+      "runs": 1,
+      "lastRun": "2026-06-28T02:08:36.973Z"
+    }
+  }
+}

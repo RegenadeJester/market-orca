@@ -312,6 +312,24 @@ function saveMetrics() {
   }
 }
 
+const BLACKLIST_DOMAINS = [
+  'cambridge.org', 'merriam-webster.com', 'wiktionary.org', 'collinsdictionary.com',
+  'dictionary.com', 'thefreedictionary.com', 'wordreference.com',
+  'github.com', 'gitlab.com', 'bitbucket.org',
+  'stackoverflow.com', 'stackexchange.com',
+  'reddit.com', 'quora.com', 'yahoo.com',
+  'facebook.com', 'twitter.com', 'x.com', 'instagram.com', 'linkedin.com',
+  'youtube.com', 'vimeo.com', 'dailymotion.com',
+  'pinterest.com', 'tumblr.com'
+]
+
+function isBlacklisted(url) {
+  try {
+    const host = new URL(url).hostname.replace(/^www\./, '')
+    return BLACKLIST_DOMAINS.some(d => host.includes(d))
+  } catch { return false }
+}
+
 // ─── Topic Processing ──────────────────────────────────────────
 async function processTopic(topic) {
   log(`\n📚 Topic: ${topic.name} [${topic.assetTags.join(', ')}]`)
@@ -341,6 +359,11 @@ async function processTopic(topic) {
         const url = r.url
         if (!url || url.includes('youtube.com') || url.includes('facebook.com') || url.includes('instagram.com') || url.includes('twitter.com') || url.includes('x.com')) continue
         if (url.includes('bing.com/ck/a') || url.includes('bing.com/cc/a')) continue
+        // Skip blacklisted domains
+        if (isBlacklisted(url)) {
+          log(`  ⛔ Skip blacklisted: ${url.slice(0, 60)}`)
+          continue
+        }
 
         const urlHash = crypto.createHash('sha256').update(url).digest('hex')
         if (learnedStore[urlHash]) {

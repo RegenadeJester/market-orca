@@ -1,265 +1,246 @@
 {
-  "_doc": "Market Orca Autolearn — define topics, search queries, and assetTags (collections). Cron job researches each topic periodically and ingests into RAG.",
-  "_usage": "Add a topic below. 'queries' = what to search. 'assetTags' = collection name for filtering. 'maxResults' = how many URLs to fetch per query.",
+  "_doc": "Market Orca Autolearn v3 — Enterprise grade topics with priorities, smart queries, and scheduled learning",
+  "_v": 3,
   "topics": [
     {
       "id": "idx-market",
       "name": "IHSG / IDX Market Overview",
+      "priority": "high",
       "queries": [
-        "IHSG hari ini idx.co.id",
-        "IHSG outlook market Indonesia",
-        "saham aktif volume tinggi IDX"
+        "IHSG hari ini terbaru",
+        "saham aktif volume tinggi IDX",
+        "pergerakan saham Indonesia minggu ini",
+        "foreign flow net buy sell IDX",
+        "rekomendasi saham analyst"
       ],
-      "assetTags": [
-        "JKSE",
-        "IDX"
-      ],
-      "maxResults": 3,
-      "schedule": "every 6h",
+      "assetTags": ["JKSE", "IDX"],
+      "maxResults": 5,
+      "schedule": "every 4h",
       "enabled": true
     },
     {
       "id": "usd-idr",
       "name": "USD/IDR & Rupiah",
+      "priority": "high",
       "queries": [
-        "kurs rupiah hari ini bank indonesia",
-        "USD IDR forecast BI",
-        "rupiah outlook 2026"
+        "kurs rupiah hari ini BI",
+        "USD IDR forecast analisis",
+        "nilai tukar rupiah terhadap dolar",
+        "dampak Fed rate ke rupiah",
+        "cadangan devisa Indonesia"
       ],
-      "assetTags": [
-        "USDIDR",
-        "BI"
-      ],
-      "maxResults": 3,
-      "schedule": "every 6h",
+      "assetTags": ["USDIDR", "BI"],
+      "maxResults": 5,
+      "schedule": "every 4h",
       "enabled": true
     },
     {
       "id": "crypto",
       "name": "Bitcoin & Crypto",
+      "priority": "high",
       "queries": [
-        "bitcoin price today",
-        "crypto market news ethereum",
-        "bitcoin etf flows"
+        "harga bitcoin hari ini",
+        "ethereum crypto market",
+        "analisis crypto market mingguan",
+        "altcoin terbaik untuk investasi",
+        "regulasi crypto Indonesia terbaru"
       ],
-      "assetTags": [
-        "BTC",
-        "CRYPTO"
-      ],
-      "maxResults": 3,
+      "assetTags": ["BTC", "CRYPTO"],
+      "maxResults": 5,
       "schedule": "every 6h",
       "enabled": true
     },
     {
       "id": "global-macro",
       "name": "Global Macro & Central Banks",
+      "priority": "high",
       "queries": [
-        "fed rate decision impact",
-        "global inflation data CPI",
-        "US treasury yield curve"
+        "kebijakan moneter global",
+        "inflasi dunia terkini",
+        "suku bunga Fed ECB BOJ",
+        "perang dagang dan dampak global",
+        "proyeksi pertumbuhan ekonomi dunia"
       ],
-      "assetTags": [
-        "MACRO",
-        "FED"
-      ],
-      "maxResults": 3,
-      "schedule": "every 12h",
-      "enabled": true
-    },
-    {
-      "id": "ai-tech",
-      "name": "AI & Technology",
-      "queries": [
-        "AI news openai anthropic",
-        "technology startup funding venture capital",
-        "generative AI enterprise adoption"
-      ],
-      "assetTags": [
-        "AI",
-        "TECH"
-      ],
-      "maxResults": 3,
-      "schedule": "every 12h",
+      "assetTags": ["MACRO", "FED"],
+      "maxResults": 5,
+      "schedule": "every 6h",
       "enabled": true
     },
     {
       "id": "commodities",
       "name": "Komoditas Indonesia",
+      "priority": "high",
       "queries": [
-        "harga emas hari ini",
-        "minyak mentah brent",
-        "nickel price Indonesia",
-        "CPO harga sawit"
+        "harga komoditas Indonesia terkini",
+        "batu bara Indonesia",
+        "palm oil CPO harga",
+        "nickel Indonesia harga dunia",
+        "komoditas strategis Indonesia"
       ],
-      "assetTags": [
-        "COMM",
-        "COMMODITY"
-      ],
-      "maxResults": 3,
-      "schedule": "every 6h",
+      "assetTags": ["COMM", "COMMODITY"],
+      "maxResults": 5,
+      "schedule": "every 4h",
       "enabled": true
     },
     {
       "id": "indonesia",
-      "name": "Indonesia",
+      "name": "Indonesia Economy & Policy",
+      "priority": "high",
       "queries": [
-        "indonesia market outlook 2026",
-        "IDX market outlook 2026",
-        "IHSG market outlook 2026",
-        "jokowi market outlook 2026"
+        "perekonomian Indonesia terkini",
+        "pertumbuhan GDP Indonesia",
+        "investasi asing Indonesia",
+        "kebijakan ekonomi pemerintah",
+        "proyek infrastruktur Indonesia"
       ],
-      "assetTags": [
-        "INDONESIA"
-      ],
+      "assetTags": ["INDONESIA"],
       "maxResults": 5,
-      "enabled": true,
-      "schedule": "every 6h",
-      "_auto_added": true,
-      "_priority": 9
+      "schedule": "every 8h",
+      "enabled": true
     },
     {
       "id": "gold",
-      "name": "Gold & Commodities",
+      "name": "Gold & Precious Metals",
+      "priority": "medium",
       "queries": [
-        "gold price market outlook 2026",
-        "emas market outlook 2026",
-        "silver market outlook 2026",
-        "copper market outlook 2026"
+        "harga emas hari ini Antam",
+        "gold price outlook",
+        "emas logam mulia investasi",
+        "komoditas emas dunia",
+        "cadangan emas Indonesia"
       ],
-      "assetTags": [
-        "GOLD"
-      ],
+      "assetTags": ["GOLD"],
       "maxResults": 5,
-      "enabled": true,
       "schedule": "every 6h",
-      "_auto_added": true,
-      "_priority": 8
+      "enabled": true
     },
     {
       "id": "us-market",
-      "name": "US Markets",
+      "name": "US Markets (S&P/Nasdaq)",
+      "priority": "medium",
       "queries": [
-        "S&P 500 market outlook 2026",
-        "Nasdaq market outlook 2026",
-        "Dow Jones market outlook 2026",
-        "Fed rate market outlook 2026"
+        "S&P 500 Nasdaq hari ini",
+        "Wall Street market mingguan",
+        "saham teknologi AS",
+        "Fed rate impact",
+        "analisis pasar modal AS"
       ],
-      "assetTags": [
-        "USMARKET"
-      ],
+      "assetTags": ["USMARKET"],
       "maxResults": 5,
-      "enabled": true,
-      "schedule": "every 6h",
-      "_auto_added": true,
-      "_priority": 6
+      "schedule": "every 8h",
+      "enabled": true
     },
     {
       "id": "china",
       "name": "China Economy",
+      "priority": "medium",
       "queries": [
-        "China market outlook 2026",
-        "Shanghai market outlook 2026",
-        "yuan market outlook 2026",
-        "PBOC market outlook 2026"
+        "ekonomi China terkini",
+        "China market outlook",
+        "Yuan China dampak global",
+        "perang dagang China AS",
+        "China stimulus kebijakan"
       ],
-      "assetTags": [
-        "CHINA"
-      ],
+      "assetTags": ["CHINA"],
       "maxResults": 5,
-      "enabled": true,
-      "schedule": "every 6h",
-      "_auto_added": true,
-      "_priority": 6
+      "schedule": "every 8h",
+      "enabled": true
     },
     {
       "id": "oil-energy",
       "name": "Oil & Energy",
+      "priority": "medium",
       "queries": [
-        "crude oil market outlook 2026",
-        "OPEC market outlook 2026",
-        "energy crisis market outlook 2026",
-        "renewable market outlook 2026"
+        "harga minyak mentah dunia",
+        "OPEC production quota",
+        "energi Indonesia",
+        "minyak dunia outlook",
+        "transisi energi Indonesia"
       ],
-      "assetTags": [
-        "OILENERGY"
-      ],
+      "assetTags": ["OILENERGY"],
       "maxResults": 5,
-      "enabled": true,
       "schedule": "every 6h",
-      "_auto_added": true,
-      "_priority": 6
+      "enabled": true
     },
     {
       "id": "forex",
-      "name": "Forex",
+      "name": "Forex (EUR/USD/GBP/JPY)",
+      "priority": "medium",
       "queries": [
-        "USD/IDR market outlook 2026",
-        "EUR/USD market outlook 2026",
-        "JPY market outlook 2026",
-        "GBP market outlook 2026"
+        "analisis forex EUR USD GBP",
+        "USD IDR technical analysis",
+        "forex market mingguan",
+        "Yen JPY forecast",
+        "forex Indonesia broker"
       ],
-      "assetTags": [
-        "FOREX"
-      ],
+      "assetTags": ["FOREX"],
       "maxResults": 5,
-      "enabled": true,
       "schedule": "every 6h",
-      "_auto_added": true,
-      "_priority": 6
+      "enabled": true
     },
     {
       "id": "geopolitics",
-      "name": "Geopolitics",
+      "name": "Geopolitics & Trade",
+      "priority": "medium",
       "queries": [
-        "war market outlook 2026",
-        "sanctions market outlook 2026",
-        "tariff market outlook 2026",
-        "trade war market outlook 2026"
+        "geopolitik dunia terkini",
+        "perang Ukraina Rusia dampak",
+        "Timur Tengah konflik",
+        "Asia Tenggara geopolitik",
+        "sanksi internasional ekonomi"
       ],
-      "assetTags": [
-        "GEOPOLITICS"
-      ],
+      "assetTags": ["GEOPOLITICS"],
       "maxResults": 5,
-      "enabled": true,
-      "schedule": "every 6h",
-      "_auto_added": true,
-      "_priority": 5
+      "schedule": "every 12h",
+      "enabled": true
     },
     {
       "id": "indonesia-politics",
       "name": "Indonesia Politics & Policy",
+      "priority": "medium",
       "queries": [
-        "pemilu market outlook 2026",
-        "kabinet market outlook 2026",
-        "DPR market outlook 2026",
-        "APBN market outlook 2026"
+        "politik Indonesia terkini",
+        "kebijakan pemerintah baru",
+        "APBN Indonesia 2026",
+        "undang undang ekonomi",
+        "reformasi kebijakan Indonesia"
       ],
-      "assetTags": [
-        "INDONESIAPOLITICS"
-      ],
+      "assetTags": ["INDONESIAPOLITICS"],
       "maxResults": 5,
-      "enabled": true,
-      "schedule": "every 6h",
-      "_auto_added": true,
-      "_priority": 7
+      "schedule": "every 12h",
+      "enabled": true
     },
     {
       "id": "startup",
       "name": "Startups & Unicorns",
+      "priority": "low",
       "queries": [
-        "startup market outlook 2026",
-        "unicorn market outlook 2026",
-        "GoTo market outlook 2026",
-        "Bukalapak market outlook 2026"
+        "startup Indonesia terbaru",
+        "unicorn Indonesia",
+        "venture capital funding",
+        "ekosistem startup Indonesia",
+        "teknologi startup IPO"
       ],
-      "assetTags": [
-        "STARTUP"
-      ],
+      "assetTags": ["STARTUP"],
       "maxResults": 5,
-      "enabled": true,
-      "schedule": "every 6h",
-      "_auto_added": true,
-      "_priority": 5
+      "schedule": "every 24h",
+      "enabled": true
+    },
+    {
+      "id": "ai-tech",
+      "name": "AI & Technology",
+      "priority": "medium",
+      "queries": [
+        "teknologi AI terbaru Indonesia",
+        "NVIDIA saham teknologi",
+        "startup teknologi Indonesia funding",
+        "kecerdasan buatan dampak ekonomi",
+        "semitokon industri teknologi global"
+      ],
+      "assetTags": ["AI", "TECH"],
+      "maxResults": 5,
+      "schedule": "every 12h",
+      "enabled": true
     }
   ]
 }

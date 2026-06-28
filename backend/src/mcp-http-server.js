@@ -26,6 +26,41 @@ app.use(express.json({ limit:'4mb' }))
 const transports = new Map()
 function auth(req,res,next){ if(!TOKEN) return next(); const h=req.headers.authorization||''; if(h === `Bearer ${TOKEN}`) return next(); res.status(401).json({ error:'unauthorized' }) }
 app.get('/health', (_req,res)=>res.json({ ok:true, name:'market-orca-mcp', transport:'streamable-http', path:PATH }))
+app.get('/', (_req,res)=>{
+  res.type('html').send(`<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Market Orca MCP</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0f0f0f;color:#e0e0e0;min-height:100vh;display:flex;align-items:center;justify-content:center}
+.card{max-width:540px;width:100%;padding:2.5rem;background:#1a1a1a;border:1px solid #222;border-radius:16px}
+h1{font-size:1.5rem;background:linear-gradient(135deg,#60a5fa,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:.5rem}
+p{color:#888;font-size:.85rem;margin-bottom:1.5rem}
+.endpoints{list-style:none}
+.endpoints li{padding:.6rem 0;border-bottom:1px solid #222;font-size:.85rem;display:flex;align-items:baseline;gap:.75rem}
+.endpoints li:last-child{border-bottom:none}
+.method{font-family:monospace;font-size:.7rem;padding:2px 6px;border-radius:4px;font-weight:600}
+.get{background:#16331a;color:#4ade80}
+.post{background:#332d1a;color:#fbbf24}
+.uri{color:#bbb;font-family:monospace}
+.desc{color:#666;font-size:.75rem}
+</style>
+</head>
+<body>
+<div class="card">
+<h1>🐋 Market Orca MCP</h1>
+<p>Model Context Protocol server — AI tool gateway</p>
+<ul class="endpoints">
+<li><span class="method get">GET</span><span class="uri">/health</span><span class="desc">Health check</span></li>
+<li><span class="method get">GET</span><span class="uri">/mcp</span><span class="desc">MCP protocol endpoint</span></li>
+<li><span class="method post">POST</span><span class="uri">/mcp</span><span class="desc">MCP tool calls</span></li>
+</ul>
+</div>
+</body></html>`)
+})
 app.all(PATH, auth, async (req,res)=>{
   try {
     let transport
