@@ -1,5 +1,17 @@
 # Market Orca — Feature Log
 
+## 2026-07-02 — Feature #25: Pipeline Monitor Frontend Page + Nav
+- **Pain point:** PipelineMonitorPage.vue existed, route `/pipeline` registered, but no nav link → page inaccessible without typing URL. API_BASE used port-qualified URLs incompatible with Cloudflare tunnel.
+- **Done:**
+  1. App.vue: added `<RouterLink to="/pipeline">Pipeline</RouterLink>` in topbar nav
+  2. api.js: relative URLs (empty-string fallback) instead of hardcoded port
+  3. PipelineMonitorPage.vue: stats cards, latest run timeline, recent events list
+  4. ReportPage.vue: styling improvements (.display-headline, .byline)
+  5. AlertSummaryWidget.vue: new component
+- **Repo:** Frontend (`report.git`)
+- **Branch:** `feat/homepage-today-report-card` → PR #1 (updated)
+- **PR:** https://github.com/RegenadeJester/report/pull/1
+
 ## 2026-06-29 — Feature #24: Pipeline Monitor API Routes
 - **Pain point:** `pipeline-monitor.js` module fully built (188 lines, 10 functions) but zero routes exposed pipeline data. All pipeline stats, runs, and events locked inside SQLite.
 - **Done:**
