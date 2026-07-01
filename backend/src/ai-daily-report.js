@@ -244,11 +244,11 @@ export function buildSummary(topics) {
   const gapNote = dataGaps.length > 0 ? `\n⚠️ **Data belum tersedia:** ${dataGaps.join(', ')} — analisa ini tidak mencakup data tersebut.` : ''
 
   return `### Ringkasan Hari Ini\n\n` +
-    `**Top Story:** ${hotTitle}${hotUrl}\n\n` +
-    `**Kenapa penting:** ${why}\n\n` +
-    `**Sentimen pasar:** ${dirText.charAt(0).toUpperCase() + dirText.slice(1)} — didorong oleh ${impact.event.label.toLowerCase()} (${driverText}).\n\n` +
-    `**Indonesia Pulse:** ${impact.pulse || 'data pending'}\n\n` +
-    `**Coverage:** ${allItems.length} berita dari ${sourceCount} sumber terverifikasi.${gapNote}`
+    `**Berita Utama:** ${hotTitle}${hotUrl}\n\n` +
+    `**Dampak:** ${why}\n\n` +
+    `**Sentimen Pasar:** ${dirText.charAt(0).toUpperCase() + dirText.slice(1)} — didorong oleh ${impact.event.label.toLowerCase()} (${driverText}).\n\n` +
+    `**Pulsa Indonesia:** ${impact.pulse || 'data pending'}\n\n` +
+    `**Cakupan:** ${allItems.length} berita dari ${sourceCount} sumber terverifikasi.${gapNote}`
 }
 
 // ═══════════════════════════════════════════
@@ -678,7 +678,7 @@ function sourceDiversityBlock(topics=[]) {
     else if (uniqueDomains >= 3) score = 60
     const label = score >= 85 ? 'excellent' : score >= 75 ? 'good' : score >= 60 ? 'moderate' : 'poor'
     const lines = [
-      `**Score:** ${score}/100 (${label})`,
+      `**Skor:** ${score}/100 (${label})`,
       `**Unique Domains:** ${uniqueDomains} | **Total Items:** ${total}`,
       `**Top Sources:** ${topDomains.map(([d,c]) => `${d} (${c}x)`).join(' · ')}`
     ]
@@ -782,7 +782,7 @@ export function extractAlertCandidates(topics) {
 }
 
 export function buildSuggestedAlertsBlock(alerts = []) {
-  if (!alerts.length) return '## ⚡ Suggested Alerts\n- Tidak ada alert candidates dari report hari ini.\n'
+  if (!alerts.length) return '## ⚡ Suggested Alerts\n- Tidak ada kandidat alert dari laporan hari ini.\n'
   const lines = alerts.map((a, i) =>
     `- **#${i + 1}** ${a.asset_symbol} ${a.direction === 'up' ? '📈' : '📉'} ${a.target_price} (confidence ${Math.round(a.confidence * 100)}%) — ${a.reason.slice(0, 80)}`
   )
@@ -840,7 +840,7 @@ export function buildTextReport(topics, opts = {}) {
   try { assets = db.prepare('SELECT * FROM assets ORDER BY abs(change_percent) DESC LIMIT 24').all() } catch (e) { console.error("[ai-report] DB query failed:", e.message) }
   const dataStatusBlock = buildDataStatusBlock(assets)
   const dataFreshnessQa = dataFreshnessQA(assets)
-  let text = `# ${heroTitle}\n${dateStr}\n\n> Vibe check: **${vibeTag(hero)}**\n> ${heroWhy}\n> Why it matters: ${whyItMatters(hero)}\n${hero?.url ? `> <${hero.url}>\n` : ''}\n\n${dotline}\n\n${userContext}\n\n${personaSection ? personaSection + '\n' : ''}${dotline}\n\n## TL;DR buat yang males baca\n\n${buildSummary(topics)}\n\n${dotline}\n\n## Report Quality\n- **Score:** ${quality.score}/100 (${quality.status})\n- **Sources:** ${quality.sources} · Items: ${quality.items} · Duplicates: ${quality.dupes} · Stale: ${quality.stale}\n- **Source rotation:** ${sourceRotationHint()}\n\n${dotline}\n\n${dataStatusBlock}\n${dataFreshnessQa.warning ? `\n> ⚠️ ${dataFreshnessQa.warning}\n` : ''}\n${dotline}\n\n## What Changed Today\n${changed}\n\n${dotline}\n\n${buildAnomalyReportBlock()}\n\n${dotline}\n\n${buildSuggestedAlertsBlock(extractAlertCandidates(topics))}\n\n${dotline}\n\n${ragMarkdown}\n\n${dotline}\n\n${impact.markdown}\n\n${dotline}\n\n${quality.score < 80 ? featureImprovementPack(topics) + `\n\n${dotline}\n\n` : ''}${quality.score < 80 ? reliabilityIncidentQaPack(topics) + `\n\n${dotline}\n\n` : ''}## Actionable Watchlist\n${thesis}\n\n## Red Flags\n${flags}\n\n${dotline}\n\n${(() => { try { return buildDataValidationBlock() } catch { return '' } })()}\n\n${dotline}\n\n# Full Drop — AI DAILY REPORT\n\n`
+  let text = `# ${heroTitle}\n${dateStr}\n\n> Mood pasar: **${vibeTag(hero)}**\n> ${heroWhy}\n> Dampak: ${whyItMatters(hero)}\n${hero?.url ? `> <${hero.url}>\n` : ''}\n\n${dotline}\n\n${userContext}\n\n${personaSection ? personaSection + '\n' : ''}${dotline}\n\n## Ringkasan Eksekutif\n\n${buildSummary(topics)}\n\n${dotline}\n\n## Kualitas Laporan\n- **Skor:** ${quality.score}/100 (${quality.status})\n- **Sumber:** ${quality.sources} · Items: ${quality.items} · Duplicates: ${quality.dupes} · Stale: ${quality.stale}\n- **Rotasi Sumber:** ${sourceRotationHint()}\n\n${dotline}\n\n${dataStatusBlock}\n${dataFreshnessQa.warning ? `\n> ⚠️ ${dataFreshnessQa.warning}\n` : ''}\n${dotline}\n\n## Yang Berubah Hari Ini\n${changed}\n\n${dotline}\n\n${buildAnomalyReportBlock()}\n\n${dotline}\n\n${buildSuggestedAlertsBlock(extractAlertCandidates(topics))}\n\n${dotline}\n\n${ragMarkdown}\n\n${dotline}\n\n${impact.markdown}\n\n${dotline}\n\n${quality.score < 80 ? featureImprovementPack(topics) + `\n\n${dotline}\n\n` : ''}${quality.score < 80 ? reliabilityIncidentQaPack(topics) + `\n\n${dotline}\n\n` : ''}## Watchlist Prioritas\n${thesis}\n\n## Bendera Merah\n${flags}\n\n${dotline}\n\n${(() => { try { return buildDataValidationBlock() } catch { return '' } })()}\n\n${dotline}\n\n# Laporan Lengkap — AI Daily Report\n\n`
 
   const textSeenUrls = new Set()
 
@@ -867,7 +867,7 @@ export function buildTextReport(topics, opts = {}) {
       if (item.snippet && item.snippet !== item.title && item.snippet.length > 15) {
         text += `> ${truncateText(clean(item.snippet), 230)}\n`
       }
-      text += `> Why care: ${whyItMatters(item)}\n`
+      text += `> Dampak: ${whyItMatters(item)}\n`
       if (item.points) text += `> ^ ${item.points} pts | ${item.comments} comments\n`
       if (item.url) text += `> <${item.url}>\n`
       text += '\n'
@@ -1906,7 +1906,7 @@ function buildReportHtml(data, summary, funFacts, textReport) {
       const details = contextBullets(item).map(b => `<li>${tC(b)}</li>`).join('')
       const fLabel = freshnessLabel(item)
       const fColor = fLabel.startsWith('stale') ? '#ef4444' : fLabel.includes('fresh') ? '#22c55e' : '#f59e0b'
-      ih += `<article class="item" data-report-item>${img ? `<div class="item-img"><img src="${img}" alt="Thumbnail berita: ${tC(item.title).slice(0,80)}" loading="lazy" onerror="this.src='${fallbackImageFor(item)}'"></div>` : ''}<div class="body"><div class="vibe">${vibeTag(item)}</div><span style="display:inline-block;font-size:10px;font-weight:700;padding:1px 5px;border-radius:3px;color:#fff;background:${fColor};margin-bottom:8px">${tC(fLabel)}</span><h3 class="headline">${src ? `<span class="badge" style="--c:${badgeColor(src)}">${src}</span>` : ''} ${tC(item.title)}</h3>${snip ? `<p class="snippet">${snip}</p>` : ''}<div class="why"><b>Kenapa penting:</b> ${tC(variedWhyCare(item))}</div><details class="showmore"><summary>Show more — konteks & catatan</summary><ul>${details}</ul></details>${pts ? `<div class="meta">${pts}</div>` : ''}${item.url ? `<a class="link" href="${item.url}" target="_blank" rel="noopener noreferrer">${urlShort}</a>` : ''}<div class="item-actions"><button type="button" data-hide-item>Hide item</button><button type="button" data-rewrite-section="${tC(topic.title)}">Rewrite section</button></div></div></article>`
+      ih += `<article class="item" data-report-item>${img ? `<div class="item-img"><img src="${img}" alt="Thumbnail berita: ${tC(item.title).slice(0,80)}" loading="lazy" onerror="this.src='${fallbackImageFor(item)}'"></div>` : ''}<div class="body"><div class="vibe">${vibeTag(item)}</div><span style="display:inline-block;font-size:10px;font-weight:700;padding:1px 5px;border-radius:3px;color:#fff;background:${fColor};margin-bottom:8px">${tC(fLabel)}</span><h3 class="headline">${src ? `<span class="badge" style="--c:${badgeColor(src)}">${src}</span>` : ''} ${tC(item.title)}</h3>${snip ? `<p class="snippet">${snip}</p>` : ''}<div class="why"><b>Dampak:</b> ${tC(variedWhyCare(item))}</div><details class="showmore"><summary>Show more — konteks & catatan</summary><ul>${details}</ul></details>${pts ? `<div class="meta">${pts}</div>` : ''}${item.url ? `<a class="link" href="${item.url}" target="_blank" rel="noopener noreferrer">${urlShort}</a>` : ''}<div class="item-actions"><button type="button" data-hide-item>Hide item</button><button type="button" data-rewrite-section="${tC(topic.title)}">Rewrite section</button></div></div></article>`
     }
     secHtml += `<section class="secc"><h2>${tC(topic.title)}</h2>${topic.intro?.length > 30 ? `<div class="intro">"${tC(topic.intro).slice(0,350)}"</div>` : ''}${ih}</section>`
   }

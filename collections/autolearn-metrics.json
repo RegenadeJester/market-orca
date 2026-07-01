@@ -13,22 +13,120 @@
       "fetched": 25,
       "quality": 66,
       "timestamp": "2026-06-28T02:08:36.973Z"
+    },
+    {
+      "topicId": "idx-market",
+      "ingested": 5,
+      "fetched": 25,
+      "quality": 47,
+      "timestamp": "2026-07-01T21:11:08.182Z"
+    },
+    {
+      "topicId": "usd-idr",
+      "ingested": 9,
+      "fetched": 25,
+      "quality": 53,
+      "timestamp": "2026-07-01T21:12:05.304Z"
+    },
+    {
+      "topicId": "crypto",
+      "ingested": 19,
+      "fetched": 25,
+      "quality": 54,
+      "timestamp": "2026-07-01T21:13:25.452Z"
+    },
+    {
+      "topicId": "global-macro",
+      "ingested": 20,
+      "fetched": 25,
+      "quality": 52,
+      "timestamp": "2026-07-01T21:15:14.095Z"
+    },
+    {
+      "topicId": "idx-market",
+      "ingested": 6,
+      "fetched": 25,
+      "quality": 34,
+      "timestamp": "2026-07-01T21:17:29.455Z"
+    },
+    {
+      "topicId": "usd-idr",
+      "ingested": 1,
+      "fetched": 25,
+      "quality": 100,
+      "timestamp": "2026-07-01T21:18:00.592Z"
+    },
+    {
+      "topicId": "crypto",
+      "ingested": 0,
+      "fetched": 25,
+      "quality": 0,
+      "timestamp": "2026-07-01T21:18:31.883Z"
+    },
+    {
+      "topicId": "global-macro",
+      "ingested": 1,
+      "fetched": 25,
+      "quality": 95,
+      "timestamp": "2026-07-01T21:19:05.406Z"
+    },
+    {
+      "topicId": "commodities",
+      "ingested": 14,
+      "fetched": 25,
+      "quality": 41,
+      "timestamp": "2026-07-01T21:19:47.338Z"
+    },
+    {
+      "topicId": "indonesia",
+      "ingested": 17,
+      "fetched": 25,
+      "quality": 62,
+      "timestamp": "2026-07-01T21:20:51.866Z"
     }
   ],
   "topicStats": {
     "idx-market": {
-      "totalIngested": 13,
+      "totalIngested": 24,
+      "totalFetched": 75,
+      "avgQuality": 47.666666666666664,
+      "runs": 3,
+      "lastRun": "2026-07-01T21:17:29.455Z"
+    },
+    "usd-idr": {
+      "totalIngested": 27,
+      "totalFetched": 75,
+      "avgQuality": 73,
+      "runs": 3,
+      "lastRun": "2026-07-01T21:18:00.592Z"
+    },
+    "crypto": {
+      "totalIngested": 19,
+      "totalFetched": 50,
+      "avgQuality": 27,
+      "runs": 2,
+      "lastRun": "2026-07-01T21:18:31.883Z"
+    },
+    "global-macro": {
+      "totalIngested": 21,
+      "totalFetched": 50,
+      "avgQuality": 73.5,
+      "runs": 2,
+      "lastRun": "2026-07-01T21:19:05.406Z"
+    },
+    "commodities": {
+      "totalIngested": 14,
+      "totalFetched": 25,
+      "avgQuality": 41,
+      "runs": 1,
+      "lastRun": "2026-07-01T21:19:47.338Z"
+    },
+    "indonesia": {
+      "totalIngested": 17,
       "totalFetched": 25,
       "avgQuality": 62,
       "runs": 1,
-      "lastRun": "2026-06-28T02:06:13.545Z"
-    },
-    "usd-idr": {
-      "totalIngested": 17,
-      "totalFetched": 25,
-      "avgQuality": 66,
-      "runs": 1,
-      "lastRun": "2026-06-28T02:08:36.973Z"
+      "lastRun": "2026-07-01T21:20:51.866Z"
     }
   }
 }
