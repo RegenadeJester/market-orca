@@ -1,5 +1,14 @@
 # Market Orca — Feature Log
 
+## 2026-07-03 — Feature #26: Silent Error Swallowing Fixes Batch 2 (report-server.js + server.js)
+- **Pain point:** 13 silent `catch {}` blocks in `report-server.js` (8) and `server.js` (5) swallowed DB failures, fetch errors, LLM rewrite failures, fts5 health checks, and asset fetch errors in critical request paths without logging.
+- **Done:**
+  1. `report-server.js`: 8 catches now log `[report-server] <context>: <msg>` — searchNews, asset fetch, filter parse, live assets, ragHybridSearch, LLM rewrite, fts5 health, APM dashboard import
+  2. `server.js`: 5 catches now log `[server] <context>: <msg>` — today report read, filter parse, fts5 health, ragHybridSearch, LLM rewrite
+- **Files:** `backend/src/report-server.js`, `backend/src/server.js`
+- **Deliverable:** Errors in request-path handlers no longer vanish; visible in logs for debugging. Continuation of Feature #21 pattern.
+- **Branch:** `feat/silent-catch-fixes-batch2` → PR #14
+
 ## 2026-07-02 — Feature #25: Pipeline Monitor Frontend Page + Nav
 - **Pain point:** PipelineMonitorPage.vue existed, route `/pipeline` registered, but no nav link → page inaccessible without typing URL. API_BASE used port-qualified URLs incompatible with Cloudflare tunnel.
 - **Done:**
