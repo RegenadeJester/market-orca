@@ -129,7 +129,7 @@ app.get('/api/market-news', async (_req, res) => {
       try {
         const data = await searchNews(q, { limit: 5, language: 'id', time_range: 'week' })
         allResults.push(...(data?.results || []))
-      } catch {}
+      } catch (e) { console.error('[report-server] searchNews failed:', e.message) }
     }
     const seen = new Set()
     const unique = allResults.filter(r => {
@@ -301,7 +301,7 @@ function buildDecisionContextFingerprint() {
   ensureDecisionFingerprintSchema()
   const prefs = db.prepare('SELECT * FROM user_report_preferences WHERE id=1').get() || {}
   const answers = db.prepare('SELECT key,value,confidence,source,updated_at FROM user_context_answers ORDER BY key').all()
-  let assets = []; try { assets = db.prepare('SELECT symbol,name FROM assets WHERE pinned=1 OR enabled=1 ORDER BY symbol LIMIT 50').all() } catch {}
+  let assets = []; try { assets = db.prepare('SELECT symbol,name FROM assets WHERE pinned=1 OR enabled=1 ORDER BY symbol LIMIT 50').all() } catch (e) { console.error('[report-server] asset fetch failed:', e.message) }
   const payload = { goal: answers.find(a => a.key === 'goal')?.value || '', time_horizon: answers.find(a => a.key === 'time_horizon')?.value || '', watchlist_priority: answers.find(a => a.key === 'watchlist_priority')?.value || prefs.favorite_assets || '', risk_tolerance: answers.find(a => a.key === 'risk_tolerance')?.value || '', preferred_action: answers.find(a => a.key === 'preferred_action')?.value || '', language: prefs.language || 'id', depth: prefs.depth || 'normal', tone: prefs.tone || 'balanced', discord_spam_level: prefs.discord_spam_level || 'digest', assets }
   const fingerprint = stableHash(JSON.stringify(payload))
   db.prepare(`INSERT INTO decision_context_fingerprints (id,fingerprint,payload_json,context_json,updated_at) VALUES (1,?,?,?,datetime('now')) ON CONFLICT(id) DO UPDATE SET fingerprint=excluded.fingerprint,payload_json=excluded.payload_json,context_json=excluded.context_json,updated_at=datetime('now')`).run(fingerprint, JSON.stringify(payload), JSON.stringify(payload))
@@ -541,7 +541,7 @@ app.get('/api/tradingview/screener', async (req, res) => {
     const market = String(req.query.market || 'crypto')
     const filters = { limit: Math.min(Number(req.query.limit || 50), 200), sortBy: String(req.query.sortBy || 'volume'), sortOrder: String(req.query.sortOrder || 'desc') }
     if (req.query.columns) filters.columns = String(req.query.columns).split(',').map(s => s.trim())
-    if (req.query.filter) { try { filters.filter = JSON.parse(req.query.filter) } catch {} }
+    if (req.query.filter) { try { filters.filter = JSON.parse(req.query.filter) } catch (e) { console.error('[report-server] filter parse failed:', e.message) } }
     res.json(await getTradingViewScreener(market, filters))
   } catch (e) { res.status(500).json({ ok: false, error: e.message }) }
 })
@@ -892,11 +892,11 @@ app.get('/report', (_req, res) => {
       const cardsHtml = marketAssets.map(a => {
         const chg = Number(a.change_percent) || 0
         const cls = chg >= 0 ? 'up' : 'down'
-        return `<div class="mo-card"><div class="mo-sym">${(a.symbol || '').toUpperCase()}</div><div class="mo-price">${fmtPrice(a.price)}</div><div class="mo-chg ${cls}">${chg >= 0 ? '+' : ''}${chg.toFixed(2)}%</div><div class="mo-name">${(a.name || '').replace(/</g, '&lt;')}</div></div>`
+        return `<div class="mo-card"><div class="mo-sym">${(a.symbol || '').toUpperCase()}</div><div class="mo-price">${fmtPrice(a.price)}</div><div class="mo-chg ${cls}">${chg >= 0 ? '+' : ''}${chg.toFixed(2)}%</div><div class="mo-name">${(a.name || '').replace(/</g, '<')}</div></div>`
       }).join('')
       marketHtml = `<section class="market-overview"><div class="mo-header">📊 Market Overview · Live Data</div><div class="mo-grid">${cardsHtml}</div></section>`
     }
-  } catch {}
+  } catch (e) { console.error('[report-server] live assets fetch failed:', e.message) }
 
   const files = fs.existsSync(reportDir) ? fs.readdirSync(reportDir).filter(f => f.endsWith('.json')).sort().reverse() : []
   const cards = files.map((f) => {
@@ -950,7 +950,7 @@ app.get('/report/:slug', (req, res) => {
 function reportEvidenceMap(report, query = '') {
   const rows = []
   if (query) {
-    try { for (const r of ragHybridSearch(query, { limit: 8 })) rows.push({ id: r.chunk_id || r.url, topic: 'Hybrid RAG', title: r.title || '', source: r.source || '', url: r.url || '', snippet: r.snippet || r.content || '', imageUrl: '', evidence_kind: r.retrieval || 'hybrid', semantic_score: r.score || r.hybridScore || 0 }) } catch {}
+    try { for (const r of ragHybridSearch(query, { limit: 8 })) rows.push({ id: r.chunk_id || r.url, topic: 'Hybrid RAG', title: r.title || '', source: r.source || '', url: r.url || '', snippet: r.snippet || r.content || '', imageUrl: '', evidence_kind: r.retrieval || 'hybrid', semantic_score: r.score || r.hybridScore || 0 }) } catch (e) { console.error('[report-server] ragHybridSearch failed:', e.message) }
   }
   let n = 1
   for (const t of report.topics || []) for (const i of t.items || []) {
@@ -1129,8 +1129,8 @@ app.post('/api/report/:slug/blocks/:blockKey/rewrite', async (req, res) => {
       const model = process.env.REPORT_REWRITE_MODEL || process.env.OPENAI_MODEL || 'gpt-4o-mini'
       const rr = await fetch(`${base.replace(/\/$/, '')}/chat/completions`, { method: 'POST', headers: { 'content-type': 'application/json', 'authorization': `Bearer ${key}` }, body: JSON.stringify({ model, temperature: 0.2, max_tokens: 450, messages: [{ role: 'system', content: 'Rewrite paragraph in Bahasa Indonesia. Use ONLY locked evidence. Preserve cautious wording. Add short source note. No invented facts.' }, { role: 'user', content: `PARAGRAPH:\n${row.body_md}\n\nLOCKED_EVIDENCE_IDS:${ctx.map(e => e.id).join(', ')}\nEVIDENCE:\n${ctx.map(e => `- ${e.title} (${e.source}): ${e.snippet}`).join('\n')}` }] }) })
       const jj = await rr.json(); const txt = jj.choices?.[0]?.message?.content?.trim(); if (txt) { rewritten = txt; usedLlm = true }
-    } catch {}
-  }
+      } catch (e) { console.error('[report-server] LLM rewrite failed:', e.message) }
+    }
   const newIds = ctx.map(e => e.id)
   const claimType = ctx.length ? 'cited' : (row.claim_type === 'assumption' ? 'weak_evidence' : row.claim_type)
   const confidence = ctx.length ? Math.min(0.9, 0.62 + ctx.length * 0.1) : Math.max(0.45, Number(row.confidence || 0.5))
@@ -1398,7 +1398,7 @@ app.get('/api/rag/health', (_req, res) => {
     initRagSchema()
     const fts5 = db.prepare(`SELECT sqlite_compileoption_used('ENABLE_FTS5') AS enabled`).get()?.enabled === 1
     let runtime = false
-    try { db.exec(`CREATE VIRTUAL TABLE IF NOT EXISTS temp.rag_health_fts USING fts5(body); DROP TABLE temp.rag_health_fts;`); runtime = true } catch {}
+    try { db.exec(`CREATE VIRTUAL TABLE IF NOT EXISTS temp.rag_health_fts USING fts5(body); DROP TABLE temp.rag_health_fts;`); runtime = true } catch (e) { console.error('[report-server] fts5 runtime check failed:', e.message) }
     const docs = db.prepare(`SELECT count(*) AS n FROM rag_evidence_documents`).get()?.n || 0
     const chunks = db.prepare(`SELECT count(*) AS n FROM rag_evidence_chunks`).get()?.n || 0
     res.json({ ok: true, fts5CompileOption: fts5, fts5Runtime: runtime, docs, chunks })
@@ -1495,12 +1495,12 @@ app.get('/api/apm/status', async (_req, res) => {
     
     // Try to import the CJS dashboard module
     let stats = { totalFeatures: 0, totalFiles: 0, totalBranches: 0, totalPRs: 0, uniqueDates: 0, dailyAverage: '0' }
-    try { 
+    try {
       const { createRequire } = await import('node:module');
       const mod = createRequire(import.meta.url)('../scripts/apm/apm-dashboard.cjs');
       const features = mod.parseFeatures();
       stats = mod.calculateStats(features);
-    } catch {}
+    } catch (e) { console.error('[report-server] APM dashboard import failed:', e.message) }
     
     const dailyBriefPath = pathMod.default.resolve(__dirname, '../daily-brief.md')
     const briefExists = fsMod.default.existsSync(dailyBriefPath)
