@@ -1032,7 +1032,7 @@ export async function buildPdfReport(topics) {
               try {
                 const ix = 55 + rowItems.indexOf(item) * 175
                 doc.image(buf, ix, imgY, { width: 155, height: 90, fit: [155, 90] })
-              } catch (_) {}
+              } catch (e) { console.warn(`[ai-report] PDF image render failed: ${e.message}`) }
             }
           }
           doc.y = imgY + maxH + 8
@@ -1106,7 +1106,7 @@ export async function buildPdfReport(topics) {
             try {
               doc.image(imgBuf, 73, doc.y, { width: 86, height: 54, fit: [86, 54] })
               doc.y += 58
-            } catch (_) {}
+            } catch (e) { console.warn(`[ai-report] PDF image render failed: ${e.message}`) }
           }
 
           // Item header with colored source badge

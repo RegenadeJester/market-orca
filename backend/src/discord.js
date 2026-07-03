@@ -1256,7 +1256,7 @@ async function handleCommand(interaction) {
         const mins = Math.floor((uptime % 3600) / 60)
         const mem = process.memoryUsage()
         let dbSize = 'N/A'
-        try { dbSize = (fs.statSync(path.join(__dirname, '..', 'data', 'market-orca.db')).size / 1024 / 1024).toFixed(1) + ' MB' } catch { }
+        try { dbSize = (fs.statSync(path.join(__dirname, '..', 'data', 'market-orca.db')).size / 1024 / 1024).toFixed(1) + ' MB' } catch (e) { console.warn(`[discord] DB size stat failed: ${e.message}`) }
         const embed = new EmbedBuilder()
           .setColor(COLORS.positive)
           .setAuthor({ name: '🐋 Market Orca', iconURL: `${APP_CONFIG.publicBaseUrl}/icon-192.svg` })
@@ -1626,7 +1626,7 @@ async function handleComponent(interaction) {
             const embed = buildAssetEmbed({ asset: d })
             await interaction.editReply({ embeds: [embed], components: [priceButtons(symbol)] })
           }
-        } catch { }
+        } catch (e) { console.warn(`[discord] refresh button failed: ${e.message}`) }
         break
       }
       case 'chart': {
@@ -1656,7 +1656,7 @@ async function handleComponent(interaction) {
             )
             .setURL(n.url || APP_CONFIG.publicBaseUrl))
           if (embeds.length) await interaction.editReply({ embeds })
-        } catch { }
+        } catch (e) { console.warn(`[discord] news button failed: ${e.message}`) }
         break
       }
       case 'market_tab': {
@@ -1682,7 +1682,7 @@ async function handleComponent(interaction) {
             embed = new EmbedBuilder().setColor(COLORS.primary).setTitle('📊 Overview').setDescription(assets.slice(0, 8).map(a => `${(a.change_percent ?? 0) >= 0 ? '🟢' : '🔴'} \`${a.symbol?.toUpperCase()}\` — **${a.change_percent ?? 0}%**`).join('\n'))
           }
           await interaction.editReply({ embeds: [embed], components: [marketSelect()] })
-        } catch { }
+        } catch (e) { console.warn(`[discord] market_tab button failed: ${e.message}`) }
         break
       }
       case 'alert_confirm': {
@@ -1710,7 +1710,7 @@ async function handleComponent(interaction) {
             const embed = new EmbedBuilder().setColor(COLORS.warning).setTitle(`📄 Report: ${date}`).setDescription(`[Buka Report](${APP_CONFIG.publicBaseUrl}/report/${date})`)
             await interaction.editReply({ embeds: [embed], components: [reportNavButtons(date)] })
           }
-        } catch { }
+        } catch (e) { console.warn(`[discord] report button failed: ${e.message}`) }
         break
       }
       case 'style_select': {
@@ -1812,7 +1812,7 @@ async function handleModal(interaction) {
     console.error(`[discord] modal error ${interaction.customId}:`, e)
     try {
       await interaction.reply({ embeds: [buildErrorEmbed({ message: 'Gagal memproses form. Silakan coba lagi.' })], ephemeral: true })
-    } catch { }
+    } catch (e2) { console.error('[discord] error reply failed:', e2.message) }
   }
 }
 
@@ -1838,7 +1838,7 @@ async function handleInteraction(interaction) {
       } else {
         await interaction.reply({ embeds: [buildErrorEmbed({ message: 'Terjadi kesalahan tak terduga.' })], ephemeral: true })
       }
-    } catch { }
+    } catch (e) { console.error('[discord] error handler failed:', e.message) }
   }
 }
 
