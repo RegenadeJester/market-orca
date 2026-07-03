@@ -284,7 +284,7 @@ app.get('/api/overview', async (_req, res) => {
           hasIncidents: !!(d.incidents || []).length,
           incidentCount: (d.incidents || []).length
         }
-      } catch {}
+      } catch (e) { console.error('[server] today report read failed:', e.message) }
     }
     res.json({ assets, latestNews, todayReport })
   } catch (error) {
@@ -782,7 +782,7 @@ app.get('/api/tradingview/screener', async (req, res) => {
       sortOrder: String(req.query.sortOrder || 'desc')
     }
     if (req.query.columns) filters.columns = String(req.query.columns).split(',').map(s => s.trim())
-    if (req.query.filter) { try { filters.filter = JSON.parse(req.query.filter) } catch {} }
+    if (req.query.filter) { try { filters.filter = JSON.parse(req.query.filter) } catch (e) { console.error('[server] filter parse failed:', e.message) } }
     res.json(await getTradingViewScreener(market, filters))
   } catch (e) { res.status(500).json({ ok: false, error: e.message }) }
 })
@@ -1081,7 +1081,7 @@ app.get('/api/rag/health', (_req, res) => {
     initRagSchema()
     const fts5 = db.prepare(`SELECT sqlite_compileoption_used('ENABLE_FTS5') AS enabled`).get()?.enabled === 1
     let runtime = false
-    try { db.exec(`CREATE VIRTUAL TABLE IF NOT EXISTS temp.rag_health_fts USING fts5(body); DROP TABLE temp.rag_health_fts;`); runtime = true } catch {}
+    try { db.exec(`CREATE VIRTUAL TABLE IF NOT EXISTS temp.rag_health_fts USING fts5(body); DROP TABLE temp.rag_health_fts;`); runtime = true } catch (e) { console.error('[server] fts5 runtime check failed:', e.message) }
     const docs = db.prepare(`SELECT count(*) AS n FROM rag_evidence_documents`).get()?.n || 0
     const chunks = db.prepare(`SELECT count(*) AS n FROM rag_evidence_chunks`).get()?.n || 0
     res.json({ ok:true, fts5CompileOption:fts5, fts5Runtime:runtime, docs, chunks })
@@ -1726,7 +1726,7 @@ app.get('/report/:slug', (req, res) => {
 function reportEvidenceMap(report, query='') {
   const rows = []
   if (query) {
-    try { for (const r of ragHybridSearch(query, { limit:8 })) rows.push({ id:r.chunk_id || r.url, topic:'Hybrid RAG', title:r.title || '', source:r.source || '', url:r.url || '', snippet:r.snippet || r.content || '', imageUrl:'', evidence_kind:r.retrieval || 'hybrid', semantic_score:r.score || r.hybridScore || 0 }) } catch {}
+    try { for (const r of ragHybridSearch(query, { limit:8 })) rows.push({ id:r.chunk_id || r.url, topic:'Hybrid RAG', title:r.title || '', source:r.source || '', url:r.url || '', snippet:r.snippet || r.content || '', imageUrl:'', evidence_kind:r.retrieval || 'hybrid', semantic_score:r.score || r.hybridScore || 0 }) } catch (e) { console.error('[server] ragHybridSearch failed:', e.message) }
   }
   let n = 1
   for (const t of report.topics || []) for (const i of t.items || []) {
@@ -1926,7 +1926,7 @@ app.post('/api/report/:slug/blocks/:blockKey/rewrite', async (req, res) => {
     try {
       const rr = await fetch('https://api.openai.com/v1/chat/completions', { method:'POST', headers:{'content-type':'application/json','authorization':`Bearer ${process.env.OPENAI_API_KEY}`}, body:JSON.stringify({ model:process.env.OPENAI_MODEL || 'gpt-4o-mini', temperature:0.2, max_tokens:450, messages:[{role:'system',content:'Rewrite paragraph in Bahasa Indonesia. Use ONLY locked evidence. Preserve cautious wording. Add short source note. No invented facts.'},{role:'user',content:`PARAGRAPH:\n${row.body_md}\n\nLOCKED_EVIDENCE_IDS:${ctx.map(e=>e.id).join(', ')}\nEVIDENCE:\n${contextLines.join('\n')}`} ] }) })
       const jj = await rr.json(); const txt = jj.choices?.[0]?.message?.content?.trim(); if (txt) { rewritten = txt; usedLlm = true }
-    } catch {}
+    } catch (e) { console.error('[server] LLM rewrite failed:', e.message) }
   }
   const newIds = ctx.map(e=>e.id)
   const claimType = ctx.length ? 'cited' : (row.claim_type === 'assumption' ? 'weak_evidence' : row.claim_type)
