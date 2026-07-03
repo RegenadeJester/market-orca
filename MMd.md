@@ -1,5 +1,14 @@
 # Market Orca — Feature Log
 
+## 2026-07-03 — Feature #27: Silent Error Swallowing Fixes Batch 3 (ai-daily-report.js + discord.js)
+- **Pain point:** 9 silent `catch {}` blocks in `ai-daily-report.js` (2) and `discord.js` (7) swallowed PDF image render failures, DB stat errors, button handler fetch failures, and error reply fallback failures without logging.
+- **Done:**
+  1. `ai-daily-report.js`: 2 PDF image render catches now log `[ai-report] PDF image render failed: <msg>` — card image L1035, body image L1109
+  2. `discord.js`: 7 catches now log `[discord] <context> failed: <msg>` — DB size stat, refresh/news/market_tab/report buttons, modal error reply, generic error handler
+- **Files:** `backend/src/ai-daily-report.js`, `backend/src/discord.js`
+- **Deliverable:** All remaining silent catches in PDF generation and Discord interaction handlers now surface errors for debugging. Completes the 3-batch silent catch elimination (Feature #21 + #26 + #27).
+- **Branch:** `feat/silent-catch-fixes-batch3` → PR #15
+
 ## 2026-07-03 — Feature #26: Silent Error Swallowing Fixes Batch 2 (report-server.js + server.js)
 - **Pain point:** 13 silent `catch {}` blocks in `report-server.js` (8) and `server.js` (5) swallowed DB failures, fetch errors, LLM rewrite failures, fts5 health checks, and asset fetch errors in critical request paths without logging.
 - **Done:**

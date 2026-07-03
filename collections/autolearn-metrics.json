@@ -377,22 +377,36 @@
       "fetched": 25,
       "quality": 10,
       "timestamp": "2026-07-03T06:14:20.261Z"
+    },
+    {
+      "topicId": "idx-market",
+      "ingested": 5,
+      "fetched": 25,
+      "quality": 19,
+      "timestamp": "2026-07-03T09:27:50.677Z"
+    },
+    {
+      "topicId": "usd-idr",
+      "ingested": 3,
+      "fetched": 25,
+      "quality": 17,
+      "timestamp": "2026-07-03T09:28:17.745Z"
     }
   ],
   "topicStats": {
     "idx-market": {
-      "totalIngested": 55,
-      "totalFetched": 200,
-      "avgQuality": 41.625,
-      "runs": 8,
-      "lastRun": "2026-07-03T06:11:32.995Z"
+      "totalIngested": 60,
+      "totalFetched": 225,
+      "avgQuality": 39.111111111111114,
+      "runs": 9,
+      "lastRun": "2026-07-03T09:27:50.677Z"
     },
     "usd-idr": {
-      "totalIngested": 34,
-      "totalFetched": 200,
-      "avgQuality": 46.75,
-      "runs": 8,
-      "lastRun": "2026-07-03T06:12:19.442Z"
+      "totalIngested": 37,
+      "totalFetched": 225,
+      "avgQuality": 43.44444444444444,
+      "runs": 9,
+      "lastRun": "2026-07-03T09:28:17.745Z"
     },
     "crypto": {
       "totalIngested": 40,
