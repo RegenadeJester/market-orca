@@ -52,7 +52,7 @@ function listWorkflows() {
     `).all()
     return rows.map(r => {
       let nodeNames = []
-      try { nodeNames = JSON.parse(r.nodes || '[]').map(n => n.name || n.type) } catch {}
+      try { nodeNames = JSON.parse(r.nodes || '[]').map(n => n.name || n.type) } catch (e) { console.warn('[n8n] parse node names:', e.message) }
       return {
         id: r.id,
         name: r.name,
@@ -74,9 +74,9 @@ function getWorkflow(id) {
     `).get(id)
     if (!row) return null
     let nodes = []
-    try { nodes = JSON.parse(row.nodes || '[]') } catch {}
+    try { nodes = JSON.parse(row.nodes || '[]') } catch (e) { console.warn('[n8n] parse nodes:', e.message) }
     let connections = {}
-    try { connections = JSON.parse(row.connections || '{}') } catch {}
+    try { connections = JSON.parse(row.connections || '{}') } catch (e) { console.warn('[n8n] parse connections:', e.message) }
     return {
       id: row.id,
       name: row.name,
@@ -289,7 +289,7 @@ async function callTool(name, args) {
         if (fs.existsSync(absCache)) {
           try {
             nodeFiles = JSON.parse(fs.readFileSync(absCache, 'utf8'))
-          } catch {}
+          } catch (e) { console.warn('[n8n] parse node cache:', e.message) }
         } else {
           return { content: [{ type: 'text', text: 'Node cache not found. Run: docker cp n8n:/tmp/n8n-nodes-cache.json /tmp/ && docker exec n8n node -e "..." to generate.' }] }
         }
@@ -310,7 +310,7 @@ async function callTool(name, args) {
           return { content: [{ type: 'text', text: 'Node cache not found' }] }
         }
         let allNodes = []
-        try { allNodes = JSON.parse(fs.readFileSync(cachePath, 'utf8')) } catch {}
+        try { allNodes = JSON.parse(fs.readFileSync(cachePath, 'utf8')) } catch (e) { console.warn('[n8n] parse all nodes:', e.message) }
         const found = allNodes.find(n => n.type === args.nodeType)
         if (!found) return { content: [{ type: 'text', text: `Node type '${args.nodeType}' not found. Available: ${allNodes.slice(0,5).map(n=>n.type).join(', ')}...` }] }
         return { content: [{ type: 'text', text: JSON.stringify(found, null, 2) }] }

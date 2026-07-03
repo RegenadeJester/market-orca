@@ -124,7 +124,7 @@ export async function getTradingViewChart(symbol = 'BTC-USD', timeframe = 'D') {
         cacheSet(cacheKey, out, 60_000)
         return out
       }
-    } catch {}
+    } catch (e) { console.warn('[mcp-tv] Coingecko OHLC:', e.message) }
   }
 
   // ── Try Yahoo Finance ──────────────────────────────────

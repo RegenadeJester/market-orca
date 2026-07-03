@@ -145,7 +145,7 @@ export function ingestReport(slug) {
         try {
           db.prepare(`INSERT INTO rag_evidence_chunks_fts (rowid, title, source, content, asset_tags) VALUES ((SELECT rowid FROM rag_evidence_chunks WHERE id = ?), ?, ?, ?, ?)`)
             .run(chunkId, title, source, chunks[ci], JSON.stringify(tags))
-        } catch {}
+        } catch (e) { console.warn('[rag-autolearn] FTS insert:', e.message) }
         chunkCount++
       }
       docCount++
@@ -341,10 +341,10 @@ export function ingestReportAsTemplate(slug) {
   try {
     const oldChunks = db.prepare('SELECT id FROM rag_evidence_chunks WHERE document_id = ?').all(docId)
     for (const oc of oldChunks) {
-      try { db.prepare('DELETE FROM rag_evidence_chunks_fts WHERE rowid = (SELECT rowid FROM rag_evidence_chunks WHERE id = ?)').run(oc.id) } catch {}
+      try { db.prepare('DELETE FROM rag_evidence_chunks_fts WHERE rowid = (SELECT rowid FROM rag_evidence_chunks WHERE id = ?)').run(oc.id) } catch (e) { console.warn('[rag-autolearn] FTS delete old:', e.message) }
       db.prepare('DELETE FROM rag_evidence_chunks WHERE id = ?').run(oc.id)
     }
-  } catch {}
+  } catch (e) { console.warn('[rag-autolearn] remove old chunks:', e.message) }
 
   let chunkCount = 0
   for (let ci = 0; ci < chunks.length; ci++) {
@@ -354,7 +354,7 @@ export function ingestReportAsTemplate(slug) {
     try {
       db.prepare(`INSERT INTO rag_evidence_chunks_fts (rowid, title, source, content, asset_tags) VALUES ((SELECT rowid FROM rag_evidence_chunks WHERE id = ?), ?, ?, ?, ?)`)
         .run(chunkId, `Template ${slug}`, 'internal', chunks[ci], tags)
-    } catch {}
+    } catch (e) { console.warn('[rag-autolearn] template FTS:', e.message) }
     chunkCount++
   }
 
