@@ -1,6 +1,13 @@
-# Market Orca — Feature Log
-
-## 2026-07-03 — Feature #26: Silent Error Swallowing Fixes Batch 2 (report-server.js + server.js)
+1|# Market Orca — Feature Log
+2|
+3|## 2026-07-04 — Feature #28: Silent Error Swallowing Fixes Batch 4 (mcp-tradingview + n8n-mcp-bridge + rag-autolearn)
+4|- **Pain point:** 9 silent `catch {}` blocks in `mcp-tradingview.js` (1), `n8n-mcp-bridge.js` (5), `rag-autolearn.js` (3) swallowed CoinGecko fetch failures, n8n workflow JSON corruption, and FTS insert/delete corruption without logging.
+5|- **Done:** Added `console.warn('[mcp-tv] ...')`, `console.warn('[n8n] ...')`, `console.warn('[rag-autolearn] ...')` with error message.
+6|- **Files:** `backend/src/mcp-tradingview.js`, `backend/src/n8n-mcp-bridge.js`, `backend/src/rag-autolearn.js`
+7|- **Deliverable:** Critical path errors no longer vanish; visible in logs for debugging. Continuation of Features #21, #26, #27.
+8|- **Branch:** `feat/silent-catch-fixes-batch4` → PR #16
+9|
+10|## 2026-07-03 — Feature #26: Silent Error Swallowing Fixes Batch 2 (report-server.js + server.js)
 - **Pain point:** 13 silent `catch {}` blocks in `report-server.js` (8) and `server.js` (5) swallowed DB failures, fetch errors, LLM rewrite failures, fts5 health checks, and asset fetch errors in critical request paths without logging.
 - **Done:**
   1. `report-server.js`: 8 catches now log `[report-server] <context>: <msg>` — searchNews, asset fetch, filter parse, live assets, ragHybridSearch, LLM rewrite, fts5 health, APM dashboard import
