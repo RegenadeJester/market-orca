@@ -1,5 +1,12 @@
 # Market Orca — Feature Log
 
+## 2026-07-05 — Feature #29: Discord Spam Level Respected in Delivery Path
+- **Pain point:** `discord_spam_level` (digest/normal/full) stored in user preferences via ReportPreferencesPage but never actually used — all 3 Discord delivery paths (webhook, bot channel, DM fallback) hardcoded `discordDigest()` regardless of setting.
+- **Done:** Added `prepareReportForDiscord(mode, text)` helper that routes report content through the correct filter per `discord_spam_level`: 'digest' strips internal/QA sections + smart truncation (no change), 'normal' strips RAG block only + ~12K truncate, 'full' sends raw text capped at 6K. Replaced hardcoded `discordDigest()` in `sendViaWebhook`, `sendAiReportToUser`, `sendAiReportToUserDm`. Added console.log showing active mode per delivery.
+- **Files:** `backend/src/ai-daily-report.js`
+- **Deliverable:** User preferences for Discord content level are now functional end-to-end. PR #17.
+- **Branch:** `feat/discord-spam-level` → PR #17
+
 ## 2026-07-04 — Feature #28: Silent Error Swallowing Fixes Batch 4 (mcp-tradingview + n8n-mcp-bridge + rag-autolearn)
 - **Pain point:** 9 silent `catch {}` blocks in `mcp-tradingview.js` (1), `n8n-mcp-bridge.js` (5), `rag-autolearn.js` (3) swallowed CoinGecko fetch failures, n8n workflow JSON corruption, and FTS insert/delete corruption without logging.
 - **Done:** Added `console.warn('[mcp-tv] ...')`, `console.warn('[n8n] ...')`, `console.warn('[rag-autolearn] ...')` with error message.
