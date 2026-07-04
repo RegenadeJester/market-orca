@@ -2235,12 +2235,33 @@ function splitDiscordText(text, max = 1900) {
   return parts
 }
 
+/**
+ * Route report text through the right content filter based on discord_spam_level.
+ *   'digest' — strip internal/QA sections + smart truncation (default, least spam)
+ *   'normal' — strip RAG block only, truncate to ~12K chars
+ *   'full'   — send the entire report (most spam)
+ */
+function prepareReportForDiscord(mode, text) {
+  const prefs = loadReportPreferences()
+  const lvl = mode || prefs.discord_spam_level || 'digest'
+  console.log(`[ai-report] discord mode: ${lvl}`)
+  if (lvl === 'full') {
+    // ponytail: no hard cap — splitDiscordText handles chunking; add max if Discord DM limit hurts
+    return String(text || '').slice(0, 6000)
+  }
+  if (lvl === 'normal') {
+    const stripped = stripLongRagBlock(text)
+    return stripped.length > 12000 ? stripped.slice(0, 11900).trim() + '\n\n…dipotong. Full report ada di web/MD/PDF.' : stripped
+  }
+  return discordDigest(text) // 'digest' default
+}
+
 async function sendViaWebhook(textReport, _embed, topics) {
   const env = loadEnv()
   const webhookUrl = env.DISCORD_WEBHOOK_URL
   if (!webhookUrl) { console.warn('[ai-report] No DISCORD_WEBHOOK_URL'); return false }
   try {
-    const digest = discordDigest(textReport)
+    const digest = prepareReportForDiscord(null, textReport)
     const parts = splitDiscordText(digest, 1900)
     for (let i = 0; i < parts.length; i++) {
       const r = await fetch(webhookUrl, {
@@ -2297,8 +2318,9 @@ export async function sendAiReportToUser(textReport, _embed, topics) {
     .then(() => logDelivery('daily', 'embed_card', 'ok'))
     .catch(e => { logDelivery('daily', 'embed_card', 'fail', e.message); console.warn('[ai-report] embed card send fail:', e.message) })
 
-  // ── Send text digest as follow-up messages ──
-  const parts = splitDiscordText(discordDigest(textReport), 1900)
+  // ── Send text content per discord_spam_level ──
+  const prepared = prepareReportForDiscord(null, textReport)
+  const parts = splitDiscordText(prepared, 1900)
   let totalParts = 0
   for (let i = 0; i < parts.length; i++) {
     await channel.send(parts[i].slice(0, 2000)).then(() => logDelivery('daily', 'text_digest', 'ok', `part ${i+1}/${parts.length}`)).catch((e) => { logDelivery('daily', 'text_digest', 'fail', e.message); console.warn('[ai-report] text send fail:', e.message) })
@@ -2342,7 +2364,7 @@ async function sendAiReportToUserDm(textReport, _embed, topics) {
     return false
   }
 
-  const digest = discordDigest(textReport)
+  const digest = prepareReportForDiscord(null, textReport)
   const parts = splitDiscordText(digest, 1900)
 
   // Send to ALL DM subscribers
