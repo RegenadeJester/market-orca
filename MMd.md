@@ -1,5 +1,13 @@
 # Market Orca — Feature Log
 
+## 2026-07-05 — Feature #30: Impact Simulator v2 — Visual Impact Bars
+- **Pain point:** Impact Simulator cards showed impact_score as text but no visual indicator of bullish vs bearish magnitude.
+- **Done:** Added dual-color bar track (green bullish, red bearish) below score number with width proportional to impact_score using `bullishPct()`/`bearishPct()` helpers. Moved risk_level + kind text below the new bar. CSS transition on width change. Frontend-only change — no backend needed.
+- **Frontend:** `frontend/src/pages/ImpactSimulatorPage.vue`
+- **Deliverable:** Impact Simulator cards now have clear visual bull/bear bars. PR #2 (frontend repo).
+- **Branch:** `feat/impact-sim-v2-visual-bars` → PR #2 (frontend repo) ✅ merged
+- **Backlog:** Market Impact Simulator v2 — custom event enhancements (Batch 1, #7 — further custom event presets remain)
+
 ## 2026-07-05 — Feature #29: Discord Spam Level Respected in Delivery Path
 - **Pain point:** `discord_spam_level` (digest/normal/full) stored in user preferences via ReportPreferencesPage but never actually used — all 3 Discord delivery paths (webhook, bot channel, DM fallback) hardcoded `discordDigest()` regardless of setting.
 - **Done:** Added `prepareReportForDiscord(mode, text)` helper that routes report content through the correct filter per `discord_spam_level`: 'digest' strips internal/QA sections + smart truncation (no change), 'normal' strips RAG block only + ~12K truncate, 'full' sends raw text capped at 6K. Replaced hardcoded `discordDigest()` in `sendViaWebhook`, `sendAiReportToUser`, `sendAiReportToUserDm`. Added console.log showing active mode per delivery.
