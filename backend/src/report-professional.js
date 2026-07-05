@@ -21,7 +21,7 @@ if (!MCP_TOKEN) {
     try {
       const match = fs.readFileSync(envFile, 'utf8').match(/^MCP_AUTH_TOKEN=(.+)$/m)
       if (match) { MCP_TOKEN = match[1]; break }
-    } catch {}
+    } catch (e) { console.warn('[report-professional] env read:', e.message) }
   }
 }
 
@@ -84,7 +84,7 @@ async function gatherLatestNews(assetTags = []) {
     try {
       const search = await mcpPost('web.search', { query: `${query} berita terbaru`, limit: 3, engines: ['bing', 'duckduckgo'] })
       allResults.push(...(search.results || []).slice(0, 3))
-    } catch {}
+    } catch (e) { console.warn('[report-professional] web.search:', e.message) }
   }
   // Dedupe by URL
   const seen = new Set()

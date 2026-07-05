@@ -394,7 +394,7 @@ function buildDecisionContextFingerprint(){
   ensureDecisionFingerprintSchema()
   const prefs = db.prepare('SELECT * FROM user_report_preferences WHERE id=1').get() || {}
   const answers = db.prepare('SELECT key,value,confidence,source,updated_at FROM user_context_answers ORDER BY key').all()
-  let assets=[]; try{ assets=db.prepare('SELECT symbol,name FROM assets WHERE pinned=1 OR enabled=1 ORDER BY symbol LIMIT 50').all() }catch{}
+  let assets=[]; try{ assets=db.prepare('SELECT symbol,name FROM assets WHERE pinned=1 OR enabled=1 ORDER BY symbol LIMIT 50').all() }catch(e){ console.warn('[server] buildDecisionContextFingerprint asset fetch:', e.message) }
   const payload = { goal:answers.find(a=>a.key==='goal')?.value||'', time_horizon:answers.find(a=>a.key==='time_horizon')?.value||'', watchlist_priority:answers.find(a=>a.key==='watchlist_priority')?.value||prefs.favorite_assets||'', risk_tolerance:answers.find(a=>a.key==='risk_tolerance')?.value||'', preferred_action:answers.find(a=>a.key==='preferred_action')?.value||'', language:prefs.language||'id', depth:prefs.depth||'normal', tone:prefs.tone||'balanced', discord_spam_level:prefs.discord_spam_level||'digest', assets }
   const fingerprint = stableHash(JSON.stringify(payload))
   db.prepare(`INSERT INTO decision_context_fingerprints (id,fingerprint,payload_json,context_json,updated_at) VALUES (1,?,?,?,datetime('now')) ON CONFLICT(id) DO UPDATE SET fingerprint=excluded.fingerprint,payload_json=excluded.payload_json,context_json=excluded.context_json,updated_at=datetime('now')`).run(fingerprint, JSON.stringify(payload), JSON.stringify(payload))
@@ -2231,7 +2231,7 @@ app.get('/api/market/activity', (_req, res) => {
             title = data.title || slug
             topicCount = data.topics?.length || 0
             hasIncidents = data.incidents?.length > 0
-          } catch {}
+          } catch (e) { console.warn('[server] getReportListMetadata parse:', e.message) }
           const stat = fs.statSync(fp)
           return { slug, title, topicCount, hasIncidents, generatedAt: stat.mtime.toISOString() }
         })
