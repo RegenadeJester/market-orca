@@ -1,5 +1,13 @@
 # Market Orca — Feature Log
 
+## 2026-07-06 — Feature #31: Silent Error Swallowing Fixes Batch 5
+- **Pain point:** 9 silent `catch {}` blocks in `hermes-skill.js` (5), `rag-autolearn.js` (2), `report-professional.js` (2), `server.js` (2) swallowed DB failures, FTS search errors, MCP fetch failures, and env file read errors without logging.
+- **Done:** Added `console.warn('[component] context:', e.message)` to all 9 catches for traceability. Pattern: `try { ... } catch (e) { console.warn('[component] context:', e.message) }`
+- **Files:** `backend/src/hermes-skill.js`, `backend/src/rag-autolearn.js`, `backend/src/report-professional.js`, `backend/src/server.js`
+- **Deliverable:** Critical path errors now surface in logs for debugging. Completes 5-batch silent catch elimination (Features #21 + #26 + #27 + #28 + #31).
+- **Branch:** `feat/silent-catch-fixes-batch5` → PR #18
+- **Backlog:** Silent catch audit complete — no remaining silent catches in critical paths.
+
 ## 2026-07-05 — Feature #30: Impact Simulator v2 — Visual Impact Bars
 - **Pain point:** Impact Simulator cards showed impact_score as text but no visual indicator of bullish vs bearish magnitude.
 - **Done:** Added dual-color bar track (green bullish, red bearish) below score number with width proportional to impact_score using `bullishPct()`/`bearishPct()` helpers. Moved risk_level + kind text below the new bar. CSS transition on width change. Frontend-only change — no backend needed.
