@@ -18,7 +18,7 @@ export function scoreRagQuality() {
     const recent = db.prepare("SELECT count(*) as n FROM rag_evidence_chunks WHERE datetime(fetched_at) > datetime('now', '-7 days')").get()?.n || 0
     score += Math.min(recent, 10)
     score = Math.min(score, 100)
-  } catch {}
+  } catch (e) { console.warn('[hermes] scoreRagQuality:', e.message) }
   return { component: 'rag', score, level: score >= 80 ? 'good' : score >= 50 ? 'fair' : 'poor' }
 }
 
@@ -32,7 +32,7 @@ export function scoreReportQuality() {
       const cnt = latest.topics?.reduce((s, t) => s + (t.items?.length || 0), 0) || 0
       score += Math.min(cnt, 25)
     }
-  } catch {}
+  } catch (e) { console.warn('[hermes] scoreReportQuality:', e.message) }
   return { component: 'report', score, level: score >= 80 ? 'good' : score >= 50 ? 'fair' : 'poor' }
 }
 
@@ -44,7 +44,7 @@ export function scoreMcpQuality() {
     score += Math.min(tools * 2, 20)
     if (mcpText.includes('market_orca_rag_ask')) score += 10
     score = Math.min(score, 100)
-  } catch {}
+  } catch (e) { console.warn('[hermes] scoreMcpQuality:', e.message) }
   return { component: 'mcp', score, level: score >= 80 ? 'good' : score >= 50 ? 'fair' : 'poor' }
 }
 
@@ -56,7 +56,7 @@ export function scoreAutolearnQuality() {
     const classified = db.prepare('SELECT count(*) as n FROM rag_evidence_chunks WHERE topic IS NOT NULL').get()?.n || 0
     const total = db.prepare('SELECT count(*) as n FROM rag_evidence_chunks').get()?.n || 1
     score += Math.min((classified / total) * 20, 20)
-  } catch {}
+  } catch (e) { console.warn('[hermes] scoreAutolearnQuality:', e.message) }
   return { component: 'autolearn', score, level: score >= 80 ? 'good' : score >= 50 ? 'fair' : 'poor' }
 }
 
@@ -88,6 +88,6 @@ export function applySelfCorrectives() {
       const r = fs.readdirSync(path.join(__dirname, '..', '..', 'reports')).filter(f => f.endsWith('.json')).sort().reverse().slice(0,3)
       fixes.push({ action: 'stale RAG, ' + r.length + ' reports ready' })
     }
-  } catch {}
+  } catch (e) { console.warn('[hermes] applySelfCorrectives:', e.message) }
   return fixes
 }

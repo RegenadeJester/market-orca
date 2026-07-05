@@ -226,10 +226,11 @@ export function searchByTopic(query, { limit = 8, topic = '' } = {}) {
       rows = db.prepare(`SELECT c.id chunk_id, c.document_id, c.title, c.source, c.url, c.content, c.asset_tags, bm25(rag_evidence_chunks_fts) rank FROM rag_evidence_chunks_fts JOIN rag_evidence_chunks c ON rag_evidence_chunks_fts.rowid = c.rowid WHERE rag_evidence_chunks_fts MATCH ? ORDER BY rank LIMIT ?`)
         .all(enrichedQuery, limit * 3)
     }
-  } catch {
+  } catch (e) {
+    console.warn('[rag-autolearn] FTS search failed:', e.message)
     // Fallback: LIKE search
     try { rows = db.prepare('SELECT id chunk_id, document_id, title, source, url, content, asset_tags, 0 rank FROM rag_evidence_chunks WHERE lower(title || " " || content) LIKE ? LIMIT ?').all(`%${query}%`, limit) }
-    catch {}
+    catch (e2) { console.warn('[rag-autolearn] LIKE fallback failed:', e2.message) }
   }
 
   // Dedup by title
@@ -404,11 +405,12 @@ export function searchReportTemplates(query, { limit = 5 } = {}) {
       rows = db.prepare(`SELECT c.id chunk_id, c.title, c.content, c.url, d.quality_score FROM rag_evidence_chunks_fts JOIN rag_evidence_chunks c ON rag_evidence_chunks_fts.rowid = c.rowid JOIN rag_evidence_documents d ON c.document_id = d.id WHERE rag_evidence_chunks_fts MATCH ? AND c.asset_tags LIKE '%template%' ORDER BY d.quality_score DESC, bm25(rag_evidence_chunks_fts) LIMIT ?`)
         .all(ftsQuery, limit * 2)
     }
-  } catch {
+  } catch (e) {
+    console.warn('[rag-autolearn] template FTS failed:', e.message)
     try {
       rows = db.prepare(`SELECT c.id chunk_id, c.title, c.content, c.url, d.quality_score FROM rag_evidence_chunks c JOIN rag_evidence_documents d ON c.document_id = d.id WHERE c.asset_tags LIKE '%template%' AND (c.title LIKE ? OR c.content LIKE ?) ORDER BY d.quality_score DESC LIMIT ?`)
         .all(`%${query}%`, `%${query}%`, limit)
-    } catch {}
+    } catch (e2) { console.warn('[rag-autolearn] template LIKE fallback failed:', e2.message) }
   }
 
   const seen = new Set()
