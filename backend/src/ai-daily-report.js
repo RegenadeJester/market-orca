@@ -2385,9 +2385,14 @@ async function sendAiReportToUserDm(textReport, _embed, topics) {
   let failCount = 0
 
   for (const sub of subscribers) {
-    const payload = { content: parts[0]?.slice(0, 2000) || 'Report tidak tersedia.' }
-    const result = await sendDmWithRetry(botClient, sub.user_id, payload, 'daily')
-    if (result.ok) okCount++; else failCount++
+    let subOk = true
+    for (let i = 0; i < parts.length; i++) {
+      const payload = { content: parts[i]?.slice(0, 2000) || '' }
+      if (!payload.content) continue
+      const result = await sendDmWithRetry(botClient, sub.user_id, payload, 'daily')
+      if (!result.ok) { subOk = false; break }
+    }
+    if (subOk) okCount++; else failCount++
   }
 
   logDelivery('daily', 'dm_fallback', okCount > 0 ? 'ok' : 'fail', `DM sent to ${okCount}/${subscribers.length} subscribers`)
