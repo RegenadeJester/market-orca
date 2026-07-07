@@ -1,4 +1,12 @@
-# Market Orca — Feature Log
+1|# Market Orca — Feature Log
+2|
+3|## 2026-07-08 — Feature #33: Language Guard Wired to Text + HTML
+4|- **Pain point:** `report-language-guard.js` existed with all ID translation maps but was never imported/called in `ai-daily-report.js`. English headers leaked in both text and HTML output despite translation infrastructure being ready.
+5|- **Done:** Converted `module.exports` → `export` (ESM). Added `import { translateReport }` in `ai-daily-report.js`. Called `translateReport(text)` before returning from `buildTextReport()`. Patched HTML: `Statistics`→`Statistik`, `Report Quality`→`Kualitas Laporan`, `What Changed Today`→`Yang Berubah Hari Ini`, `Red Flags`→`Bendera Merah`.
+6|- **Files:** `backend/src/report-language-guard.js`, `backend/src/ai-daily-report.js`
+7|- **Deliverable:** Language guard now actively translates text reports and HTML headers to Bahasa Indonesia. PR #20.
+8|- **Branch:** `feat/language-guard-wire` → PR #20
+9|- **Backlog:** —
 
 ## 2026-07-06 — Feature #31: Silent Error Swallowing Fixes Batch 5
 - **Pain point:** 9 silent `catch {}` blocks in `hermes-skill.js` (5), `rag-autolearn.js` (2), `report-professional.js` (2), `server.js` (2) swallowed DB failures, FTS search errors, MCP fetch failures, and env file read errors without logging.
