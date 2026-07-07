@@ -16,6 +16,7 @@ import path from 'node:path'
 import crypto from 'node:crypto'
 import { execFile } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
+import { translateReport, scoreLanguage } from './report-language-guard.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
@@ -881,6 +882,7 @@ export function buildTextReport(topics, opts = {}) {
   }
 
   text += `Little Candle -- AI Daily Report -- 16+ sources -- PDF available`
+  text = translateReport(text)
   return text
 }
 
@@ -2044,13 +2046,13 @@ ${hero?.url ? `<a href="${hero.url}" target="_blank">Read source: ${tC(hero.url)
 ${heroImg ? `<img class="hero-img" src="${heroImg}" alt="" loading="lazy" onerror="this.style.display='none'">` : ''}
 </section>
 <div class="date">${topics.length} sections &middot; ${allSrc.length} sources</div>
-<div class="stats"><h3>Statistics</h3><div class="row">Items: ${tItems} &middot; Articles: ${tArts} &middot; Models: ${tMods} &middot; Sources: ${allSrc.join(', ')}</div></div>
+<div class="stats"><h3>Statistik</h3><div class="row">Items: ${tItems} &middot; Articles: ${tArts} &middot; Models: ${tMods} &middot; Sources: ${allSrc.join(', ')}</div></div>
 <div class="sb"><h2>Ringkasan</h2><div class="stext">${summary.split('\\n').filter(l => l.trim()).map(l => inlineMd(safe(l))).join('<br>')}</div></div>
-<div class="qbox"><h2>Report Quality</h2><p><b>${quality.score}/100</b> ${quality.status} · ${quality.sources} sources · ${quality.dupes} dupes · ${quality.stale} stale · rotation ${sourceRotationHint()}</p></div>
+<div class="qbox"><h2>Kualitas Laporan</h2><p><b>${quality.score}/100</b> ${quality.status} · ${quality.sources} sumber · ${quality.dupes} duplikat · ${quality.stale} stale · rotasi ${sourceRotationHint()}</p></div>
 <div class="qbox"><h2>Data Status</h2><p>${dataStatusBlock.split('\\n').map(l=>l.replace(/^\*\*/,'').replace(/\*/g,'').trim()).filter(Boolean).join(' · ')}${dataFreshnessQa.warning ? `<br><b>⚠️ ${dataFreshnessQa.warning}</b>` : ''}</p></div>
-<div class="changed"><h2>What Changed Today</h2><div class="stext">${changed.split('\\n').map(l=>inlineMd(l)).join('<br>')}</div></div>
+<div class="changed"><h2>Yang Berubah Hari Ini</h2><div class="stext">${changed.split('\\n').map(l=>inlineMd(l)).join('<br>')}</div></div>
 <div class="impact" role="region" aria-labelledby="impact-title"><h2 id="impact-title">▣ MARKET IMPACT TERMINAL</h2><div class="terminal-line">$ regime --now → ${impact.regime.regime} :: ${impact.regime.signals.map(tC).join(' | ')}</div><div class="terminal-line">$ indonesia-pulse → ${tC(impact.pulse)}</div><div class="terminal-line">$ event-bias → ${tC(impact.event.label)}</div><div class="terminal-line">$ drivers → ${impact.event.drivers.map(tC).join(' / ')}</div><div class="impact-bars" aria-label="Market impact score bars">${impact.rows.map(r => { const pct=Math.min(100,Math.max(4,Math.abs(Number(r.score)||0)*18)); return `<div class="impact-row ${r.dir}"><div class="impact-sym"><b>${tC(r.symbol)}</b><span>${r.dir.toUpperCase()} · ${r.risk.toUpperCase()}</span></div><div class="impact-bar"><i style="width:${pct}%"></i></div><div class="impact-score">${r.score}</div><details class="impact-detail"><summary>driver</summary>${tC(impactReason(r, impact.event))}</details></div>` }).join('')}</div></div>
-<div class="flags"><h2>Red Flags</h2><div class="stext">${flags.map(f=>`• ${tC(f)}`).join('<br>')}</div></div>
+<div class="flags"><h2>Bendera Merah</h2><div class="stext">${flags.map(f=>`• ${tC(f)}`).join('<br>')}</div></div>
 ${data?.rag?.citations?.length ? `<div class="secc"><h2>🔍 RAG Evidence & Citations</h2><div class="stext">Terdapat ${data.rag.citations.length} sumber yang diverifikasi ulang via RAG retrieval.</div>${data.rag.citations.slice(0,5).map(c => `<div class="item" style="border-bottom:1px solid rgba(255,255,255,.06);margin-bottom:12px;padding-bottom:12px"><div class="body"><h3 class="headline" style="font-size:16px">${tC(c.title||'Sumber')}</h3><p class="snippet" style="font-size:13px">${tC(((c.content||c.snippet||'')).slice(0,800))}</p><a class="link" href="${c.url}" target="_blank">${tC((c.url||'').slice(0,80))}</a></div></div>`).join('')}</div>` : ''}
 ${funFacts.length ? `<div class="fb"><h2>Fun Facts</h2>${funFacts.map(f => `<p><span class="ftitle">${tC(f.title)}:</span> ${tC(f.fact)}</p>`).join('')}</div>` : ''}
 ${secHtml}
