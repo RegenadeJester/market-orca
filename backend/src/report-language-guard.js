@@ -139,4 +139,4 @@ function scoreLanguage(text) {
   return { score, issues: foundIssues }
 }
 
-module.exports = { translateReport, scoreLanguage, ID_MAP, ALLOWED_ENGLISH }
+export { translateReport, scoreLanguage, ID_MAP, ALLOWED_ENGLISH }
