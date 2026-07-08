@@ -1798,7 +1798,7 @@ export async function saveReport(topics, textReport) {
     new Promise(r => setTimeout(r, 5000))
   ]).then(() => {
     // Re-save JSON with images
-    const d2 = { slug, date: slug, generatedAt: new Date().toISOString(), topics, textReport, rag, executiveBrief: buildExecutiveBrief(topics) }
+    const d2 = { slug, date: slug, generatedAt: new Date().toISOString(), topics, textReport, rag, executiveBrief: translateReport(buildExecutiveBrief(topics)) }
     fs.writeFileSync(path.join(reportDir, `${slug}.json`), JSON.stringify(d2, null, 2))
     fs.writeFileSync(path.join(reportDir, `${slug}.md`), textReport)
     fs.writeFileSync(path.join(reportDir, `${slug}-brief.md`), d2.executiveBrief)
@@ -1809,7 +1809,7 @@ export async function saveReport(topics, textReport) {
     fs.writeFileSync(path.join(reportDir, `${slug}.html`), buildReportHtml(d2, summary2, fun2, textReport))
   }).catch(() => {})
 
-  const executiveBrief = buildExecutiveBrief(topics)
+  const executiveBrief = translateReport(buildExecutiveBrief(topics))
   const data = { slug, date: slug, generatedAt: new Date().toISOString(), topics, textReport, rag, executiveBrief }
   const summary = buildSummary(topics)
   const funFacts = topics.filter(t => t.funFact?.length > 15).map(t => ({ title: t.title, fact: t.funFact }))

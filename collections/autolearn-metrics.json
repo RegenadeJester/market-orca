@@ -391,113 +391,855 @@
       "fetched": 25,
       "quality": 17,
       "timestamp": "2026-07-03T09:28:17.745Z"
+    },
+    {
+      "topicId": "idx-market",
+      "ingested": 6,
+      "fetched": 25,
+      "quality": 45,
+      "timestamp": "2026-07-07T21:35:50.793Z"
+    },
+    {
+      "topicId": "usd-idr",
+      "ingested": 6,
+      "fetched": 25,
+      "quality": 52,
+      "timestamp": "2026-07-07T21:36:30.592Z"
+    },
+    {
+      "topicId": "crypto",
+      "ingested": 8,
+      "fetched": 25,
+      "quality": 41,
+      "timestamp": "2026-07-07T21:37:31.032Z"
+    },
+    {
+      "topicId": "global-macro",
+      "ingested": 5,
+      "fetched": 25,
+      "quality": 49,
+      "timestamp": "2026-07-07T21:37:57.096Z"
+    },
+    {
+      "topicId": "commodities",
+      "ingested": 5,
+      "fetched": 25,
+      "quality": 46,
+      "timestamp": "2026-07-07T21:38:29.505Z"
+    },
+    {
+      "topicId": "indonesia",
+      "ingested": 6,
+      "fetched": 25,
+      "quality": 29,
+      "timestamp": "2026-07-07T21:39:22.977Z"
+    },
+    {
+      "topicId": "idx-market",
+      "ingested": 1,
+      "fetched": 25,
+      "quality": 95,
+      "timestamp": "2026-07-07T21:39:42.768Z"
+    },
+    {
+      "topicId": "usd-idr",
+      "ingested": 0,
+      "fetched": 25,
+      "quality": 0,
+      "timestamp": "2026-07-07T21:39:42.807Z"
+    },
+    {
+      "topicId": "crypto",
+      "ingested": 0,
+      "fetched": 25,
+      "quality": 0,
+      "timestamp": "2026-07-07T21:39:43.167Z"
+    },
+    {
+      "topicId": "global-macro",
+      "ingested": 0,
+      "fetched": 25,
+      "quality": 0,
+      "timestamp": "2026-07-07T21:39:43.300Z"
+    },
+    {
+      "topicId": "commodities",
+      "ingested": 0,
+      "fetched": 25,
+      "quality": 0,
+      "timestamp": "2026-07-07T21:39:43.456Z"
+    },
+    {
+      "topicId": "indonesia",
+      "ingested": 0,
+      "fetched": 25,
+      "quality": 0,
+      "timestamp": "2026-07-07T21:39:46.702Z"
+    },
+    {
+      "topicId": "gold",
+      "ingested": 6,
+      "fetched": 25,
+      "quality": 35,
+      "timestamp": "2026-07-07T21:40:24.980Z"
+    },
+    {
+      "topicId": "us-market",
+      "ingested": 3,
+      "fetched": 25,
+      "quality": 71,
+      "timestamp": "2026-07-07T21:40:56.387Z"
+    },
+    {
+      "topicId": "china",
+      "ingested": 9,
+      "fetched": 25,
+      "quality": 54,
+      "timestamp": "2026-07-07T21:42:01.998Z"
+    },
+    {
+      "topicId": "oil-energy",
+      "ingested": 12,
+      "fetched": 25,
+      "quality": 43,
+      "timestamp": "2026-07-07T21:43:31.497Z"
+    },
+    {
+      "topicId": "forex",
+      "ingested": 3,
+      "fetched": 25,
+      "quality": 40,
+      "timestamp": "2026-07-07T21:44:03.927Z"
+    },
+    {
+      "topicId": "geopolitics",
+      "ingested": 4,
+      "fetched": 24,
+      "quality": 38,
+      "timestamp": "2026-07-07T21:44:36.284Z"
+    },
+    {
+      "topicId": "indonesia-politics",
+      "ingested": 6,
+      "fetched": 25,
+      "quality": 56,
+      "timestamp": "2026-07-07T21:45:52.066Z"
+    },
+    {
+      "topicId": "startup",
+      "ingested": 8,
+      "fetched": 24,
+      "quality": 27,
+      "timestamp": "2026-07-07T21:46:32.922Z"
+    },
+    {
+      "topicId": "ai-tech",
+      "ingested": 10,
+      "fetched": 25,
+      "quality": 41,
+      "timestamp": "2026-07-07T21:47:25.752Z"
+    },
+    {
+      "topicId": "idx-market",
+      "ingested": 2,
+      "fetched": 25,
+      "quality": 10,
+      "timestamp": "2026-07-07T23:02:23.279Z"
+    },
+    {
+      "topicId": "usd-idr",
+      "ingested": 1,
+      "fetched": 25,
+      "quality": 10,
+      "timestamp": "2026-07-07T23:03:02.703Z"
+    },
+    {
+      "topicId": "crypto",
+      "ingested": 1,
+      "fetched": 25,
+      "quality": 25,
+      "timestamp": "2026-07-07T23:04:14.869Z"
+    },
+    {
+      "topicId": "global-macro",
+      "ingested": 0,
+      "fetched": 25,
+      "quality": 0,
+      "timestamp": "2026-07-07T23:04:44.484Z"
+    },
+    {
+      "topicId": "idx-market",
+      "ingested": 5,
+      "fetched": 25,
+      "quality": 21,
+      "timestamp": "2026-07-07T23:08:19.287Z"
+    },
+    {
+      "topicId": "usd-idr",
+      "ingested": 0,
+      "fetched": 25,
+      "quality": 0,
+      "timestamp": "2026-07-07T23:08:48.793Z"
+    },
+    {
+      "topicId": "crypto",
+      "ingested": 0,
+      "fetched": 25,
+      "quality": 0,
+      "timestamp": "2026-07-07T23:09:34.057Z"
+    },
+    {
+      "topicId": "global-macro",
+      "ingested": 0,
+      "fetched": 25,
+      "quality": 0,
+      "timestamp": "2026-07-07T23:10:14.732Z"
+    },
+    {
+      "topicId": "commodities",
+      "ingested": 0,
+      "fetched": 25,
+      "quality": 0,
+      "timestamp": "2026-07-07T23:10:48.955Z"
+    },
+    {
+      "topicId": "indonesia",
+      "ingested": 5,
+      "fetched": 25,
+      "quality": 12,
+      "timestamp": "2026-07-07T23:11:44.667Z"
+    },
+    {
+      "topicId": "gold",
+      "ingested": 1,
+      "fetched": 25,
+      "quality": 100,
+      "timestamp": "2026-07-07T23:12:11.801Z"
+    },
+    {
+      "topicId": "us-market",
+      "ingested": 1,
+      "fetched": 25,
+      "quality": 10,
+      "timestamp": "2026-07-07T23:13:04.307Z"
+    },
+    {
+      "topicId": "china",
+      "ingested": 0,
+      "fetched": 25,
+      "quality": 0,
+      "timestamp": "2026-07-07T23:13:34.071Z"
+    },
+    {
+      "topicId": "oil-energy",
+      "ingested": 5,
+      "fetched": 25,
+      "quality": 12,
+      "timestamp": "2026-07-07T23:14:18.610Z"
+    },
+    {
+      "topicId": "forex",
+      "ingested": 0,
+      "fetched": 25,
+      "quality": 0,
+      "timestamp": "2026-07-07T23:15:01.052Z"
+    },
+    {
+      "topicId": "geopolitics",
+      "ingested": 1,
+      "fetched": 25,
+      "quality": 81,
+      "timestamp": "2026-07-07T23:16:11.056Z"
+    },
+    {
+      "topicId": "indonesia-politics",
+      "ingested": 1,
+      "fetched": 25,
+      "quality": 100,
+      "timestamp": "2026-07-07T23:17:23.737Z"
+    },
+    {
+      "topicId": "idx-market",
+      "ingested": 4,
+      "fetched": 25,
+      "quality": 24,
+      "timestamp": "2026-07-07T23:25:47.150Z"
+    },
+    {
+      "topicId": "usd-idr",
+      "ingested": 0,
+      "fetched": 25,
+      "quality": 0,
+      "timestamp": "2026-07-07T23:26:03.711Z"
+    },
+    {
+      "topicId": "crypto",
+      "ingested": 0,
+      "fetched": 25,
+      "quality": 0,
+      "timestamp": "2026-07-07T23:28:03.013Z"
+    },
+    {
+      "topicId": "gold",
+      "ingested": 0,
+      "fetched": 25,
+      "quality": 0,
+      "timestamp": "2026-07-07T23:28:13.866Z"
+    },
+    {
+      "topicId": "oil-energy",
+      "ingested": 3,
+      "fetched": 25,
+      "quality": 20,
+      "timestamp": "2026-07-07T23:28:58.458Z"
+    },
+    {
+      "topicId": "us-market",
+      "ingested": 0,
+      "fetched": 25,
+      "quality": 0,
+      "timestamp": "2026-07-07T23:31:52.794Z"
+    },
+    {
+      "topicId": "china",
+      "ingested": 0,
+      "fetched": 25,
+      "quality": 0,
+      "timestamp": "2026-07-07T23:32:02.005Z"
+    },
+    {
+      "topicId": "global-macro",
+      "ingested": 1,
+      "fetched": 25,
+      "quality": 20,
+      "timestamp": "2026-07-07T23:32:16.062Z"
+    },
+    {
+      "topicId": "idx-market",
+      "ingested": 6,
+      "fetched": 25,
+      "quality": 13,
+      "timestamp": "2026-07-08T01:01:19.754Z"
+    },
+    {
+      "topicId": "usd-idr",
+      "ingested": 5,
+      "fetched": 25,
+      "quality": 46,
+      "timestamp": "2026-07-08T01:02:04.612Z"
+    },
+    {
+      "topicId": "crypto",
+      "ingested": 2,
+      "fetched": 25,
+      "quality": 10,
+      "timestamp": "2026-07-08T01:02:29.902Z"
+    },
+    {
+      "topicId": "global-macro",
+      "ingested": 2,
+      "fetched": 25,
+      "quality": 63,
+      "timestamp": "2026-07-08T01:02:53.208Z"
+    },
+    {
+      "topicId": "commodities",
+      "ingested": 2,
+      "fetched": 25,
+      "quality": 23,
+      "timestamp": "2026-07-08T01:03:26.427Z"
+    },
+    {
+      "topicId": "indonesia",
+      "ingested": 3,
+      "fetched": 25,
+      "quality": 15,
+      "timestamp": "2026-07-08T01:03:55.133Z"
+    },
+    {
+      "topicId": "idx-market",
+      "ingested": 0,
+      "fetched": 25,
+      "quality": 0,
+      "timestamp": "2026-07-08T01:04:08.935Z"
+    },
+    {
+      "topicId": "usd-idr",
+      "ingested": 0,
+      "fetched": 25,
+      "quality": 0,
+      "timestamp": "2026-07-08T01:04:20.254Z"
+    },
+    {
+      "topicId": "crypto",
+      "ingested": 0,
+      "fetched": 25,
+      "quality": 0,
+      "timestamp": "2026-07-08T01:04:23.363Z"
+    },
+    {
+      "topicId": "global-macro",
+      "ingested": 0,
+      "fetched": 25,
+      "quality": 0,
+      "timestamp": "2026-07-08T01:04:23.659Z"
+    },
+    {
+      "topicId": "commodities",
+      "ingested": 0,
+      "fetched": 25,
+      "quality": 0,
+      "timestamp": "2026-07-08T01:04:24.166Z"
+    },
+    {
+      "topicId": "indonesia",
+      "ingested": 0,
+      "fetched": 25,
+      "quality": 0,
+      "timestamp": "2026-07-08T01:04:29.681Z"
+    },
+    {
+      "topicId": "gold",
+      "ingested": 5,
+      "fetched": 25,
+      "quality": 19,
+      "timestamp": "2026-07-08T01:05:13.943Z"
+    },
+    {
+      "topicId": "us-market",
+      "ingested": 1,
+      "fetched": 25,
+      "quality": 20,
+      "timestamp": "2026-07-08T01:05:41.539Z"
+    },
+    {
+      "topicId": "china",
+      "ingested": 4,
+      "fetched": 25,
+      "quality": 15,
+      "timestamp": "2026-07-08T01:06:06.180Z"
+    },
+    {
+      "topicId": "oil-energy",
+      "ingested": 8,
+      "fetched": 25,
+      "quality": 17,
+      "timestamp": "2026-07-08T01:07:09.732Z"
+    },
+    {
+      "topicId": "forex",
+      "ingested": 0,
+      "fetched": 25,
+      "quality": 0,
+      "timestamp": "2026-07-08T01:07:45.576Z"
+    },
+    {
+      "topicId": "geopolitics",
+      "ingested": 0,
+      "fetched": 25,
+      "quality": 0,
+      "timestamp": "2026-07-08T01:08:01.465Z"
+    },
+    {
+      "topicId": "indonesia-politics",
+      "ingested": 0,
+      "fetched": 25,
+      "quality": 0,
+      "timestamp": "2026-07-08T01:08:53.406Z"
+    },
+    {
+      "topicId": "startup",
+      "ingested": 15,
+      "fetched": 25,
+      "quality": 18,
+      "timestamp": "2026-07-08T01:10:38.581Z"
+    },
+    {
+      "topicId": "ai-tech",
+      "ingested": 10,
+      "fetched": 25,
+      "quality": 27,
+      "timestamp": "2026-07-08T01:11:23.696Z"
+    },
+    {
+      "topicId": "idx-market",
+      "ingested": 4,
+      "fetched": 25,
+      "quality": 21,
+      "timestamp": "2026-07-08T05:01:45.194Z"
+    },
+    {
+      "topicId": "usd-idr",
+      "ingested": 0,
+      "fetched": 25,
+      "quality": 0,
+      "timestamp": "2026-07-08T05:02:17.352Z"
+    },
+    {
+      "topicId": "crypto",
+      "ingested": 5,
+      "fetched": 25,
+      "quality": 19,
+      "timestamp": "2026-07-08T05:02:53.026Z"
+    },
+    {
+      "topicId": "global-macro",
+      "ingested": 3,
+      "fetched": 25,
+      "quality": 48,
+      "timestamp": "2026-07-08T05:03:31.833Z"
+    },
+    {
+      "topicId": "commodities",
+      "ingested": 13,
+      "fetched": 25,
+      "quality": 30,
+      "timestamp": "2026-07-08T05:05:03.600Z"
+    },
+    {
+      "topicId": "indonesia",
+      "ingested": 1,
+      "fetched": 25,
+      "quality": 15,
+      "timestamp": "2026-07-08T05:05:36.468Z"
+    },
+    {
+      "topicId": "idx-market",
+      "ingested": 0,
+      "fetched": 25,
+      "quality": 0,
+      "timestamp": "2026-07-08T05:07:39.556Z"
+    },
+    {
+      "topicId": "usd-idr",
+      "ingested": 0,
+      "fetched": 25,
+      "quality": 0,
+      "timestamp": "2026-07-08T05:08:00.274Z"
+    },
+    {
+      "topicId": "crypto",
+      "ingested": 1,
+      "fetched": 25,
+      "quality": 10,
+      "timestamp": "2026-07-08T05:08:20.228Z"
+    },
+    {
+      "topicId": "global-macro",
+      "ingested": 4,
+      "fetched": 25,
+      "quality": 20,
+      "timestamp": "2026-07-08T05:09:02.478Z"
+    },
+    {
+      "topicId": "commodities",
+      "ingested": 0,
+      "fetched": 25,
+      "quality": 0,
+      "timestamp": "2026-07-08T05:09:11.562Z"
+    },
+    {
+      "topicId": "indonesia",
+      "ingested": 0,
+      "fetched": 25,
+      "quality": 0,
+      "timestamp": "2026-07-08T05:09:25.136Z"
+    },
+    {
+      "topicId": "gold",
+      "ingested": 1,
+      "fetched": 25,
+      "quality": 20,
+      "timestamp": "2026-07-08T05:09:46.562Z"
+    },
+    {
+      "topicId": "us-market",
+      "ingested": 3,
+      "fetched": 25,
+      "quality": 10,
+      "timestamp": "2026-07-08T05:10:10.905Z"
+    },
+    {
+      "topicId": "china",
+      "ingested": 6,
+      "fetched": 25,
+      "quality": 31,
+      "timestamp": "2026-07-08T05:10:50.115Z"
+    },
+    {
+      "topicId": "oil-energy",
+      "ingested": 3,
+      "fetched": 25,
+      "quality": 17,
+      "timestamp": "2026-07-08T05:11:27.105Z"
+    },
+    {
+      "topicId": "forex",
+      "ingested": 6,
+      "fetched": 25,
+      "quality": 18,
+      "timestamp": "2026-07-08T05:12:47.568Z"
+    },
+    {
+      "topicId": "geopolitics",
+      "ingested": 3,
+      "fetched": 25,
+      "quality": 34,
+      "timestamp": "2026-07-08T05:13:20.989Z"
+    },
+    {
+      "topicId": "indonesia-politics",
+      "ingested": 2,
+      "fetched": 25,
+      "quality": 25,
+      "timestamp": "2026-07-08T05:14:28.464Z"
+    },
+    {
+      "topicId": "startup",
+      "ingested": 5,
+      "fetched": 24,
+      "quality": 22,
+      "timestamp": "2026-07-08T05:15:47.238Z"
+    },
+    {
+      "topicId": "ai-tech",
+      "ingested": 4,
+      "fetched": 25,
+      "quality": 10,
+      "timestamp": "2026-07-08T05:16:21.525Z"
+    },
+    {
+      "topicId": "idx-market",
+      "ingested": 0,
+      "fetched": 25,
+      "quality": 0,
+      "timestamp": "2026-07-08T09:01:13.712Z"
+    },
+    {
+      "topicId": "usd-idr",
+      "ingested": 0,
+      "fetched": 25,
+      "quality": 0,
+      "timestamp": "2026-07-08T09:01:31.041Z"
+    },
+    {
+      "topicId": "crypto",
+      "ingested": 0,
+      "fetched": 25,
+      "quality": 0,
+      "timestamp": "2026-07-08T09:02:03.369Z"
+    },
+    {
+      "topicId": "global-macro",
+      "ingested": 0,
+      "fetched": 25,
+      "quality": 0,
+      "timestamp": "2026-07-08T09:02:18.797Z"
+    },
+    {
+      "topicId": "commodities",
+      "ingested": 0,
+      "fetched": 25,
+      "quality": 0,
+      "timestamp": "2026-07-08T09:02:35.935Z"
+    },
+    {
+      "topicId": "indonesia",
+      "ingested": 0,
+      "fetched": 25,
+      "quality": 0,
+      "timestamp": "2026-07-08T09:03:30.697Z"
+    },
+    {
+      "topicId": "idx-market",
+      "ingested": 0,
+      "fetched": 25,
+      "quality": 0,
+      "timestamp": "2026-07-08T13:01:34.169Z"
+    },
+    {
+      "topicId": "usd-idr",
+      "ingested": 0,
+      "fetched": 15,
+      "quality": 0,
+      "timestamp": "2026-07-08T13:03:33.175Z"
+    },
+    {
+      "topicId": "crypto",
+      "ingested": 0,
+      "fetched": 25,
+      "quality": 0,
+      "timestamp": "2026-07-08T13:04:07.790Z"
+    },
+    {
+      "topicId": "global-macro",
+      "ingested": 0,
+      "fetched": 25,
+      "quality": 0,
+      "timestamp": "2026-07-08T13:05:08.277Z"
+    },
+    {
+      "topicId": "commodities",
+      "ingested": 0,
+      "fetched": 25,
+      "quality": 0,
+      "timestamp": "2026-07-08T13:06:37.754Z"
+    },
+    {
+      "topicId": "indonesia",
+      "ingested": 0,
+      "fetched": 25,
+      "quality": 0,
+      "timestamp": "2026-07-08T13:07:01.036Z"
+    },
+    {
+      "topicId": "idx-market",
+      "ingested": 0,
+      "fetched": 25,
+      "quality": 0,
+      "timestamp": "2026-07-08T17:01:53.472Z"
+    },
+    {
+      "topicId": "usd-idr",
+      "ingested": 0,
+      "fetched": 25,
+      "quality": 0,
+      "timestamp": "2026-07-08T17:02:17.400Z"
+    },
+    {
+      "topicId": "crypto",
+      "ingested": 0,
+      "fetched": 25,
+      "quality": 0,
+      "timestamp": "2026-07-08T17:02:33.731Z"
+    },
+    {
+      "topicId": "global-macro",
+      "ingested": 0,
+      "fetched": 25,
+      "quality": 0,
+      "timestamp": "2026-07-08T17:03:03.315Z"
+    },
+    {
+      "topicId": "commodities",
+      "ingested": 0,
+      "fetched": 25,
+      "quality": 0,
+      "timestamp": "2026-07-08T17:03:15.668Z"
+    },
+    {
+      "topicId": "indonesia",
+      "ingested": 0,
+      "fetched": 25,
+      "quality": 0,
+      "timestamp": "2026-07-08T17:03:57.282Z"
     }
   ],
   "topicStats": {
     "idx-market": {
-      "totalIngested": 60,
-      "totalFetched": 225,
-      "avgQuality": 39.111111111111114,
-      "runs": 9,
-      "lastRun": "2026-07-03T09:27:50.677Z"
+      "totalIngested": 88,
+      "totalFetched": 525,
+      "avgQuality": 27.666666666666668,
+      "runs": 21,
+      "lastRun": "2026-07-08T17:01:53.472Z"
     },
     "usd-idr": {
-      "totalIngested": 37,
-      "totalFetched": 225,
-      "avgQuality": 43.44444444444444,
-      "runs": 9,
-      "lastRun": "2026-07-03T09:28:17.745Z"
+      "totalIngested": 49,
+      "totalFetched": 515,
+      "avgQuality": 23.761904761904763,
+      "runs": 21,
+      "lastRun": "2026-07-08T17:02:17.400Z"
     },
     "crypto": {
-      "totalIngested": 40,
-      "totalFetched": 175,
-      "avgQuality": 43.57142857142857,
-      "runs": 7,
-      "lastRun": "2026-07-03T06:13:10.802Z"
+      "totalIngested": 57,
+      "totalFetched": 475,
+      "avgQuality": 21.57894736842105,
+      "runs": 19,
+      "lastRun": "2026-07-08T17:02:33.731Z"
     },
     "global-macro": {
-      "totalIngested": 41,
-      "totalFetched": 175,
-      "avgQuality": 53.57142857142857,
-      "runs": 7,
-      "lastRun": "2026-07-03T06:13:31.333Z"
+      "totalIngested": 56,
+      "totalFetched": 475,
+      "avgQuality": 30.263157894736842,
+      "runs": 19,
+      "lastRun": "2026-07-08T17:03:03.315Z"
     },
     "commodities": {
-      "totalIngested": 29,
-      "totalFetched": 150,
-      "avgQuality": 23.5,
-      "runs": 6,
-      "lastRun": "2026-07-03T06:13:47.756Z"
+      "totalIngested": 49,
+      "totalFetched": 400,
+      "avgQuality": 15,
+      "runs": 16,
+      "lastRun": "2026-07-08T17:03:15.668Z"
     },
     "indonesia": {
-      "totalIngested": 39,
-      "totalFetched": 150,
-      "avgQuality": 26.166666666666668,
-      "runs": 6,
-      "lastRun": "2026-07-03T06:14:20.261Z"
+      "totalIngested": 54,
+      "totalFetched": 400,
+      "avgQuality": 14.250000000000002,
+      "runs": 16,
+      "lastRun": "2026-07-08T17:03:57.282Z"
     },
     "gold": {
-      "totalIngested": 12,
-      "totalFetched": 50,
-      "avgQuality": 44,
-      "runs": 2,
-      "lastRun": "2026-07-02T23:10:32.006Z"
+      "totalIngested": 25,
+      "totalFetched": 175,
+      "avgQuality": 37.42857142857143,
+      "runs": 7,
+      "lastRun": "2026-07-08T05:09:46.562Z"
     },
     "us-market": {
-      "totalIngested": 8,
-      "totalFetched": 50,
-      "avgQuality": 19,
-      "runs": 2,
-      "lastRun": "2026-07-02T23:10:35.348Z"
+      "totalIngested": 16,
+      "totalFetched": 175,
+      "avgQuality": 21.285714285714285,
+      "runs": 7,
+      "lastRun": "2026-07-08T05:10:10.905Z"
     },
     "china": {
-      "totalIngested": 12,
-      "totalFetched": 50,
-      "avgQuality": 36,
-      "runs": 2,
-      "lastRun": "2026-07-02T23:10:37.676Z"
+      "totalIngested": 31,
+      "totalFetched": 175,
+      "avgQuality": 24.571428571428573,
+      "runs": 7,
+      "lastRun": "2026-07-08T05:10:50.115Z"
     },
     "oil-energy": {
-      "totalIngested": 17,
-      "totalFetched": 25,
-      "avgQuality": 37,
-      "runs": 1,
-      "lastRun": "2026-07-02T23:11:31.621Z"
+      "totalIngested": 48,
+      "totalFetched": 150,
+      "avgQuality": 24.333333333333332,
+      "runs": 6,
+      "lastRun": "2026-07-08T05:11:27.105Z"
     },
     "forex": {
-      "totalIngested": 8,
-      "totalFetched": 25,
-      "avgQuality": 17,
-      "runs": 1,
-      "lastRun": "2026-07-02T23:12:01.451Z"
+      "totalIngested": 17,
+      "totalFetched": 125,
+      "avgQuality": 15,
+      "runs": 5,
+      "lastRun": "2026-07-08T05:12:47.568Z"
     },
     "geopolitics": {
-      "totalIngested": 16,
-      "totalFetched": 25,
-      "avgQuality": 45,
-      "runs": 1,
-      "lastRun": "2026-07-02T23:13:15.235Z"
+      "totalIngested": 24,
+      "totalFetched": 124,
+      "avgQuality": 39.6,
+      "runs": 5,
+      "lastRun": "2026-07-08T05:13:20.989Z"
     },
     "indonesia-politics": {
-      "totalIngested": 15,
-      "totalFetched": 25,
-      "avgQuality": 52,
-      "runs": 1,
-      "lastRun": "2026-07-02T23:14:39.436Z"
+      "totalIngested": 24,
+      "totalFetched": 125,
+      "avgQuality": 46.6,
+      "runs": 5,
+      "lastRun": "2026-07-08T05:14:28.464Z"
     },
     "startup": {
-      "totalIngested": 18,
-      "totalFetched": 25,
-      "avgQuality": 42,
-      "runs": 1,
-      "lastRun": "2026-07-02T23:15:43.792Z"
+      "totalIngested": 46,
+      "totalFetched": 98,
+      "avgQuality": 27.25,
+      "runs": 4,
+      "lastRun": "2026-07-08T05:15:47.238Z"
     },
     "ai-tech": {
-      "totalIngested": 10,
-      "totalFetched": 25,
-      "avgQuality": 27,
-      "runs": 1,
-      "lastRun": "2026-07-02T23:16:34.645Z"
+      "totalIngested": 34,
+      "totalFetched": 100,
+      "avgQuality": 26.25,
+      "runs": 4,
+      "lastRun": "2026-07-08T05:16:21.525Z"
     }
   }
 }
