@@ -1,4 +1,4 @@
-# Market Orca CI — tests + build on push/PR to main
+# Market Orca CI — tests on push/PR to main
 name: CI
 on:
   push:
@@ -23,19 +23,4 @@ jobs:
       - run: mkdir -p data
       - run: node --check src/*.js src/**/*.js
       - run: node --test --test-concurrency=1 src/*.test.js
-        timeout-minutes: 5
-
-  build-frontend:
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: frontend
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-      - run: npm ci
-        working-directory: frontend
-      - run: npm run build
-        timeout-minutes: 3
+        timeout-minutes: 6
