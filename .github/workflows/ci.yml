@@ -22,5 +22,5 @@ jobs:
       - run: npm ci
       - run: mkdir -p data
       - run: node --check src/*.js src/**/*.js
-      - run: node --test --test-concurrency=1 src/*.test.js
+      - run: node --test --test-force-exit --test-concurrency=1 src/*.test.js
         timeout-minutes: 8
