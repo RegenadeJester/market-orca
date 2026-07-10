@@ -21,10 +21,22 @@ async function get(url) {
   return { status: res.status, data: await res.json().catch(() => ({})) }
 }
 
+// ── Server reachability check ──
+// Integration tests require running MCP HTTP + n8n bridge servers.
+// Skip all tests when servers are unavailable (CI, unit-only runs).
+async function serversAvailable() {
+  try {
+    const res = await fetch(`${BASE}/health`, { signal: AbortSignal.timeout(1500) })
+    return res.ok
+  } catch { return false }
+}
+
+const SKIP = !(await serversAvailable())
+
 // ═══════════════════════════════════════════
 // Market Orca MCP HTTP Server (port 1788)
 // ═══════════════════════════════════════════
-describe('Market Orca MCP HTTP (SSE)', () => {
+describe('Market Orca MCP HTTP (SSE)', { skip: SKIP && 'servers not running — integration tests skipped' }, () => {
   it('GET /health returns ok', async () => {
     const { status, data } = await get(`${BASE}/health`)
     assert.equal(status, 200)
@@ -45,12 +57,10 @@ describe('Market Orca MCP HTTP (SSE)', () => {
     const timeout = setTimeout(() => controller.abort(), 2000)
     try {
       const res = await fetch(`${BASE}/mcp/sse`, { signal: controller.signal })
-      // Should get SSE headers
       const ct = res.headers.get('content-type') || ''
       assert.ok(ct.includes('text/event-stream') || res.status === 200,
         `Expected SSE stream, got content-type: ${ct}`)
     } catch (e) {
-      // SSE connection stays open — abort is expected
       assert.ok(e.name === 'AbortError' || e.message.includes('abort'))
     } finally {
       clearTimeout(timeout)
@@ -66,7 +76,7 @@ describe('Market Orca MCP HTTP (SSE)', () => {
 // ═══════════════════════════════════════════
 // n8n MCP Bridge (port 1789)
 // ═══════════════════════════════════════════
-describe('n8n MCP Bridge', () => {
+describe('n8n MCP Bridge', { skip: SKIP && 'servers not running — integration tests skipped' }, () => {
   it('GET /health returns ok', async () => {
     const { status, data } = await get(`${N8N_BASE}/health`)
     assert.equal(status, 200)
@@ -178,6 +188,7 @@ describe('Auth (when TOKEN set)', () => {
   it('n8n bridge rejects invalid token when MCP_TOKEN is set', async () => {
     // This test only matters if N8N_MCP_TOKEN env var is set
     // Without it, auth is bypassed — which is the default
+    if (SKIP) return
     const { status } = await get(`${N8N_BASE}/health`)
     assert.equal(status, 200) // no token = auth bypassed
   })

@@ -55,6 +55,55 @@ const ID_MAP = {
   'Indonesia Pulse:': 'Pulsa Indonesia:',
   'Coverage:': 'Cakupan:',
   'Data belum tersedia:': 'Data belum tersedia:',
+
+  // Brief + Impact subsections
+  '# Executive Morning Brief': '# Executive Morning Brief',
+  '## Market Impact Watch': '## Pantauan Dampak Pasar',
+  '- **Market mood:**': '- **Mood pasar:**',
+  '- **Indonesia pulse:**': '- **Pulsa Indonesia:**',
+  '- **Biggest risk:**': '- **Risiko terbesar:**',
+  '- **One opportunity:**': '- **Satu peluang:**',
+  '- **Watch next:**': '- **Pantau selanjutnya:**',
+  '- **Regime:**': '- **Regim:**',
+  '- **Event bias:**': '- **Bias peristiwa:**',
+  '- **Drivers:**': '- **Pendorong:**',
+  '- **Signals:**': '- **Sinyal:**',
+
+  // Improvement/Added Features subsection
+  '## Improvement / Added Features QA Pack': '## Peningkatan / Fitur Tambahan QC',
+  '**Auto Root Cause Tagging:**': '**Penandaan Akar Masalah:**',
+  '**Blackout / Outage Timeline:**': '**Linimasa Blackout:**',
+  '**Impact Area Map:**': '**Peta Dampak:**',
+  '**SLA Breach Detector:**': '**Detektor Pelanggaran SLA:**',
+  '**Daily Executive Summary:**': '**Ringkasan Eksekutif Harian:**',
+  '**Anomaly Alert:**': '**Peringatan Anomali:**',
+  '**Before-After Improvement Tracker:**': '**Pelacak Peningkatan:**',
+  '**Competitor Signal Feed:**': '**Sinyal Kompetitor:**',
+  '**Action Recommendation Engine:**': '**Rekomendasi Tindakan:**',
+  '**Report Confidence Score:**': '**Skor Keyakinan Laporan:**',
+
+  // Reliability / Incident / QA subsection
+  '## Reliability / Incident / QA Add-on Batch 3': '## Keandalan / Insiden / QC Paket 3',
+  '| Feature | Status | Output |': '| Fitur | Status | Keluaran |',
+  '| Source Reliability Score | added |': '| Skor Keandalan Sumber | ditambah |',
+  '| Incident Severity Level | added |': '| Tingkat Keparahan Insiden | ditambah |',
+  '| Customer Impact Estimate | added |': '| Estimasi Dampak Pelanggan | ditambah |',
+  '| Recovery Status Tracker | added |': '| Pelacak Status Pemulihan | ditambah |',
+  '| Duplicate News Cluster | added |': '| Klaster Berita Duplikat | ditambah |',
+  '| Market Sentiment Meter | added |': '| Meter Sentimen Pasar | ditambah |',
+  '| Risk Heatmap | added |': '| Peta Panas Risiko | ditambah |',
+  '| Follow-up Task Generator | added |': '| Generator Tugas Lanjutan | ditambah |',
+  '| Historical Comparison | added |': '| Perbandingan Historis | ditambah |',
+  '| Report QA Checklist | added |': '| Daftar Periksa QA Laporan | ditambah |',
+  '**Strong sources:**': '**Sumber kuat:**',
+  '**Incident ops:**': '**Operasi insiden:**',
+  '**QA checklist:**': '**Daftar periksa QA:**',
+  '**Follow-up tasks:**': '**Tugas lanjutan:**',
+  'no incident': 'tidak ada insiden',
+  'no incident detected': 'tidak ada insiden terdeteksi',
+
+  // Sentiment Trend subsection
+  '## Sentiment Trend': '## Tren Sentimen',
 };
 
 // Technical / proper nouns that should NEVER be translated
