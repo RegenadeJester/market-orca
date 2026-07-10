@@ -98,9 +98,9 @@ test('call() market_orca_trusted_domains returns array', async () => {
   const result = await call('market_orca_trusted_domains', { limit: 5 })
   assert.ok(Array.isArray(result.structuredContent))
   assert.ok(result.structuredContent.length <= 5)
-  // Each domain should be an object with score
+  // Each domain is a string
   for (const d of result.structuredContent) {
-    assert.ok(typeof d === 'object')
+    assert.ok(typeof d === 'string', `expected string domain, got ${typeof d}: ${d}`)
   }
 })
 
