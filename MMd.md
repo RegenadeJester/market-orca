@@ -8,6 +8,14 @@
 8|- **Branch:** `feat/language-guard-wire` → PR #20
 9|- **Backlog:** —
 
+## 2026-07-10 — Feature #34: Translate Remaining English Subsections
+- **Pain point:** `Executive Morning Brief`, `Market Impact Watch`, `Improvement / Added Features QA Pack`, `Reliability / Incident / QA Add-on Batch 3`, `Sentiment Trend` still had English headers despite language guard infrastructure being ready. `executiveBrief` not wrapped with `translateReport()`.
+- **Done:** Added 49 ID translations to `ID_MAP` in `report-language-guard.js`. Wrapped `executiveBrief` with `translateReport()`. Also bundled CI stability fixes (test concurrency, force-exit, 8min timeout).
+- **Files:** `backend/src/report-language-guard.js`, `backend/src/ai-daily-report.js`, `.github/workflows/ci.yml`
+- **Deliverable:** All report subsections now fully Indonesian. PR #21.
+- **Branch:** `feat/translate-remaining-english` → PR #21 ✅ merged
+- **Backlog:** —
+
 ## 2026-07-06 — Feature #31: Silent Error Swallowing Fixes Batch 5
 - **Pain point:** 9 silent `catch {}` blocks in `hermes-skill.js` (5), `rag-autolearn.js` (2), `report-professional.js` (2), `server.js` (2) swallowed DB failures, FTS search errors, MCP fetch failures, and env file read errors without logging.
 - **Done:** Added `console.warn('[component] context:', e.message)` to all 9 catches for traceability. Pattern: `try { ... } catch (e) { console.warn('[component] context:', e.message) }`
