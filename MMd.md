@@ -1,6 +1,14 @@
-1|# Market Orca — Feature Log
-2|
-3|## 2026-07-08 — Feature #33: Language Guard Wired to Text + HTML
+# Market Orca — Feature Log
+
+## 2026-07-12 — Feature #35: Automated SQLite Backup with Daily Cron and API Endpoints
+- **Pain point:** No automated DB backup. Manual backup required `sqlite3` CLI or file copy. Risk of data loss from corruption, disk failure, or accidental deletion. No API to list/prune backups.
+- **Done:** Added 4 functions to `db.js` (`createBackup`, `listBackups`, `deleteOldBackups`, `ensureBackupDir`) using `better-sqlite3` native `.backup()` API — atomic, no locks, no new deps. 3 REST endpoints in `server.js`: `POST /api/backup` (manual), `GET /api/backup/list` (list), `POST /api/backup/cleanup` (prune to 30). Daily cron at 07:00 WIB via `jakartaHour()` check (hourly interval, minimal overhead).
+- **Files:** `backend/src/db.js`, `backend/src/server.js`
+- **Deliverable:** Zero-dep automated backup with daily cron and full REST API. PR #22.
+- **Branch:** `feat/sqlite-backup` → PR #22
+- **Backlog:** Backup verification (checksum), S3/GCS upload target, retention policy config via DB.
+
+## 2026-07-08 — Feature #33: Language Guard Wired to Text + HTML
 4|- **Pain point:** `report-language-guard.js` existed with all ID translation maps but was never imported/called in `ai-daily-report.js`. English headers leaked in both text and HTML output despite translation infrastructure being ready.
 5|- **Done:** Converted `module.exports` → `export` (ESM). Added `import { translateReport }` in `ai-daily-report.js`. Called `translateReport(text)` before returning from `buildTextReport()`. Patched HTML: `Statistics`→`Statistik`, `Report Quality`→`Kualitas Laporan`, `What Changed Today`→`Yang Berubah Hari Ini`, `Red Flags`→`Bendera Merah`.
 6|- **Files:** `backend/src/report-language-guard.js`, `backend/src/ai-daily-report.js`
