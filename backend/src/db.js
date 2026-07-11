@@ -1,6 +1,7 @@
 import Database from 'better-sqlite3'
 import path from 'node:path'
 import crypto from 'node:crypto'
+import fs from 'node:fs'
 import { fileURLToPath } from 'node:url'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -460,4 +461,39 @@ export function rejectSuggestedAlert(id, reason = '') {
 
 export function suggestedAlertCount(status = 'pending') {
   return db.prepare('SELECT count(*) AS n FROM suggested_alerts WHERE status = ?').get(status)?.n || 0
+}
+
+// Backup helpers
+const backupDir = path.join(__dirname, '..', 'data', 'backups')
+export function ensureBackupDir() {
+  if (!fs.existsSync(backupDir)) fs.mkdirSync(backupDir, { recursive: true })
+}
+
+export function createBackup(label = 'manual') {
+  ensureBackupDir()
+  const ts = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19)
+  const fname = `market-${label}-${ts}.db`
+  const dest = path.join(backupDir, fname)
+  fs.copyFileSync(dbPath, dest)
+  return { ok: true, file: fname, path: dest, size: fs.statSync(dest).size, created_at: new Date().toISOString() }
+}
+
+export function listBackups(limit = 50) {
+  ensureBackupDir()
+  return fs.readdirSync(backupDir)
+    .filter(f => f.endsWith('.db'))
+    .map(f => ({ file: f, size: fs.statSync(path.join(backupDir, f)).size, mtime: fs.statSync(path.join(backupDir, f)).mtime }))
+    .sort((a, b) => b.mtime - a.mtime)
+    .slice(0, limit)
+}
+
+export function deleteOldBackups(keep = 30) {
+  ensureBackupDir()
+  const files = fs.readdirSync(backupDir).filter(f => f.endsWith('.db')).sort()
+  let deleted = 0
+  for (const f of files.slice(0, Math.max(0, files.length - keep))) {
+    fs.unlinkSync(path.join(backupDir, f))
+    deleted++
+  }
+  return { ok: true, deleted, kept: files.length - deleted }
 }

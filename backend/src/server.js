@@ -6,7 +6,7 @@ import fs from 'node:fs'
 import crypto from 'node:crypto'
 import { fileURLToPath } from 'node:url'
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
-import { db, saveAssetSnapshot, getStoredCandles, getStoredNews, getIncidentStatusHistory, manualUpdateIncidentStatus, incidentTitleHash } from './db.js'
+import { db, saveAssetSnapshot, getStoredCandles, getStoredNews, getIncidentStatusHistory, manualUpdateIncidentStatus, incidentTitleHash, createBackup, listBackups, deleteOldBackups } from './db.js'
 import { sendDiscordAlert, initDiscordBot } from './discord.js'
 import { getLiveAsset, getLiveAssets } from './live-data.js'
 import { buildArticle } from './article.js'
@@ -1624,6 +1624,17 @@ app.get('/api/report-health', (_req, res) => {
   })
 })
 
+// ── SQLite Backup Endpoints ───────────────────────────────────────
+app.post('/api/backup', (_req, res) => {
+  try { res.json(createBackup('api')) } catch (e) { res.status(500).json({ ok:false, error: e.message }) }
+})
+app.get('/api/backup/list', (_req, res) => {
+  try { res.json({ ok:true, backups: listBackups(50) }) } catch (e) { res.status(500).json({ ok:false, error: e.message }) }
+})
+app.post('/api/backup/cleanup', (_req, res) => {
+  try { res.json(deleteOldBackups(30)) } catch (e) { res.status(500).json({ ok:false, error: e.message }) }
+})
+
 function latestReportTopics() {
   const saved = latestSavedReport()
   return Array.isArray(saved?.topics) ? saved.topics : []
@@ -2806,4 +2817,11 @@ app.listen(PORT, '::', () => {
   if (jakartaHour() >= 7 && !reportExists(todaySlug())) {
     setTimeout(() => maybeRunDailyReport('startup-catchup').catch((e) => { aiReportSent = false; console.error('[ai-daily-catchup]', e) }), 15000)
   }
+  // Daily DB backup at 07:00 WIB
+  const backupCron = () => {
+    const h = jakartaHour()
+    if (h === 7) { createBackup('daily'); console.log('[backup] daily backup created') }
+  }
+  backupCron()
+  setInterval(backupCron, 3600000)
 })
