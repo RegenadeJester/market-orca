@@ -59,6 +59,7 @@ report-error.log
 *.sqlite
 data/
 !backend/data/.gitkeep
+collections/
 *.pid
 *.pid.lock
 
