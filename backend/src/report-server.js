@@ -49,6 +49,9 @@ app.use((_req, res, next) => {
   next()
 })
 
+// ── Health endpoint ───────────────────────────────────────────────────────
+app.get('/health', (_req, res) => res.json({ ok: true, name: 'market-orca-report', port: PORT }))
+
 // ── robots.txt ─────────────────────────────────────────────────────────────
 app.get('/robots.txt', (_req, res) => {
   res.setHeader('Content-Type', 'text/plain; charset=utf-8')

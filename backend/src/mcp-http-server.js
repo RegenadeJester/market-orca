@@ -10,6 +10,7 @@ import { tools, call } from './mcp-server.js'
 const PORT = Number(process.env.MCP_PORT || 1788)
 const HOST = process.env.MCP_HOST || '0.0.0.0'
 const TOKEN = process.env.MCP_TOKEN || ''
+const PATH = process.env.MCP_PATH || '/mcp'
 
 function makeServer() {
   const server = new Server({ name: 'market-orca-mcp', version: '1.2.0' }, { capabilities: { tools: {} } })

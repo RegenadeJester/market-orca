@@ -169,14 +169,33 @@ function calculateQualityScore(title, content, source, trust) {
   return Math.min(100, score)
 }
 
+// ─── Relevance Filter ──────────────────────────────────────────
+const TOPIC_KEYWORDS = {
+  'idx-market': ['IHSG','IDX','saham','indeks','Jakarta','BEI','Bursa Efek','JCI','composite','trading','investasi','pasar modal','foreign','net buy','net sell','rekomendasi','analyst','harga','saham','emiten','kapitalisasi','dividen'],
+  'usd-idr': ['rupiah','IDR','USD','kurs','dollar','Bank Indonesia','devisa','forex','BI rate','Suku bunga','dollar AS','nilai tukar','mata uang','exchange','currency','forex','trading'],
+  'crypto': ['bitcoin','ethereum','crypto','blockchain','altcoin','token','DeFi','Binance','Coinbase','cryptocurrency','solana','ripple','BTC','ETH','Web3','stablecoin'],
+  'global-macro': ['inflasi','Fed','interest rate','monetary','IMF','GDP','trade war','recession','ekonomi','perekonomian','fiscal','stimulus','central bank','bank sentral','proyeksi','pertumbuhan'],
+  'commodities': ['komoditas','batu bara','nickel','palm oil','CPO','emas','minyak','crude','commodity','nikel','tembaga','kopi','karet','kelapa sawit'],
+  'gold': ['emas','gold','Antam','logam mulia','bullion','harga emas','XAU','precious metal'],
+  'oil-energy': ['minyak mentah','OPEC','crude oil','energi','oil price','brent','WTI','BBM','fuel','natural gas'],
+}
+
+function isRelevant(title, content, topicId) {
+  const keywords = TOPIC_KEYWORDS[topicId]
+  if (!keywords) return true
+  const text = (title + ' ' + (content || '').slice(0, 3000)).toLowerCase()
+  const matches = keywords.filter(kw => text.includes(kw.toLowerCase()))
+  return matches.length >= 1 // need at least 1 keyword match
+}
+
 // ─── Smart Query Generation ────────────────────────────────────
 const INDONESIAN_QUERIES = {
   'idx-market': [
-    'IHSG hari ini terbaru',
-    'saham aktif IDX',
-    'pergerakan saham Indonesia minggu ini',
-    'foreign flow net buy sell IDX',
-    'rekomendasi saham analyst'
+    'IHSG hari ini indeks komposit Jakarta',
+    'saham aktif volume tinggi IDX hari ini',
+    'pergerakan saham Indonesia minggu ini analisis',
+    'foreign investor net buy sell IDX IHSG',
+    'rekomendasi saham analyst Indonesia'
   ],
   'usd-idr': [
     'kurs rupiah hari ini BI',
@@ -382,6 +401,12 @@ async function processTopic(topic) {
           const summary = generateSummary(page.content)
           const credibility = estimateCredibility(page.source, r.trust)
           const qualityScore = calculateQualityScore(page.title, page.content, page.source, credibility)
+
+          // Relevance filter - skip noise
+          if (!isRelevant(page.title, page.content, topic.id)) {
+            log(`  🚫 Irrelevant: "${page.title.slice(0, 50)}"`)
+            continue
+          }
 
           log(`  📝 Ingest: "${page.title.slice(0, 50)}" (${page.content.length} chars, Q:${qualityScore}) → [${topic.assetTags.join(',')}]`)
 
