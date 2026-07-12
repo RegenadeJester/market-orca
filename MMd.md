@@ -1,5 +1,13 @@
 # Market Orca — Feature Log
 
+## 2026-07-13 — Feature #36: .gitignore Collections Autolearn Generated Data
+- **Pain point:** `collections/autolearn-learned.json`, `collections/autolearn-metrics.json`, `collections/autolearn-topics.json` regenerated daily by autolearn cron — tracked in git, making `git status` permanently dirty and commits noisy with auto-generated JSON.
+- **Done:** Added `collections/` to `.gitignore`. Ran `git rm --cached` on all 3 tracked files (+ 8MB autolearn.log never tracked). Repo now clean between runs.
+- **Files:** `.gitignore`
+- **Deliverable:** `git status` clean between autolearn cron runs. No more noise commits for regenerated data. PR #23.
+- **Branch:** `feat/gitignore-collections-autolearn` → PR #23
+- **Backlog:** —
+
 ## 2026-07-12 — Feature #35: Automated SQLite Backup with Daily Cron and API Endpoints
 - **Pain point:** No automated DB backup. Manual backup required `sqlite3` CLI or file copy. Risk of data loss from corruption, disk failure, or accidental deletion. No API to list/prune backups.
 - **Done:** Added 4 functions to `db.js` (`createBackup`, `listBackups`, `deleteOldBackups`, `ensureBackupDir`) using `better-sqlite3` native `.backup()` API — atomic, no locks, no new deps. 3 REST endpoints in `server.js`: `POST /api/backup` (manual), `GET /api/backup/list` (list), `POST /api/backup/cleanup` (prune to 30). Daily cron at 07:00 WIB via `jakartaHour()` check (hourly interval, minimal overhead).
