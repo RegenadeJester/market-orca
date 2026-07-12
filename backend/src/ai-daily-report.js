@@ -1461,15 +1461,15 @@ async function fetchFromGitHub() {
 // ═══════════════════════════════════════════
 
 const TOPICS = [
-  { id:'news', title:'News', desc:'Berita pasar saham Indonesia, IHSG, BEI.' },
-  { id:'finance', title:'Finance', desc:'Rupiah, USD/IDR, suku bunga BI, ekonomi Indonesia.' },
+  { id:'news', title:'Market News', desc:'Berita pasar saham Indonesia & global terkini.' },
+  { id:'finance', title:'Finance', desc:'Saham, rupiah, USD/IDR, suku bunga BI, ekonomi.' },
   { id:'aifinance', title:'AI Finance', desc:'AI di fintech, perbankan, investing Indonesia.' },
-  { id:'commodity', title:'Komoditas', desc:'Emas, minyak, CPO, batu bara, komoditas global.' },
+  { id:'commodity', title:'Komoditas & Emas', desc:'Emas (XAUUSD), minyak (CL), CPO, batu bara.' },
   { id:'crypto', title:'Crypto', desc:'Bitcoin, Ethereum, regulasi crypto Indonesia.' },
-  { id:'global', title:'Global Markets', desc:'Wall Street, Fed, ECB, pasar Asia.' },
-  { id:'macro', title:'Macro', desc:'Inflasi, GDP, kebijakan moneter, fiskal.' },
-  { id:'tech', title:'Tech', desc:'Tech company relevan: Apple, Google, Nvidia, TSMC.' },
-  { id:'fun', title:'Fun Facts', desc:'Fakta menarik pasar dan ekonomi.' },
+  { id:'global', title:'Global Markets', desc:'Wall Street, Fed, ECB, Nikkei, Hang Seng.' },
+  { id:'macro', title:'Macro & Ekonomi', desc:'Inflasi, GDP, kebijakan moneter & fiskal.' },
+  { id:'tech', title:'Tech & AI', desc:'Tech relevan pasar: Nvidia, Apple, TSMC, AI.' },
+  { id:'fun', title:'Fakta Market', desc:'Fakta menarik pasar keuangan & ekonomi.' },
 ]
 
 const RSS_FEEDS = [
@@ -1641,6 +1641,18 @@ export async function generateAiDailyReport() {
       const pool = [...cnbcArticles, ...coinDeskArticles, ...vbArticles, ...tcArticles, ...avArticles]
       const ha = allArticles.filter(a => /\b(AI.*(financ|bank|invest|trad|stock|market|fintech|crypto|wealth))|(financ.*AI)|(AI.*fintech)/i.test(a.title + ' ' + (a.snippet||'').slice(0, 100)))
       items = deduped([...pool, ...ha], 4)
+    } else if (def.id === 'commodity') {
+      const hc = allArticles.filter(a => /\b(gold|xauusd|oil|crude|brent|wti|cpo|palm oil|coal|batu bara|commodity|komoditas|silver|copper|nickel|tin|rubber|karet|coffee|kopi)/i.test(a.title + ' ' + (a.snippet||'').slice(0, 100)))
+      items = deduped([...hc, ...marketWatchArticles], 4)
+    } else if (def.id === 'crypto') {
+      const cr = allArticles.filter(a => /\b(bitcoin|btc|ethereum|eth|crypto|blockchain|defi|nft|solana|sol|altcoin|token|binance|coinbase|stablecoin|web3|regulasi crypto|indonesia.*crypto)/i.test(a.title + ' ' + (a.snippet||'').slice(0, 100)))
+      items = deduped([...cr, ...coinDeskArticles], 4)
+    } else if (def.id === 'global') {
+      const gl = allArticles.filter(a => /\b(wall street|s&p 500|nasdaq|dow jones|fed|federal reserve|ecb|boj|bank of japan|nikkei|hang seng|sse|shanghai|kospi|ftse|dax|dow|wall.st|market.*asia|market.*europe|market.*global)/i.test(a.title + ' ' + (a.snippet||'').slice(0, 100)))
+      items = deduped([...gl, ...cnbcArticles, ...marketWatchArticles], 4)
+    } else if (def.id === 'macro') {
+      const mc = allArticles.filter(a => /\b(inflasi|inflation|gdp|suku bunga|interest rate|bi rate|kebijakan moneter|monetary policy|fiscal|defisit|surplus|neraca|cadangan|kurs|exchange rate|impor|ekspor|perekonomian|ekonomi.*indonesia)/i.test(a.title + ' ' + (a.snippet||'').slice(0, 100)))
+      items = deduped([...mc, ...cnbcArticles, ...guardianArticles, ...bbcArticles], 4)
     } else {
       items = deduped([...allArticles, ...hfModels], 4)
     }
