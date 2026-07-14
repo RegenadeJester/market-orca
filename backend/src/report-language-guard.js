@@ -57,13 +57,14 @@ const ID_MAP = {
   'Data belum tersedia:': 'Data belum tersedia:',
 
   // Brief + Impact subsections
-  '# Executive Morning Brief': '# Executive Morning Brief',
+  '# Executive Morning Brief': '# Ringkasan Pagi',
   '## Market Impact Watch': '## Pantauan Dampak Pasar',
   '- **Market mood:**': '- **Mood pasar:**',
   '- **Indonesia pulse:**': '- **Pulsa Indonesia:**',
   '- **Biggest risk:**': '- **Risiko terbesar:**',
   '- **One opportunity:**': '- **Satu peluang:**',
   '- **Watch next:**': '- **Pantau selanjutnya:**',
+  '- **hot topic:**': '- **topik hangat:**',
   '- **Regime:**': '- **Regim:**',
   '- **Event bias:**': '- **Bias peristiwa:**',
   '- **Drivers:**': '- **Pendorong:**',

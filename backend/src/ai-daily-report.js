@@ -10,6 +10,8 @@ import { getAssetFreshness, buildDataStatusBlock, dataFreshnessQA } from './mark
 import { scoreSourceTrust } from './source-reliability.js'
 import { getPersona, buildContextPrompt } from './persona.js'
 import { listDmSubscribers, sendDmToAllSubscribers } from './discord-dm.js'
+import { scanNewsForBreaking } from './breaking-news-detector.js'
+import { startPipelineRun, logPipelineEvent, completePipelineRun } from './pipeline-monitor.js'
 import PDFDocument from 'pdfkit'
 import fs from 'node:fs'
 import path from 'node:path'
@@ -19,6 +21,8 @@ import { fileURLToPath } from 'node:url'
 import { translateReport, scoreLanguage } from './report-language-guard.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
+
+function todaySlug() { return new Intl.DateTimeFormat('en-CA', { timeZone:'Asia/Jakarta', year:'numeric', month:'2-digit', day:'2-digit' }).format(new Date()) }
 
 
 function reportSearchQueries(topics=[], limit=6){
@@ -322,7 +326,7 @@ export function buildExecutiveBrief(topics) {
   const riskLine = topRisk ? `${topRisk.symbol}: ${topRisk.dir}, ${topRisk.risk} risk; pantau ${impact.event.signals.slice(0,2).join(' + ')}.` : 'Risiko utama belum cukup data.'
   const oppLine = opportunity ? `${opportunity.symbol}: ${opportunity.dir}; validasi volume/news sebelum aksi.` : 'Peluang belum jelas; tunggu konfirmasi data.'
   const watch = impact.event.signals.slice(0,3).join(' • ') || 'harga • volume • berita resmi'
-  return `# Executive Morning Brief\n\n- **Market mood:** ${impact.regime.regime}; ${allItems.length} item dari ${sourceCount} sumber.\n- **Indonesia pulse:** ${impact.pulse}\n- **Biggest risk:** ${riskLine}\n- **One opportunity:** ${oppLine}\n- **Watch next:** ${watch}; hot topic: ${hot}`
+  return `# Ringkasan Pagi\n\n- **Mood pasar:** ${impact.regime.regime}; ${allItems.length} item dari ${sourceCount} sumber.\n- **Pulsa Indonesia:** ${impact.pulse}\n- **Risiko terbesar:** ${riskLine}\n- **Satu peluang:** ${oppLine}\n- **Pantau selanjutnya:** ${watch}; topik hangat: ${hot}`
 }
 
 function inferReportEvent(topics) {
@@ -1461,6 +1465,7 @@ async function fetchFromGitHub() {
 // ═══════════════════════════════════════════
 
 const TOPICS = [
+  { id:'breaking', title:'Breaking News', desc:'Berita penting berdampak tinggi, pergerakan harga & volume ekstrem.' },
   { id:'news', title:'Market News', desc:'Berita pasar saham Indonesia & global terkini.' },
   { id:'finance', title:'Finance', desc:'Saham, rupiah, USD/IDR, suku bunga BI, ekonomi.' },
   { id:'aifinance', title:'AI Finance', desc:'AI di fintech, perbankan, investing Indonesia.' },
@@ -1519,6 +1524,10 @@ export async function generateAiDailyReport() {
   const startTime = Date.now()
   console.log('[ai-report] Generating with timeouts per feed...')
 
+  // Start pipeline run
+  const pipelineId = startPipelineRun('ai-report', { stage: 'news_search' })
+  logPipelineEvent(pipelineId, 'news_search', 'running', '', { started: new Date().toISOString() })
+
   // Fetch all feeds in parallel with individual timeouts; one failure doesn't block others
   const results = await Promise.allSettled([
     fetchFeedWithTimeout('HN', fetchFromHNSearch),
@@ -1563,6 +1572,17 @@ export async function generateAiDailyReport() {
     hfModels.length + ghRepos.length
   console.log(`[ai-report] Total items from all feeds: ${totalItems}`)
 
+  // Breaking news scan — non-blocking, runs in background, collected for breaking topic
+  const breakingResult = await scanNewsForBreaking().catch(e => {
+    console.warn('[ai-report] Breaking news scan failed:', e.message)
+    return null
+  })
+  logPipelineEvent(pipelineId, 'breaking_news', 'completed', '', {
+    breakingCount: breakingResult?.breakingCount || 0,
+    totalSignals: breakingResult?.totalSignals || 0,
+    completed: new Date().toISOString()
+  })
+
   const allArticles = await enrichOgThumbnails(stripStaleAndDupe([
     ...hnArticles, ...tcArticles, ...vbArticles, ...vergeArticles, ...googleArticles,
     ...mitArticles, ...arsArticles, ...devArticles, ...bbcArticles, ...guardianArticles,
@@ -1598,7 +1618,19 @@ export async function generateAiDailyReport() {
 
   for (const def of topicDefs) {
     let items = []
-    if (def.id === 'news') {
+    if (def.id === 'breaking') {
+      // Map breaking signals from detector into topic items
+      const signals = breakingResult?.signals || []
+      items = signals.slice(0, 8).map(s => ({
+        title: s.title || s.symbol || 'Breaking Signal',
+        snippet: s.reason || '',
+        source: s.source || 'breaking-detector',
+        breakingScore: s.breakingScore,
+        imageUrl: null,
+        url: null,
+        type: 'breaking',
+      }))
+    } else if (def.id === 'news') {
       const pool = [...tcArticles, ...arsArticles, ...mitArticles, ...vbArticles, ...vergeArticles, ...bbcArticles, ...guardianArticles, ...engadgetArticles, ...hnArticles]
       items = deduped(pool, 4).map(i => ({ ...i, type: 'article' }))
     } else if (def.id === 'models') {
@@ -1668,7 +1700,19 @@ export async function generateAiDailyReport() {
 
   const elapsed = Math.round((Date.now() - startTime) / 1000)
   console.log(`[ai-report] Done in ${elapsed}s, ${enrichedTopics.length} topics`)
-  return { topics: enrichedTopics.filter(t => t.items.length > 0) }
+
+  // Complete pipeline run
+  logPipelineEvent(pipelineId, 'news_search', 'completed', '', { elapsed, topics: enrichedTopics.length })
+  completePipelineRun(pipelineId, 'completed', { topics: enrichedTopics.length, breaking: breakingResult?.breakingCount || 0, elapsed })
+
+  return {
+    topics: enrichedTopics.filter(t => t.items.length > 0),
+    breaking: breakingResult ? {
+      breakingCount: breakingResult.breakingCount,
+      totalSignals: breakingResult.totalSignals,
+      signals: breakingResult.signals,
+    } : null,
+  }
 }
 
 // ═══════════════════════════════════════════
@@ -1787,7 +1831,7 @@ async function saveSocialCard(reportDir, slug, topics) {
 export async function saveReport(topics, textReport) {
   const reportDir = path.join(__dirname, '..', '..', 'reports')
   fs.mkdirSync(reportDir, { recursive: true })
-  const slug = new Date().toISOString().slice(0, 10)
+  const slug = todaySlug()
 
   const rag = buildRagContext(topics)
   saveRagCitations(slug, rag)
