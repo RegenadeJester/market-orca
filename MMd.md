@@ -1,5 +1,13 @@
 # Market Orca — Feature Log
 
+## 2026-07-15 — Feature #37: Executive Morning Brief → Indonesian (Ringkasan Pagi)
+- **Pain point:** `# Executive Morning Brief` header mapped to itself in `ID_MAP` (no-op translation). `hot topic:` inline label was untranslated. English leaked in both text and HTML output despite language guard infrastructure being ready.
+- **Done:** Fixed `ID_MAP`: `'# Executive Morning Brief'` → `'# Ringkasan Pagi'`. Added `'- **hot topic:**'` → `'- **topik hangat:**'`. Updated `buildExecutiveBrief()` in `ai-daily-report.js` to output Indonesian labels directly as defense-in-depth. `translateReport()` backup also works.
+- **Files:** `backend/src/report-language-guard.js`, `backend/src/ai-daily-report.js`
+- **Deliverable:** Executive Morning Brief now fully Indonesian. PR #24.
+- **Branch:** `feat/executive-brief-id-translation` → PR #24
+- **Backlog:** APM #5 — replace remaining English in old reports
+
 ## 2026-07-13 — Feature #36: .gitignore Collections Autolearn Generated Data
 - **Pain point:** `collections/autolearn-learned.json`, `collections/autolearn-metrics.json`, `collections/autolearn-topics.json` regenerated daily by autolearn cron — tracked in git, making `git status` permanently dirty and commits noisy with auto-generated JSON.
 - **Done:** Added `collections/` to `.gitignore`. Ran `git rm --cached` on all 3 tracked files (+ 8MB autolearn.log never tracked). Repo now clean between runs.

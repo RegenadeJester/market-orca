@@ -61,8 +61,25 @@ const TOPIC_COLLECTIONS = {
   },
 }
 
+// ─── Domain denylist ─────────────────────────────────────────────────────
+const DOMAIN_DENYLIST = new Set([
+  'medium.com', 'reddit.com', 'redd.it', 'facebook.com', 'twitter.com', 'x.com',
+  'instagram.com', 'youtube.com', 'tiktok.com', 'pinterest.com', 'tumblr.com',
+  'wikipedia.org', 'wikihow.com', 'blogspot.com', 'wordpress.com', 'wixsite.com',
+  'quora.com', 'stackexchange.com', 'stackoverflow.com',
+  'theonion.com', 'clickhole.com', 'scmp.com', 'dailymail.co.uk',
+])
+
 // ─── Helpers ──────────────────────────────────────────────────────────────
 function contentHash(s) { return crypto.createHash('md5').update(s).digest('hex') }
+
+function isDomainDenied(url) {
+  try {
+    const host = new URL(url).hostname.replace(/^www\./, '')
+    for (const d of DOMAIN_DENYLIST) if (host === d || host.endsWith('.' + d)) return true
+  } catch {}
+  return false
+}
 
 function safeParseTags(raw) {
   if (!raw) return []
@@ -123,6 +140,12 @@ export function ingestReport(slug) {
       const url = item.url || ''
       if (!title && !snippet) continue
 
+      // Domain denylist
+      if (url && isDomainDenied(url)) { skipped++; continue }
+
+      // Min quality: skip if snippet < 40 chars (low quality)
+      if (snippet.length < 40) { skipped++; continue }
+
       const content = `Title: ${title}\nSource: ${source}\nTopic: ${topic.title}\nDate: ${slug}\nContent: ${snippet}\nURL: ${url}`
       const hash = contentHash(content)
       const tags = classifyTopics(content, topic.title, title)
@@ -132,8 +155,9 @@ export function ingestReport(slug) {
       // existing check removed for re-ingest
 
       const docId = `report-${slug}-${docCount}`
+      const qualityScore = Math.min(1.0, Math.max(0.1, snippet.length / 500))
       db.prepare(`INSERT OR IGNORE INTO rag_evidence_documents (id, url, title, source, published_at, fetched_at, content_hash, asset_tags, quality_score) VALUES (?, ?, ?, ?, ?, datetime('now'), ?, ?, ?)`)
-        .run(docId, url, title, source, slug, hash, JSON.stringify(tags), 0.7)
+        .run(docId, url, title, source, slug, hash, JSON.stringify(tags), Number(qualityScore.toFixed(2)))
 
       // Chunk the content
       const chunks = chunkText(snippet)

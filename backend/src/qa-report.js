@@ -33,7 +33,7 @@ const CONFIG = {
   // Minimum items per section to not be considered "empty"
   minItemsPerSection: 1,
   // Minimum words in section body to not be "empty"
-  minWordsPerSection: 20,
+  minWordsPerSection: 30,
   // Allowed domains for citations (empty = allow all)
   allowedSourceDomains: [
     'reuters.com',

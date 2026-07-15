@@ -27,7 +27,7 @@ CREATE INDEX IF NOT EXISTS idx_pipeline_runs_status ON pipeline_runs(status);
 CREATE TABLE IF NOT EXISTS pipeline_events (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   run_id INTEGER NOT NULL,
-  stage TEXT NOT NULL, -- 'news_search' | 'rag_ingest' | 'autolearn' | 'report_gen' | 'qa_gate' | 'discord_delivery' | 'rag_answer'
+  stage TEXT NOT NULL, -- 'news_search' | 'rag_ingest' | 'autolearn' | 'report_gen' | 'qa_gate' | 'discord_delivery' | 'rag_answer' | 'breaking_news'
   status TEXT NOT NULL, -- 'started' | 'completed' | 'failed' | 'skipped'
   message TEXT,
   details TEXT, -- JSON
@@ -166,7 +166,7 @@ export function getStageBreakdown(runId) {
     FROM pipeline_events WHERE run_id = ? GROUP BY stage, status
   `).all(runId)
   
-  const stages = ['news_search', 'rag_ingest', 'autolearn', 'report_gen', 'qa_gate', 'discord_delivery', 'rag_answer']
+  const stages = ['news_search', 'breaking_news', 'rag_ingest', 'autolearn', 'report_gen', 'qa_gate', 'discord_delivery', 'rag_answer']
   const breakdown = {}
   for (const stage of stages) {
     const s = events.filter(e => e.stage === stage)

@@ -41,7 +41,7 @@ const TRIGGER_KEYWORDS = {
   'dividend': 5, 'buyback': 5, 'stock split': 10,
 }
 
-async function scanNewsForBreaking() {
+export async function scanNewsForBreaking() {
   // Connect to SQLite to check recent price changes
   let priceAnomalies = []
   try {
