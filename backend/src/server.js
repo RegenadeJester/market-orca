@@ -1360,8 +1360,9 @@ app.post('/api/impact-simulator', (req, res) => {
     r.risk_level = Math.abs(r.impact_score) >= 4 ? 'high' : Math.abs(r.impact_score) >= 2 ? 'medium' : 'low'
     return r
   }).sort((a,b)=>Math.abs(b.impact_score)-Math.abs(a.impact_score))
-  const md = `## Market Event Impact Simulator\n- **Event**: ${tmpl.label}\n- **Timeframe**: ${timeframe}\n- **Severity**: ${severity}x\n- **Probability**: ${Math.round(probability*100)}%\n- **Drivers**: ${tmpl.drivers.join(', ')}\n- **Signals to watch**: ${tmpl.signals.join(', ')}\n\n` + rows.map(r => `- **${r.symbol}** (${r.direction}, ${r.risk_level}, score ${r.impact_score}): bull=${r.bull}; base=${r.base}; bear=${r.bear}`).join('\n')
-  res.json({ ok:true, event_type:eventType, event_label:tmpl.label, custom_event_text:customText, timeframe, severity, probability, drivers:tmpl.drivers, signals:tmpl.signals, items:rows, markdown:md, report_block:md })
+  const eventLabel = customText || tmpl.label
+  const md = `## Market Event Impact Simulator\n- **Event**: ${eventLabel}\n- **Timeframe**: ${timeframe}\n- **Severity**: ${severity}x\n- **Probability**: ${Math.round(probability*100)}%\n- **Drivers**: ${tmpl.drivers.join(', ')}\n- **Signals to watch**: ${tmpl.signals.join(', ')}\n\n` + rows.map(r => `- **${r.symbol}** (${r.direction}, ${r.risk_level}, score ${r.impact_score}): bull=${r.bull}; base=${r.base}; bear=${r.bear}`).join('\n')
+  res.json({ ok:true, event_type:eventType, event_label: eventLabel, custom_event_text:customText, timeframe, severity, probability, drivers:tmpl.drivers, signals:tmpl.signals, items:rows, markdown:md, report_block:md })
 })
 
 app.post('/api/alerts/test', async (req, res) => {
