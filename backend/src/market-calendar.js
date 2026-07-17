@@ -163,25 +163,29 @@ function getHolidayName(marketType, dateStr) {
 }
 
 // Check if any significant portion of data is stale/holiday
+// Note: only 'stale' data_freshness counts as stale — 'closed' is expected off-hours
 export function dataFreshnessQA(assets = [], now = new Date()) {
   if (!assets.length) return { pass: true, staleCount: 0, holidayCount: 0, total: 0 }
-  let staleCount = 0, holidayCount = 0
+  let staleCount = 0, holidayCount = 0, closedCount = 0, liveCount = 0
   for (const a of assets) {
     const f = getAssetFreshness(a, now)
-    if (f.data_freshness === 'stale' || f.data_freshness === 'closed') staleCount++
-    if (f.data_freshness === 'holiday') holidayCount++
+    if (f.data_freshness === 'stale') staleCount++
+    else if (f.data_freshness === 'holiday') holidayCount++
+    else if (f.data_freshness === 'closed') closedCount++
+    else if (f.data_freshness === 'live') liveCount++
   }
-  const staleRatio = staleCount / assets.length
-  const holidayRatio = holidayCount / assets.length
+  // Only stale (actual old data) triggers warning; closed is normal off-hours
+  const staleRatio = assets.length ? staleCount / assets.length : 0
   const pass = staleRatio <= 0.3
   return {
     pass,
     staleCount,
     holidayCount,
+    closedCount,
+    liveCount,
     total: assets.length,
     staleRatio: Number(staleRatio.toFixed(2)),
-    holidayRatio: Number(holidayRatio.toFixed(2)),
-    warning: !pass ? `>30% data stale (${Math.round(staleRatio*100)}%) — label diperlukan` : undefined,
+    warning: !pass ? `>30% data stale (${Math.round(staleRatio*100)}%) — beberapa sumber perlu diperbarui` : undefined,
   }
 }
 
