@@ -1,5 +1,13 @@
 # Market Orca — Feature Log
 
+## 2026-07-17 — Feature #39: Separate Closed from Stale in Data Freshness QA
+- **Pain point:** At 08:00 WIB, off-hours IDX/NYSE assets counted as 'stale' → 100% stale warning (misleading). Both `stale` and `closed` merged in `staleCount`.
+- **Done:** `dataFreshnessQA()` now only counts `data_freshness === 'stale'` (actual old data for open markets). `closed` is normal off-hours, no longer triggers warning. Added `closedCount`/`liveCount` to return object.
+- **Files:** `backend/src/market-calendar.js`
+- **Deliverable:** 08:00 WIB → 0% stale, 67% closed, 33% live, no warning. PR #26 ✅ merged.
+- **Branch:** `feat/separate-closed-from-stale` → PR #26 ✅ merged
+- **Backlog:** —
+
 ## 2026-07-16 — Feature #38: Impact Simulator Custom Event Label + Bahasa Indonesia UI
 - **Pain point:** (1) Custom event text entered by user showed matched template label (e.g., "AI breakthrough") instead of user's own text in both JSON response and markdown export. (2) Impact Simulator UI still had English labels (Timeframe, Scope, Drivers, Signals, Export Block, Run Simulation) despite other pages being Indonesian.
 - **Done:** Backend: `server.js` line ~1360 — `event_label` now returns `customText || tmpl.label`; markdown export uses same `eventLabel`. Frontend: `ImpactSimulatorPage.vue` all labels translated to Indonesian.
@@ -7,14 +15,6 @@
 - **Deliverable:** Custom event text properly shown; all UI labels Indonesian. PR #25 (backend), PR #3 (frontend).
 - **Branch:** `feat/impact-sim-custom-label` → PR #25; `feat/impact-sim-id-labels` → PR #3 (frontend repo)
 - **Backlog:** —
-
-## 2026-07-15 — Feature #37: Executive Morning Brief → Indonesian (Ringkasan Pagi)
-- **Pain point:** `# Executive Morning Brief` header mapped to itself in `ID_MAP` (no-op translation). `hot topic:` inline label was untranslated. English leaked in both text and HTML output despite language guard infrastructure being ready.
-- **Done:** Fixed `ID_MAP`: `'# Executive Morning Brief'` → `'# Ringkasan Pagi'`. Added `'- **hot topic:**'` → `'- **topik hangat:**'`. Updated `buildExecutiveBrief()` in `ai-daily-report.js` to output Indonesian labels directly as defense-in-depth. `translateReport()` backup also works.
-- **Files:** `backend/src/report-language-guard.js`, `backend/src/ai-daily-report.js`
-- **Deliverable:** Executive Morning Brief now fully Indonesian. PR #24.
-- **Branch:** `feat/executive-brief-id-translation` → PR #24
-- **Backlog:** APM #5 — replace remaining English in old reports
 
 ## 2026-07-13 — Feature #36: .gitignore Collections Autolearn Generated Data
 - **Pain point:** `collections/autolearn-learned.json`, `collections/autolearn-metrics.json`, `collections/autolearn-topics.json` regenerated daily by autolearn cron — tracked in git, making `git status` permanently dirty and commits noisy with auto-generated JSON.
