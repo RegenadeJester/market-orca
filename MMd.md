@@ -1,5 +1,13 @@
 # Market Orca — Feature Log
 
+## 2026-07-18 — Feature #40: PDF English Labels → Bahasa Indonesia
+- **Pain point:** PDF export still had 6 English labels: 'AI DAILY REPORT', 'Curated by Little Candle', 'Statistics', 'Top Stories Gallery', 'Market Impact + Quality', 'Fun Facts' — despite all text/HTML reports already Indonesian.
+- **Done:** Translated all 6 PDF section headers + subtitle to ID: `LAPORAN HARIAN AI`, `Dikurasi oleh Little Candle — 18 sumber, 13 bagian`, `Statistik`, `Galeri Berita Teratas`, `Dampak Pasar + Kualitas`, `Fakta Menarik`.
+- **Files:** `backend/src/ai-daily-report.js`
+- **Deliverable:** PDF report now fully Indonesian. PR #27 ✅ merged.
+- **Branch:** `feat/pdf-id-labels` → PR #27 ✅ merged
+- **Backlog:** PDF export of old English reports (Batch 5, #5)
+
 ## 2026-07-17 — Feature #39: Separate Closed from Stale in Data Freshness QA
 - **Pain point:** At 08:00 WIB, off-hours IDX/NYSE assets counted as 'stale' → 100% stale warning (misleading). Both `stale` and `closed` merged in `staleCount`.
 - **Done:** `dataFreshnessQA()` now only counts `data_freshness === 'stale'` (actual old data for open markets). `closed` is normal off-hours, no longer triggers warning. Added `closedCount`/`liveCount` to return object.
