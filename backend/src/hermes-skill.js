@@ -51,7 +51,7 @@ export function scoreMcpQuality() {
 export function scoreAutolearnQuality() {
   let score = 50
   try {
-    const cols = db.prepare('SELECT count(DISTINCT collection) as n FROM rag_evidence_chunks').get()?.n || 0
+    const cols = db.prepare('SELECT count(DISTINCT json_extract(asset_tags, "$[0]")) as n FROM rag_evidence_chunks WHERE asset_tags IS NOT NULL AND asset_tags != "[]"').get()?.n || 0
     score += Math.min(cols * 5, 25)
     const classified = db.prepare('SELECT count(*) as n FROM rag_evidence_chunks WHERE topic IS NOT NULL').get()?.n || 0
     const total = db.prepare('SELECT count(*) as n FROM rag_evidence_chunks').get()?.n || 1
