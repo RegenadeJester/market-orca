@@ -977,13 +977,13 @@ export async function buildPdfReport(topics) {
           doc.y = 55
         }
       }
-      doc.fontSize(24).font('Helvetica-Bold').fillColor(P).text('AI DAILY REPORT', { align: 'center' })
+      doc.fontSize(24).font('Helvetica-Bold').fillColor(P).text('LAPORAN HARIAN AI', { align: 'center' })
       doc.moveDown(0.6)
       doc.fontSize(22).font('Helvetica-Bold').fillColor(DK).text(heroTitle, { align: 'center', lineGap: 3 })
       doc.moveDown(0.4)
       doc.fontSize(13).font('Helvetica').fillColor(GY).text(dateStr, { align: 'center' })
       doc.moveDown(0.3)
-      doc.fontSize(10).font('Helvetica').fillColor(GY).text('Curated by Little Candle -- 18 sources, 13 sections', { align: 'center' })
+      doc.fontSize(10).font('Helvetica').fillColor(GY).text('Dikurasi oleh Little Candle — 18 sumber, 13 bagian', { align: 'center' })
       doc.moveDown(1)
       doc.moveTo(55, doc.y).lineTo(545, doc.y).strokeColor(PG).lineWidth(3).stroke()
       doc.moveDown(1.5)
@@ -1009,7 +1009,7 @@ export async function buildPdfReport(topics) {
         const as = [...new Set(topics.flatMap(t=>t.items.map(i=>i.source).filter(Boolean)))]
         const by = doc.y
         doc.rect(55, by, 500, 42).fill('#F9FAFB')
-        doc.fillColor(P).fontSize(10).font('Helvetica-Bold').text('Statistics', 65, by + 8)
+        doc.fillColor(P).fontSize(10).font('Helvetica-Bold').text('Statistik', 65, by + 8)
         doc.fillColor(DK).fontSize(9).font('Helvetica').text(`Items: ${ti} | Articles: ${ta} | Models: ${tm} | Sources: ${as.length}`, 65, by + 24)
         doc.fillColor(GY).fontSize(8).text(`Sources: ${as.join(', ')}`, 65, doc.y + 3)
       }
@@ -1023,7 +1023,7 @@ export async function buildPdfReport(topics) {
       if (topStories.length >= 3) {
         doc.addPage()
         doc.rect(55, doc.y, 500, 22).fill(PG)
-        doc.fillColor(P).fontSize(13).font('Helvetica-Bold').text('Top Stories Gallery', 65, doc.y + 5)
+        doc.fillColor(P).fontSize(13).font('Helvetica-Bold').text('Galeri Berita Teratas', 65, doc.y + 5)
         doc.fillColor(DK).moveDown(1.8)
 
         // Show images in 2 rows of 3
@@ -1052,7 +1052,7 @@ export async function buildPdfReport(topics) {
 
       doc.addPage()
       doc.rect(55, doc.y, 500, 22).fill(PG)
-      doc.fillColor(P).fontSize(13).font('Helvetica-Bold').text('Market Impact + Quality', 65, doc.y + 5)
+      doc.fillColor(P).fontSize(13).font('Helvetica-Bold').text('Dampak Pasar + Kualitas', 65, doc.y + 5)
       doc.fillColor(DK).moveDown(1.8)
       doc.fontSize(10).font('Helvetica-Bold').text(`Regime: ${safe(impact.regime.regime)} | Quality: ${quality.score}/100 (${quality.status})`)
       doc.fontSize(9).font('Helvetica').text(`Indonesia pulse: ${safe(impact.pulse)}`, { lineGap: 3 })
@@ -1067,7 +1067,7 @@ export async function buildPdfReport(topics) {
       if (funFacts.length > 0) {
         if (doc.y > 620) doc.addPage()
         doc.rect(55, doc.y, 500, 22).fill(PG)
-        doc.fillColor(P).fontSize(13).font('Helvetica-Bold').text('Fun Facts', 65, doc.y + 5)
+        doc.fillColor(P).fontSize(13).font('Helvetica-Bold').text('Fakta Menarik', 65, doc.y + 5)
         doc.fillColor(DK).moveDown(1.8)
         funFacts.slice(0, 8).forEach(f => {
           if (doc.y > 710) doc.addPage()
