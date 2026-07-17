@@ -463,7 +463,7 @@ function rootCauseTagging(topics=[]) {
 }
 function outageTimeline(topics=[]) {
   const items = topics.flatMap(t=>t.items||[]).filter(i=>/blackout|outage|pemadaman|pln|down|incident|gangguan/i.test(`${i.title||''} ${i.snippet||''}`)).slice(0,5)
-  if (!items.length) return ['No outage/incident headline detected today']
+  if (!items.length) return ['Tidak ada judul gangguan/insiden terdeteksi hari ini']
   return items.map((i,idx)=>`${idx+1}. ${freshnessLabel(i)} — ${clean(i.title).slice(0,120)}${i.source?` (${i.source})`:''}`)
 }
 function impactAreaMap(topics=[]) {
@@ -479,12 +479,12 @@ function slaBreachDetector(topics=[]) {
 }
 function executiveSummary(topics=[]) {
   const q = reportQuality(topics), impact = buildImpactWatch(topics), rc = rootCauseTagging(topics)
-  return [`Revenue/market: ${impact.regime.regime}`, `Incident: ${rc.primary}`, `Customer impact: ${impactAreaMap(topics).join(', ')}`, `Market signal: ${impact.event.label}`, `Next action: verify ${impact.event.signals[0] || 'primary source'}`]
+  return [`Pendapatan/pasar: ${impact.regime.regime}`, `Insiden: ${rc.primary}`, `Dampak pelanggan: ${impactAreaMap(topics).join(', ')}`, `Sinyal pasar: ${impact.event.label}`, `Langkah selanjutnya: verifikasi ${impact.event.signals[0] || 'sumber primer'}`]
 }
 function anomalyAlert(topics=[]) {
   const items = topics.flatMap(t=>t.items||[])
   const spikes = items.filter(i=>Number(i.points||0)>150 || /surge|spike|crash|drop|outage|blackout|breach|hack/i.test(`${i.title||''} ${i.snippet||''}`)).slice(0,5)
-  return spikes.length ? spikes.map(i=>`${clean(i.title).slice(0,110)}${i.points?` (^${i.points})`:''}`) : ['No major anomaly detected']
+  return spikes.length ? spikes.map(i=>`${clean(i.title).slice(0,110)}${i.points?` (^${i.points})`:''}`) : ['Tidak ada anomali besar terdeteksi']
 }
 function beforeAfterTracker(topics=[]) {
   const q = reportQuality(topics)
@@ -493,7 +493,7 @@ function beforeAfterTracker(topics=[]) {
 function competitorSignalFeed(topics=[]) {
   const names = ['OpenAI','Anthropic','Google','Meta','Microsoft','Nvidia','Apple','xAI','Perplexity','Mistral']
   const textItems = topics.flatMap(t=>t.items||[])
-  return names.map(n=>({n,c:textItems.filter(i=>new RegExp(n,'i').test(`${i.title||''} ${i.snippet||''}`)).length})).filter(x=>x.c).sort((a,b)=>b.c-a.c).slice(0,6).map(x=>`${x.n}: ${x.c} signal`) || ['No named competitor spike']
+  return names.map(n=>({n,c:textItems.filter(i=>new RegExp(n,'i').test(`${i.title||''} ${i.snippet||''}`)).length})).filter(x=>x.c).sort((a,b)=>b.c-a.c).slice(0,6).map(x=>`${x.n}: ${x.c} sinyal`) || ['Tidak ada lonjakan kompetitor']
 }
 function actionRecommendationEngine(topics=[]) {
   const sla = slaBreachDetector(topics), impact = buildImpactWatch(topics)
@@ -948,7 +948,7 @@ export async function buildPdfReport(topics) {
       const tmpFile = path.join(__dirname, '..', 'tmp', `ai-report-${Date.now()}.pdf`)
       fs.mkdirSync(path.dirname(tmpFile), { recursive: true })
 
-      const doc = new PDFDocument({ size: 'A4', margin: 55, info: { Title: 'AI Daily Report', Author: 'Little Candle' }, bufferPages: true })
+      const doc = new PDFDocument({ size: 'A4', margin: 55, info: { Title: 'Laporan Harian AI', Author: 'Little Candle' }, bufferPages: true })
       const stream = fs.createWriteStream(tmpFile)
       doc.pipe(stream)
 
@@ -1161,7 +1161,7 @@ export function buildDiscordEmbed(topics) {
   const allItems = topics.flatMap(t => (t.items || []).filter(i => i.title))
   const sourceCount = new Set(allItems.map(i => i.source).filter(Boolean)).size
   const embed = new EmbedBuilder()
-    .setTitle('AI Daily Report')
+    .setTitle('Laporan Harian AI')
     .setDescription(formatDateIndonesia())
     .setColor(0x8B5CF6)
     .setFooter({ text: `Little Candle -- ${sourceCount} sources` })
@@ -1465,15 +1465,15 @@ async function fetchFromGitHub() {
 // ═══════════════════════════════════════════
 
 const TOPICS = [
-  { id:'breaking', title:'Breaking News', desc:'Berita penting berdampak tinggi, pergerakan harga & volume ekstrem.' },
-  { id:'news', title:'Market News', desc:'Berita pasar saham Indonesia & global terkini.' },
-  { id:'finance', title:'Finance', desc:'Saham, rupiah, USD/IDR, suku bunga BI, ekonomi.' },
-  { id:'aifinance', title:'AI Finance', desc:'AI di fintech, perbankan, investing Indonesia.' },
+  { id:'breaking', title:'Berita Mendadak', desc:'Berita penting berdampak tinggi, pergerakan harga & volume ekstrem.' },
+  { id:'news', title:'Berita Pasar', desc:'Berita pasar saham Indonesia & global terkini.' },
+  { id:'finance', title:'Keuangan', desc:'Saham, rupiah, USD/IDR, suku bunga BI, ekonomi.' },
+  { id:'aifinance', title:'AI Keuangan', desc:'AI di fintech, perbankan, investing Indonesia.' },
   { id:'commodity', title:'Komoditas & Emas', desc:'Emas (XAUUSD), minyak (CL), CPO, batu bara.' },
-  { id:'crypto', title:'Crypto', desc:'Bitcoin, Ethereum, regulasi crypto Indonesia.' },
-  { id:'global', title:'Global Markets', desc:'Wall Street, Fed, ECB, Nikkei, Hang Seng.' },
+  { id:'crypto', title:'Kripto', desc:'Bitcoin, Ethereum, regulasi crypto Indonesia.' },
+  { id:'global', title:'Pasar Global', desc:'Wall Street, Fed, ECB, Nikkei, Hang Seng.' },
   { id:'macro', title:'Macro & Ekonomi', desc:'Inflasi, GDP, kebijakan moneter & fiskal.' },
-  { id:'tech', title:'Tech & AI', desc:'Tech relevan pasar: Nvidia, Apple, TSMC, AI.' },
+  { id:'tech', title:'Teknologi & AI', desc:'Tech relevan pasar: Nvidia, Apple, TSMC, AI.' },
   { id:'fun', title:'Fakta Market', desc:'Fakta menarik pasar keuangan & ekonomi.' },
 ]
 
@@ -1622,7 +1622,7 @@ export async function generateAiDailyReport() {
       // Map breaking signals from detector into topic items
       const signals = breakingResult?.signals || []
       items = signals.slice(0, 8).map(s => ({
-        title: s.title || s.symbol || 'Breaking Signal',
+        title: s.title || s.symbol || 'Sinyal Mendadak',
         snippet: s.reason || '',
         source: s.source || 'breaking-detector',
         breakingScore: s.breakingScore,
@@ -2214,7 +2214,7 @@ function buildDigestEmbed(text, topics) {
 
     const embed = new EmbedBuilder()
       .setColor(impact.regime.regime === 'risk-on' ? 0x22c55e : impact.regime.regime === 'risk-off' ? 0xef4444 : 0x6366f1)
-      .setTitle(hero ? clean(hero.title).slice(0, 100) : 'AI Daily Report')
+      .setTitle(hero ? clean(hero.title).slice(0, 100) : 'Laporan Harian AI')
       .setURL(hero?.url || 'https://market-orca.local')
       .setDescription(`📅 ${dateStr}\n${hero ? clean(whyItMatters(hero)).slice(0, 200) : ''}`)
       .addFields(
@@ -2233,7 +2233,7 @@ function buildDigestEmbed(text, topics) {
   } catch {
     return new EmbedBuilder()
       .setColor(0x6366f1)
-      .setTitle('📊 AI Daily Report')
+      .setTitle('📊 Laporan Harian AI')
       .setDescription('Gagal membangun embed ringkasan.')
       .setTimestamp()
   }
