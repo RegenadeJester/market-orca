@@ -1,5 +1,16 @@
 # Market Orca — Feature Log
 
+## 2026-07-19 — Feature #42: MCP StreamableHTTP Transport + Scripts Setup
+- **Pain point:** MCP HTTP server used deprecated SSE transport; StreamableHTTP is now recommended standard (SDK 1.x). Also missing `scripts/package.json` for MCP server config.
+- **Done:**
+  - `backend/src/mcp-http-server.js`: Import `StreamableHTTPServerTransport` from `@modelcontextprotocol/sdk/server/streamableHttp.js`, use as primary transport on `app.all(PATH)`
+  - `scripts/package.json`: Add module type config for MCP scripts
+  - Keep SSE endpoint for backward compatibility
+- **Files:** `backend/src/mcp-http-server.js`, `scripts/package.json`
+- **Deliverable:** MCP HTTP server now uses modern StreamableHTTP transport. PR #29 ✅ merged.
+- **Branch:** `feat/mcp-streamablehttp` → PR #29 ✅ merged
+- **Backlog:** —
+
 ## 2026-07-18 — Feature #41: AI Daily Report Full Indonesian Cleanup (Remaining English Labels)
 - **Pain point:** After Feature #40 (PDF headers), `ai-daily-report.js` still had 25+ English strings bypassing `report-language-guard.js`: PDF metadata title, Discord embed titles (3), TOPICS array (7 topic titles), Breaking Signal fallback, fallback messages (3), executive summary labels (5), competitor 'signal' word.
 - **Done:** Translated all remaining user-facing English to Indonesian:
