@@ -1622,7 +1622,7 @@ export async function generateAiDailyReport() {
       // Map breaking signals from detector into topic items
       const signals = breakingResult?.signals || []
       items = signals.slice(0, 8).map(s => ({
-        title: s.title || s.symbol || 'Breaking Signal',
+        title: s.title || s.symbol || 'Sinyal Mendadak',
         snippet: s.reason || '',
         source: s.source || 'breaking-detector',
         breakingScore: s.breakingScore,
