@@ -1465,15 +1465,15 @@ async function fetchFromGitHub() {
 // ═══════════════════════════════════════════
 
 const TOPICS = [
-  { id:'breaking', title:'Breaking News', desc:'Berita penting berdampak tinggi, pergerakan harga & volume ekstrem.' },
-  { id:'news', title:'Market News', desc:'Berita pasar saham Indonesia & global terkini.' },
-  { id:'finance', title:'Finance', desc:'Saham, rupiah, USD/IDR, suku bunga BI, ekonomi.' },
-  { id:'aifinance', title:'AI Finance', desc:'AI di fintech, perbankan, investing Indonesia.' },
+  { id:'breaking', title:'Berita Mendadak', desc:'Berita penting berdampak tinggi, pergerakan harga & volume ekstrem.' },
+  { id:'news', title:'Berita Pasar', desc:'Berita pasar saham Indonesia & global terkini.' },
+  { id:'finance', title:'Keuangan', desc:'Saham, rupiah, USD/IDR, suku bunga BI, ekonomi.' },
+  { id:'aifinance', title:'AI Keuangan', desc:'AI di fintech, perbankan, investing Indonesia.' },
   { id:'commodity', title:'Komoditas & Emas', desc:'Emas (XAUUSD), minyak (CL), CPO, batu bara.' },
-  { id:'crypto', title:'Crypto', desc:'Bitcoin, Ethereum, regulasi crypto Indonesia.' },
-  { id:'global', title:'Global Markets', desc:'Wall Street, Fed, ECB, Nikkei, Hang Seng.' },
-  { id:'macro', title:'Macro & Ekonomi', desc:'Inflasi, GDP, kebijakan moneter & fiskal.' },
-  { id:'tech', title:'Tech & AI', desc:'Tech relevan pasar: Nvidia, Apple, TSMC, AI.' },
+  { id:'crypto', title:'Kripto', desc:'Bitcoin, Ethereum, regulasi crypto Indonesia.' },
+  { id:'global', title:'Pasar Global', desc:'Wall Street, Fed, ECB, Nikkei, Hang Seng.' },
+  { id:'macro', title:'Makro & Ekonomi', desc:'Inflasi, GDP, kebijakan moneter & fiskal.' },
+  { id:'tech', title:'Teknologi & AI', desc:'Tech relevan pasar: Nvidia, Apple, TSMC, AI.' },
   { id:'fun', title:'Fakta Market', desc:'Fakta menarik pasar keuangan & ekonomi.' },
 ]
 
