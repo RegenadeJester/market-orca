@@ -334,6 +334,7 @@ function saveMetrics() {
 const BLACKLIST_DOMAINS = [
   'cambridge.org', 'merriam-webster.com', 'wiktionary.org', 'collinsdictionary.com',
   'dictionary.com', 'thefreedictionary.com', 'wordreference.com',
+  'thesaurus.com', 'kbbi.', 'bdir.in', 'knowyourgst.com', 'mybroadband.co.za',
   'github.com', 'gitlab.com', 'bitbucket.org',
   'stackoverflow.com', 'stackexchange.com',
   'reddit.com', 'quora.com', 'yahoo.com',
@@ -341,6 +342,8 @@ const BLACKLIST_DOMAINS = [
   'youtube.com', 'vimeo.com', 'dailymotion.com',
   'pinterest.com', 'tumblr.com'
 ]
+
+const MIN_QUALITY = 30
 
 function isBlacklisted(url) {
   try {
@@ -405,6 +408,12 @@ async function processTopic(topic) {
           // Relevance filter - skip noise
           if (!isRelevant(page.title, page.content, topic.id)) {
             log(`  🚫 Irrelevant: "${page.title.slice(0, 50)}"`)
+            continue
+          }
+
+          // Quality threshold filter - reject low quality
+          if (qualityScore < MIN_QUALITY) {
+            log(`  🗑️ Low quality (Q:${qualityScore} < ${MIN_QUALITY}): "${page.title.slice(0, 50)}"`)
             continue
           }
 

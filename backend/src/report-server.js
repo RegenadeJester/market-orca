@@ -1584,8 +1584,8 @@ app.use((err, _req, res, next) => {
 })
 
 // ── Start server ─────────────────────────────────────────────────────────
-app.listen(PORT, '::', () => {
-  console.log(`[report-server] listening on http://localhost:${PORT} (IPv4+IPv6)`)
+app.listen(PORT, '127.0.0.1', () => {
+  console.log(`[report-server] listening on http://localhost:${PORT} (IPv4)`)
   console.log(`[report-server] SPA dist: ${frontendDist} (exists: ${fs.existsSync(frontendDist)})`)
   // Initialize Discord bot for report delivery
   if (process.env.NO_DISCORD !== '1') {
