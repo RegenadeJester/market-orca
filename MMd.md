@@ -1,5 +1,30 @@
 # Market Orca — Feature Log
 
+## 2026-07-19 — Feature #42: MCP StreamableHTTP Transport + Scripts Setup
+- **Pain point:** MCP HTTP server used deprecated SSE transport; StreamableHTTP is now recommended standard (SDK 1.x). Also missing `scripts/package.json` for MCP server config.
+- **Done:**
+  - `backend/src/mcp-http-server.js`: Import `StreamableHTTPServerTransport` from `@modelcontextprotocol/sdk/server/streamableHttp.js`, use as primary transport on `app.all(PATH)`
+  - `scripts/package.json`: Add module type config for MCP scripts
+  - Keep SSE endpoint for backward compatibility
+- **Files:** `backend/src/mcp-http-server.js`, `scripts/package.json`
+- **Deliverable:** MCP HTTP server now uses modern StreamableHTTP transport. PR #29 ✅ merged.
+- **Branch:** `feat/mcp-streamablehttp` → PR #29 ✅ merged
+- **Backlog:** —
+
+## 2026-07-18 — Feature #41: AI Daily Report Full Indonesian Cleanup (Remaining English Labels)
+- **Pain point:** After Feature #40 (PDF headers), `ai-daily-report.js` still had 25+ English strings bypassing `report-language-guard.js`: PDF metadata title, Discord embed titles (3), TOPICS array (7 topic titles), Breaking Signal fallback, fallback messages (3), executive summary labels (5), competitor 'signal' word.
+- **Done:** Translated all remaining user-facing English to Indonesian:
+  - PDF metadata: `AI Daily Report` → `Laporan Harian AI`
+  - Discord embeds (3x): `AI Daily Report` → `Laporan Harian AI`
+  - TOPICS array: Breaking News→Berita Mendadak, Market News→Berita Pasar, Finance→Keuangan, AI Finance→AI Keuangan, Crypto→Kripto, Global Markets→Pasar Global, Tech & AI→Teknologi & AI
+  - Breaking Signal fallback: `Breaking Signal` → `Sinyal Mendadak`
+  - Fallbacks: No outage/incident→Tidak ada judul gangguan, No major anomaly→Tidak ada anomali besar, No named competitor spike→Tidak ada lonjakan kompetitor, signal→sinyal
+  - Executive summary: Revenue/market→Pendapatan/pasar, Incident→Insiden, Customer impact→Dampak pelanggan, Market signal→Sinyal pasar, Next action→Langkah selanjutnya, primary source→sumber primer
+- **Files:** `backend/src/ai-daily-report.js`
+- **Deliverable:** All user-facing report strings now Indonesian. PR #28.
+- **Branch:** `feat/id-cleanup-remaining` → PR #28
+- **Backlog:** APM #5 — Batch 5 re-export old English reports from source
+
 ## 2026-07-18 — Feature #40: PDF English Labels → Bahasa Indonesia
 - **Pain point:** PDF export still had 6 English labels: 'AI DAILY REPORT', 'Curated by Little Candle', 'Statistics', 'Top Stories Gallery', 'Market Impact + Quality', 'Fun Facts' — despite all text/HTML reports already Indonesian.
 - **Done:** Translated all 6 PDF section headers + subtitle to ID: `LAPORAN HARIAN AI`, `Dikurasi oleh Little Candle — 18 sumber, 13 bagian`, `Statistik`, `Galeri Berita Teratas`, `Dampak Pasar + Kualitas`, `Fakta Menarik`.

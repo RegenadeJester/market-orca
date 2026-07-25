@@ -1472,9 +1472,6 @@ const TOPICS = [
   { id:'commodity', title:'Komoditas & Emas', desc:'Emas (XAUUSD), minyak (CL), CPO, batu bara.' },
   { id:'crypto', title:'Kripto', desc:'Bitcoin, Ethereum, regulasi crypto Indonesia.' },
   { id:'global', title:'Pasar Global', desc:'Wall Street, Fed, ECB, Nikkei, Hang Seng.' },
-  { id:'macro', title:'Macro & Ekonomi', desc:'Inflasi, GDP, kebijakan moneter & fiskal.' },
-  { id:'tech', title:'Teknologi & AI', desc:'Tech relevan pasar: Nvidia, Apple, TSMC, AI.' },
-  { id:'fun', title:'Fakta Market', desc:'Fakta menarik pasar keuangan & ekonomi.' },
 ]
 
 const RSS_FEEDS = [
