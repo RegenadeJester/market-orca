@@ -163,14 +163,14 @@ function pickHero(topics) {
 
 function vibeTag(item) {
   const t = `${item?.title || ''} ${item?.snippet || ''}`.toLowerCase()
-  if (/agent|claude code|cursor|copilot|developer|coding|github|vibe/.test(t)) return 'dev-core'
-  if (/funding|raises|ipo|valuation|billion|million|startup/.test(t)) return 'money moves'
-  if (/security|privacy|hack|breach|vulnerability|malware/.test(t)) return 'red flag'
-  if (/model|llm|benchmark|reasoning|openai|anthropic|gemini|llama|qwen/.test(t)) return 'model wars'
-  if (/stock|market|finance|crypto|bitcoin|fed|rate|bank/.test(t)) return 'market mood'
-  if (/launch|release|tool|platform|api|sdk|app|feature/.test(t)) return 'new tool drop'
-  if (/research|paper|study|dataset|evaluation|safety/.test(t)) return 'lab notes'
-  return 'worth knowing'
+  if (/agent|claude code|cursor|copilot|developer|coding|github|vibe/.test(t)) return 'inti-dev'
+  if (/funding|raises|ipo|valuation|billion|million|startup/.test(t)) return 'gerakan-uang'
+  if (/security|privacy|hack|breach|vulnerability|malware/.test(t)) return 'bendera-merah'
+  if (/model|llm|benchmark|reasoning|openai|anthropic|gemini|llama|qwen/.test(t)) return 'perang-model'
+  if (/stock|market|finance|crypto|bitcoin|fed|rate|bank/.test(t)) return 'mood-pasar'
+  if (/launch|release|tool|platform|api|sdk|app|feature/.test(t)) return 'tool-baru-drop'
+  if (/research|paper|study|dataset|evaluation|safety/.test(t)) return 'catatan-lab'
+  return 'berharga-diketahui'
 }
 
 function whyItMatters(item) {
@@ -367,7 +367,7 @@ function buildImpactWatch(topics) {
   const regime = marketRegimeFromAssets(assets)
   const pulse = indonesiaPulse(assets)
   const reasons = rows.map(r => impactReason(r, event))
-  return { event, rows, regime, pulse, reasons, markdown: `## Market Impact Watch\n- **Regime:** ${regime.regime} (${regime.signals.join(' • ')})\n- **Indonesia pulse:** ${pulse}\n- **Event bias:** ${event.label}\n- **Drivers:** ${event.drivers.join(', ')}\n- **Signals:** ${event.signals.join(', ')}\n\n${rows.map(r => `- **${r.symbol}**: ${r.dir}, ${r.risk} risk, score ${r.score} — ${impactReason(r,event)}`).join('\n')}` }
+  return { event, rows, regime, pulse, reasons, markdown: `## Pantauan Dampak Pasar\n- **Rezim:** ${regime.regime} (${regime.signals.join(' • ')})\n- **Denyut Indonesia:** ${pulse}\n- **Bias peristiwa:** ${event.label}\n- **Pendorong:** ${event.drivers.join(', ')}\n- **Sinyal:** ${event.signals.join(', ')}\n\n${rows.map(r => `- **${r.symbol}**: ${r.dir}, ${r.risk} risiko, score ${r.score} — ${impactReason(r,event)}`).join('\n')}` }
 }
 
 
@@ -428,7 +428,7 @@ function indonesiaPulse(assets=[]) {
   return picked.map(a => `${a.symbol}: ${Number(a.change_percent||0)>=0?'+':''}${a.change_percent||0}%`).join(' • ') || 'IHSG/IDR data pending'
 }
 function watchlistThesis(rows=[]) {
-  return rows.slice(0,6).map(r => `- **${r.symbol}**: pantau karena ${r.risk} risk, ${r.dir}, score ${r.score}; next signal = breakout/volume/news confirmation`).join('\n')
+  return rows.slice(0,6).map(r => `- **${r.symbol}**: pantau karena ${r.risk} risiko, ${r.dir}, score ${r.score}; next signal = breakout/volume/news confirmation`).join('\n')
 }
 function redFlags(topics=[], impactRows=[]) {
   const text = topics.flatMap(t=>t.items||[]).map(i=>`${i.title} ${i.snippet||''}`).join(' ').toLowerCase()
@@ -647,7 +647,7 @@ function reliabilityIncidentQaPack(topics=[]) {
 `## Source Diversity Score\n`+
 `${sourceDiversityBlock(topics)}\n\n`+
 `··································\n\n`+
-`## Market Regime\n`+
+`## Rezim Pasar\n`+
 `${marketRegimeBlock(topics)}`
 }
 function sentimentTrendBlock(topics=[]) {
@@ -704,11 +704,11 @@ function marketRegimeBlock(topics=[]) {
     else { conviction = Math.max(40, 60 - Math.abs(up - down) * 5) }
     const emoji = regime === 'risk-on' ? '🟢' : regime === 'risk-off' ? '🔴' : '🟡'
     const lines = [
-      `**Regime:** ${emoji} ${regime.toUpperCase()} (conviction ${conviction}%)`,
+      `**Rezim:** ${emoji} ${regime.toUpperCase()} (keyakinan ${conviction}%)`,
       `**Breadth:** ${up} assets >+1% · ${down} assets <-1% · ${totalMov} assets bergerak`
     ]
     const sentiment = scoreMarketSentiment(topics)
-    if (sentiment.overall) lines.push(`**Sentimen vs Regime:** ${sentiment.overall.label === 'bullish' && regime === 'risk-on' ? '✅ Selaras bullish' : sentiment.overall.label === 'bearish' && regime === 'risk-off' ? '✅ Selaras bearish' : '⚠️ Divergensi — price vs sentiment berbeda arah'}`)
+    if (sentiment.overall) lines.push(`**Sentimen vs Rezim:** ${sentiment.overall.label === 'bullish' && regime === 'risk-on' ? '✅ Selaras bullish' : sentiment.overall.label === 'bearish' && regime === 'risk-off' ? '✅ Selaras bearish' : '⚠️ Divergensi — price vs sentiment berbeda arah'}`)
     return lines.join('\n')
   } catch { return 'Market regime data tidak tersedia.' }
 }
@@ -824,12 +824,12 @@ export function buildTextReport(topics, opts = {}) {
     try { pSectors = JSON.parse(persona?.focus_sectors || '[]') } catch { pSectors = [] }
     const pTimeframe = persona?.preferred_timeframe || 'swing'
     const pStyle = persona?.alert_style || 'brief'
-    const sectorLine = pSectors.length ? pSectors.join(', ') : 'general market'
-    personaSection = `## Tailored For You\n` +
-      `- **Profile:** ${pRole} · ${pRisk} risk · ${pTimeframe} timeframe\n` +
-      `- **Focus sectors:** ${sectorLine}\n` +
-      `- **Alert style:** ${pStyle}\n` +
-      `- **Context:** ${personaPrompt}\n`
+    const sectorLine = pSectors.length ? pSectors.join(', ') : 'pasar umum'
+    personaSection = `## Disesuaikan Untuk Anda\n` +
+      `- **Profil:** ${pRole} · ${pRisk} risk · ${pTimeframe} jangka-waktu\n` +
+      `- **Sektor fokus:** ${sectorLine}\n` +
+      `- **Gaya alert:** ${pStyle}\n` +
+      `- **Konteks:** ${personaPrompt}\n`
     // Highlight assets relevant to persona's sectors
     if (pSectors.length) {
       const sectorAssets = impact.rows.filter(r => {
@@ -837,7 +837,7 @@ export function buildTextReport(topics, opts = {}) {
         return pSectors.some(s => txt.includes(s.toLowerCase()))
       })
       if (sectorAssets.length) {
-        personaSection += `\n**Sector highlights:**\n${sectorAssets.map(r => `- **${r.symbol}**: ${r.dir}, ${r.risk} risk, score ${r.score}`).join('\n')}\n`
+        personaSection += `\n**Sorotan Sektor:**\n${sectorAssets.map(r => `- **${r.symbol}**: ${r.dir}, ${r.risk} risiko, score ${r.score}`).join('\n')}\n`
       }
     }
   }
@@ -1054,8 +1054,8 @@ export async function buildPdfReport(topics) {
       doc.rect(55, doc.y, 500, 22).fill(PG)
       doc.fillColor(P).fontSize(13).font('Helvetica-Bold').text('Dampak Pasar + Kualitas', 65, doc.y + 5)
       doc.fillColor(DK).moveDown(1.8)
-      doc.fontSize(10).font('Helvetica-Bold').text(`Regime: ${safe(impact.regime.regime)} | Quality: ${quality.score}/100 (${quality.status})`)
-      doc.fontSize(9).font('Helvetica').text(`Indonesia pulse: ${safe(impact.pulse)}`, { lineGap: 3 })
+      doc.fontSize(10).font('Helvetica-Bold').text(`**Regim:**${safe(impact.regime.regime)} | Kualitas: ${quality.score}/100 (${quality.status})`)
+      doc.fontSize(9).font('Helvetica').text(`Denyut Indonesia: ${safe(impact.pulse)}`, { lineGap: 3 })
       doc.moveDown(0.5)
       impact.rows.slice(0, 10).forEach(r => {
         doc.fontSize(9).font('Helvetica-Bold').fillColor(DK).text(`${safe(r.symbol)} ${r.dir} ${r.risk} score ${r.score}`, { continued:false })
@@ -1956,7 +1956,7 @@ function buildReportHtml(data, summary, funFacts, textReport) {
       const details = contextBullets(item).map(b => `<li>${tC(b)}</li>`).join('')
       const fLabel = freshnessLabel(item)
       const fColor = fLabel.startsWith('stale') ? '#ef4444' : fLabel.includes('fresh') ? '#22c55e' : '#f59e0b'
-      ih += `<article class="item" data-report-item>${img ? `<div class="item-img"><img src="${img}" alt="Thumbnail berita: ${tC(item.title).slice(0,80)}" loading="lazy" onerror="this.src='${fallbackImageFor(item)}'"></div>` : ''}<div class="body"><div class="vibe">${vibeTag(item)}</div><span style="display:inline-block;font-size:10px;font-weight:700;padding:1px 5px;border-radius:3px;color:#fff;background:${fColor};margin-bottom:8px">${tC(fLabel)}</span><h3 class="headline">${src ? `<span class="badge" style="--c:${badgeColor(src)}">${src}</span>` : ''} ${tC(item.title)}</h3>${snip ? `<p class="snippet">${snip}</p>` : ''}<div class="why"><b>Dampak:</b> ${tC(variedWhyCare(item))}</div><details class="showmore"><summary>Show more — konteks & catatan</summary><ul>${details}</ul></details>${pts ? `<div class="meta">${pts}</div>` : ''}${item.url ? `<a class="link" href="${item.url}" target="_blank" rel="noopener noreferrer">${urlShort}</a>` : ''}<div class="item-actions"><button type="button" data-hide-item>Hide item</button><button type="button" data-rewrite-section="${tC(topic.title)}">Rewrite section</button></div></div></article>`
+      ih += `<article class="item" data-report-item>${img ? `<div class="item-img"><img src="${img}" alt="Thumbnail berita: ${tC(item.title).slice(0,80)}" loading="lazy" onerror="this.src='${fallbackImageFor(item)}'"></div>` : ''}<div class="body"><div class="vibe">${vibeTag(item)}</div><span style="display:inline-block;font-size:10px;font-weight:700;padding:1px 5px;border-radius:3px;color:#fff;background:${fColor};margin-bottom:8px">${tC(fLabel)}</span><h3 class="headline">${src ? `<span class="badge" style="--c:${badgeColor(src)}">${src}</span>` : ''} ${tC(item.title)}</h3>${snip ? `<p class="snippet">${snip}</p>` : ''}<div class="why"><b>Dampak:</b> ${tC(variedWhyCare(item))}</div><details class="showmore"><summary>Buka selengkapnya — konteks & catatan</summary><ul>${details}</ul></details>${pts ? `<div class="meta">${pts}</div>` : ''}${item.url ? `<a class="link" href="${item.url}" target="_blank" rel="noopener noreferrer">${urlShort}</a>` : ''}<div class="item-actions"><button type="button" data-hide-item>Sembunyikan item</button><button type="button" data-rewrite-section="${tC(topic.title)}">Tulis ulang section</button></div></div></article>`
     }
     secHtml += `<section class="secc"><h2>${tC(topic.title)}</h2>${topic.intro?.length > 30 ? `<div class="intro">"${tC(topic.intro).slice(0,350)}"</div>` : ''}${ih}</section>`
   }
@@ -2114,7 +2114,7 @@ function st(n){
 }
 document.addEventListener('click', e => {
   if(e.target.matches('[data-hide-item]')) { e.target.closest('[data-report-item]')?.remove(); updateVisibleCount(); }
-  if(e.target.matches('[data-rewrite-section]')) showToast('Rewrite section masuk backlog. Hide item lemah dulu, lalu regenerate report untuk score baru.');
+  if(e.target.matches('[data-rewrite-section]')) showToast('Tulis ulang section masuk backlog. Sembunyikan item lemah dulu, lalu regenerate report untuk score baru.');
 });
 function updateVisibleCount(){ const n=document.querySelectorAll('[data-report-item]').length; document.querySelector('.date').textContent = document.querySelector('.date').textContent.replace(/\d+ visible items|$/, ' · '+n+' visible items') }
 function showToast(msg){ let t=document.getElementById('toast'); if(!t){t=document.createElement('div');t.id='toast';t.style.cssText='position:fixed;right:14px;bottom:14px;background:#111;color:#fff;padding:12px 14px;border:2px solid #fbbf24;z-index:99;font-weight:900;max-width:320px';document.body.appendChild(t)} t.textContent=msg; clearTimeout(window.__toast); window.__toast=setTimeout(()=>t.remove(),2600) }
@@ -2122,7 +2122,7 @@ function showToast(msg){ let t=document.getElementById('toast'); if(!t){t=docume
 }
 
 function stripLongRagBlock(s) {
-  return String(s || '').replace(/\n## Retrieval Evidence \/ RAG[\s\S]*?(?=\n[-=·%]{5,}|\n## Market Impact Watch|\n## Actionable)/, '\n## Bukti & Sitasi\n- Ringkasan sumber lengkap tersedia di web/MD/PDF.\n')
+  return String(s || '').replace(/\n## Retrieval Evidence \/ RAG[\s\S]*?(?=\n[-=·%]{5,}|\n## Pantauan Dampak Pasar|\n## Actionable)/, '\n## Bukti & Sitasi\n- Ringkasan sumber lengkap tersedia di web/MD/PDF.\n')
 }
 // Sections that should be REMOVED from the Discord digest (internal/QA/meta, not user-facing)
 const DIGEST_REMOVE_SECTIONS = new Set([
