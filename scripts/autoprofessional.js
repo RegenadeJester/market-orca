@@ -41,7 +41,7 @@ const httpGet = (url, timeout = 8000) => new Promise(resolve => {
 })
 
 // ── 1. SERVICE HEALTH ──
-const PORTS = { 'market-orca':4567, 'report-server':4568, 'mcp':1788, 'mcp-n8n':1789, 'n8n':5678, '9router':9090, 'searxng':18080 }
+const PORTS = { 'market-orca':4567, 'report-server':4568, 'mcp':1788, '9router':9090 }
 for (const [name, port] of Object.entries(PORTS)) {
   const listening = checkPort(port)
   report.services[name] = { port, status: listening ? '✅' : '❌' }

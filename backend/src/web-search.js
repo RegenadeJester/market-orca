@@ -1,6 +1,7 @@
 
 import dns from 'node:dns'
 import { URL } from 'node:url'
+import { rerank, isOpenRouterReady } from './openrouter.js'
 
 const SSRF_DENY_PREFIXES = ['127.','10.','172.16.','172.17.','172.18.','172.19.','172.20.','172.21.','172.22.','172.23.','172.24.','172.25.','172.26.','172.27.','172.28.','172.29.','172.30.','172.31.','192.168.','169.254.','0.','::1']
 const SSRF_DENY_HOSTS = new Set(['localhost','[::1]','metadata.google.internal','169.254.169.254','instance-data','100.100.100.200'])
@@ -173,29 +174,8 @@ export async function previewPublicPage(url){
 
 function decodeDdgUrl(u){ try{ const x=new URL(u); const uddg=x.searchParams.get('uddg'); return uddg ? decodeURIComponent(uddg) : u } catch { return u } }
 
-async function searchSearxng(query,{limit=10, categories='general'}={}){
-  const base = process.env.SEARXNG_URL || process.env.SEARX_URL || ''
-  if (!base) throw new Error('searxng_not_configured')
-  const searchUrl = `${base.replace(/\/$/,'')}/search?q=${encodeURIComponent(query)}&format=json&language=all&safesearch=0&categories=${encodeURIComponent(categories)}`
-  // Validate SSRF before hitting external service
-  const ssrf = await validateFetchUrl(searchUrl, { internal: true }).catch(() => ({ ok: false, error: 'validate_fail' }))
-  if (!ssrf.ok) {
-    // localhost SearXNG is allowed as internal
-    if (!base.startsWith('http://127.') && !base.startsWith('http://localhost') && !base.startsWith('http://0.')) {
-      throw new Error('searxng_blocked:'+ssrf.error)
-    }
-  }
-  let lastErr
-  for (let attempt = 0; attempt < 2; attempt++) {
-    try {
-      const r = await fetch(searchUrl,{headers:{'user-agent':'MarketOrcaSearch/1.0','accept':'application/json'},signal:AbortSignal.timeout(8000)})
-      if(!r.ok) throw new Error(`searxng_${r.status}`)
-      const j=await r.json(); const rows=Array.isArray(j.results)?j.results:[]
-      return rows.slice(0,limit*2).map(x=>{ const u=x.url||''; return { title:clean(x.title||u), url:u, snippet:clean(x.content||''), source:'searxng', domain:host(u), trust:trustedScore(u), engines:x.engines||[] } }).filter(x=>/^https?:/.test(x.url)).sort((a,b)=>b.trust-a.trust).slice(0,limit)
-    } catch(e) { lastErr = e; if (attempt === 0) await new Promise(r => setTimeout(r, 1000)) }
-  }
-  throw lastErr || new Error('searxng_retries_exhausted')
-}
+// ponytail: SearXNG removed. Use DDG/Bing/Yahoo/Yandex built-in scrapers instead.
+async function searchSearxng(){ return [] }
 
 async function searchDuckDuckGo(query,{limit=10}={}){
   const url=`https://html.duckduckgo.com/html/?q=${encodeURIComponent(query)}`
@@ -260,7 +240,7 @@ async function previewTopResults(results=[], n=3){
   return out
 }
 
-export async function webSearch(query,{limit=10, engines=['searxng','duckduckgo','bing','yahoo','yandex'], preferTrusted=true, mode='', dynamic=true, sites=[], domains=[], site='', excludeSites=[], filetype='', intitle='', exact='', after='', before='', time_range='', mustHave=[], autoPreview=false, previewLimit=3, cacheTtlMs=300000}={}){
+export async function webSearch(query,{limit=10, engines=['duckduckgo','bing','yahoo','yandex'], preferTrusted=true, mode='', dynamic=true, sites=[], domains=[], site='', excludeSites=[], filetype='', intitle='', exact='', after='', before='', time_range='', mustHave=[], autoPreview=false, previewLimit=3, cacheTtlMs=300000}={}){
   const cacheKey='webSearch:'+JSON.stringify({query,limit,engines,preferTrusted,mode,dynamic,sites,domains,site,excludeSites,filetype,intitle,exact,after,before,time_range,mustHave,autoPreview,previewLimit})
   const cached=cacheTtlMs?cacheGet(cacheKey):null; if(cached) return {...cached, cached:true}
   const opts={sites,domains,site,excludeSites,filetype,intitle,exact,after,before,time_range,mustHave}
@@ -273,6 +253,10 @@ export async function webSearch(query,{limit=10, engines=['searxng','duckduckgo'
   if (!ranked.length) {
     const sites = (SEARCH_MODES[mode] || TRUSTED_WEB_SOURCES).slice(0, limit)
     ranked = sites.map(s=>({ title:`Search ${s}: ${query}`, url:`https://duckduckgo.com/?q=${encodeURIComponent(`${query} site:${s}`)}`, snippet:'fallback search link; engine blocked or returned no parseable HTML', source:'fallback_query', domain:s, trust:trustedScore(`https://${s}`), quality:trustedScore(`https://${s}`) }))
+  }
+  // Rerank via OpenRouter reranker model (top-8 LLM reranking)
+  if(ranked.length > 2 && await isOpenRouterReady()){
+    try { ranked = await rerank(query, ranked, { topN: Math.min(limit, ranked.length) }) } catch {}
   }
   return cacheSet(cacheKey, { ok:true, query, variants, mode, engines, errors, results:ranked, clusters:clusterResults(ranked), previews:autoPreview?await previewTopResults(ranked, Number(previewLimit||3)):[], trustedSources:TRUSTED_WEB_SOURCES, capabilities:WEB_SEARCH_CAPABILITIES, modes:Object.keys(SEARCH_MODES) }, cacheTtlMs)
 }
@@ -394,7 +378,7 @@ function cleanContent(text='') {
     .trim()
 }
 
-export async function searchAndAnswer(query,{limit=6,readLimit=4,engines=['searxng','bing','duckduckgo'],modes=['','official','market','coding','journal','forum','blog'],time_range='',domains=[],sites=[]}={}){
+export async function searchAndAnswer(query,{limit=6,readLimit=4,engines=['bing','duckduckgo','yahoo','yandex'],modes=['','official','market','coding','journal','forum','blog'],time_range='',domains=[],sites=[]}={}){
   const search=await deepWebSearch(query,{limit,engines,modes,autoPreview:false})
   const sources=[]
   for(const r of (search.results||[]).slice(0,readLimit)){
@@ -417,32 +401,7 @@ export async function searchAndAnswer(query,{limit=6,readLimit=4,engines=['searx
 export async function searchNews(query, {limit=10, language='all', time_range='', sources=[]}={}){
   const results=[]; const errors=[]
   const lang=language||'all'
-  // 1) SearXNG news category
-  const searxngBase = process.env.SEARXNG_URL || process.env.SEARX_URL || ''
-  if(searxngBase){
-    try{
-      const url=`${searxngBase.replace(/\/$/,'')}/search?q=${encodeURIComponent(query)}&format=json&language=${lang}&safesearch=0&categories=news`
-      const r=await fetch(url,{headers:{'user-agent':'MarketOrcaNews/1.0','accept':'application/json'},signal:AbortSignal.timeout(8000)})
-      if(r.ok){
-        const j=await r.json()
-        const rows=Array.isArray(j.results)?j.results:[]
-        for(const x of rows){
-          const u=x.url||''
-          if(!/^https?:/.test(u)) continue
-          results.push({
-            title:x.title||'',
-            url:u,
-            snippet:x.content||'',
-            source:x.engine?.[0]||'searxng',
-            domain:host(u),
-            published_at:x.publishedDate||x.pubdate||'',
-            engine:'searxng'
-          })
-        }
-      }
-    } catch(e){ errors.push({engine:'searxng',error:String(e.message||e)}) }
-  }
-  // 2) DDG news fallback
+  // 1) DDG news fallback
   if(results.length<limit){
     try{
       const ddgUrl=`https://html.duckduckgo.com/html/?q=${encodeURIComponent(query)}&iar=news`
@@ -508,25 +467,7 @@ export async function newsSearch(query, {limit=10, engines=['searxng'], time_ran
       allResults.push(...(out.results || []))
     } catch(e) { /* skip */ }
   }
-  // Also try SearXNG news category
-  const searxngBase = process.env.SEARXNG_URL || process.env.SEARX_URL || ''
-  if (searxngBase) try {
-    const searxUrl = `${searxngBase.replace(/\/$/,'')}/search?q=${encodeURIComponent(query)}&format=json&categories=news&time_range=${time_range}`
-    const r = await fetch(searxUrl, { headers: { 'user-agent': 'MarketOrcaNews/1.0', 'accept': 'application/json' }, signal: AbortSignal.timeout(10000) })
-    if (!r.ok) throw new Error(`searxng_news_${r.status}`)
-    const data = await r.json()
-    const newsResults = (data?.results || []).map(r => ({
-      title: clean(r.title || ''),
-      url: r.url || '',
-      snippet: clean(r.content || '').slice(0, 600),
-      source: r.engine || 'searxng-news',
-      domain: host(r.url || ''),
-      trust: trustedScore(r.url || ''),
-      publishedDate: r.publishedDate || r.published_date || '',
-      thumbnail: r.thumbnail || ''
-    })).filter(r => r.url && /^https?:/.test(r.url))
-    allResults.push(...newsResults)
-  } catch(e) { /* skip */ }
+  // ponytail: SearXNG news removed; DDG + Google News RSS cover it.
   // Dedupe by URL
   const seen = new Set()
   const deduped = allResults.filter(r => { const k = r.url.replace(/[?#].*/,''); if (seen.has(k)) return false; seen.add(k); return true })

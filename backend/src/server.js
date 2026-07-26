@@ -721,7 +721,7 @@ app.post('/api/search/deep', async (req,res)=>{
     const limit=Number(req.body?.limit||30)
     const all=[]; const errors=[]
     for (const q of queries.slice(0, Number(req.body?.queryPasses||2))) for (const mode of modes.slice(0, Number(req.body?.modePasses||1))) {
-      const out=await webSearch(q,{limit:Math.min(8,limit),engines:req.body?.engines||['searxng'],mode,dynamic:false,preferTrusted:req.body?.preferTrusted!==false}).catch(e=>({ok:false,error:String(e),results:[]}))
+      const out=await webSearch(q,{limit:Math.min(8,limit),engines:req.body?.engines||['duckduckgo','bing','yahoo','yandex'],mode,dynamic:false,preferTrusted:req.body?.preferTrusted!==false}).catch(e=>({ok:false,error:String(e),results:[]}))
       if(out.error) errors.push({q,mode,error:out.error}); else all.push(...(out.results||[]))
     }
     const seen=new Set(); const results=[]
@@ -739,7 +739,7 @@ app.post('/api/search/profile-safe', async (req,res)=>{
     const name=String(req.body?.name||req.body?.query||'').trim()
     if(!name) return res.status(400).json({ok:false,error:'name_required'})
     const deep = req.body?.deep === true
-    const out=await webSearch(deep ? name : `"${name.replace(/"/g,'')}"`, { limit:Number(req.body?.limit||20), engines:req.body?.engines||['searxng'], preferTrusted:false, dynamic:deep, mode:req.body?.mode||'' })
+    const out=await webSearch(deep ? name : `"${name.replace(/"/g,'')}"`, { limit:Number(req.body?.limit||20), engines:req.body?.engines||['duckduckgo','bing','yahoo','yandex'], preferTrusted:false, dynamic:deep, mode:req.body?.mode||'' })
     const results=(out.results||[]).map(r=>({...r,...classifySearchResult(r)}))
     const publicOpenDocs=results.filter(r=>r.safeToAutoCrawl)
     const social=results.filter(r=>r.social)
@@ -1900,7 +1900,7 @@ app.post('/api/report/:slug/search-related', async (req,res)=>{
     const report=JSON.parse(fs.readFileSync(fp,'utf8'))
     const base=[report.title, ...(report.topics||[]).map(t=>t.title), ...((report.topics||[]).flatMap(t=>(t.items||[]).slice(0,2).map(i=>i.title)))].filter(Boolean).slice(0, Number(req.body?.queries||8))
     const all=[]
-    for(const q of base){ const out=await webSearch(q,{limit:Number(req.body?.perQuery||5),engines:req.body?.engines||['searxng'],mode:req.body?.mode||'market',dynamic:true,preferTrusted:true}); all.push(...(out.results||[]).map(r=>({...r,query:q,...classifySearchResult(r)}))) }
+    for(const q of base){ const out=await webSearch(q,{limit:Number(req.body?.perQuery||5),engines:req.body?.engines||['duckduckgo','bing','yahoo','yandex'],mode:req.body?.mode||'market',dynamic:true,preferTrusted:true}); all.push(...(out.results||[]).map(r=>({...r,query:q,...classifySearchResult(r)}))) }
     const seen=new Set(); const results=[]
     for(const r of all){ const k=String(r.url||'').replace(/[#?].*$/,''); if(k && !seen.has(k)){ seen.add(k); results.push(r) } }
     const filtered=await filterSearchForCrawl(results,{allowUntrusted:true,openDocsOnly:!!req.body?.openDocsOnly})

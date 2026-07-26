@@ -2,6 +2,7 @@ use_default_settings: true
 server:
   secret_key: "market-orca-aroxng-2026-static"
   base_url: "https://searxng.anomali.web.id/"
+  bind_address: "127.0.0.1"
   limiter: false
   image_proxy: false
 ui:
