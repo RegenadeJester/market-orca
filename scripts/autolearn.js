@@ -18,7 +18,22 @@ const TOPICS_FILE = path.join(__dirname, '..', 'collections', 'autolearn-topics.
 const LOG_FILE = path.join(__dirname, '..', 'collections', 'autolearn.log')
 const LEARNED_FILE = path.join(__dirname, '..', 'collections', 'autolearn-learned.json')
 const MCP_BASE = process.env.MCP_BASE || 'http://127.0.0.1:4567'
-const SEARXNG_URL = process.env.SEARXNG_URL || 'http://127.0.0.1:18080'
+
+// AnySearch CLI wrapper
+const { execSync } = await import('node:child_process')
+const ANYSEARCH_CLI = 'python3 /home/dicky/.hermes/skills/anysearch-skill/scripts/anysearch_cli.py'
+async function anysearchSearch(query, limit = 5) {
+  try {
+    const out = execSync(`${ANYSEARCH_CLI} search "${query.replace(/"/g, '\\"')}" --max_results ${limit}`, { timeout: 25000, encoding: 'utf8' })
+    const results = []
+    for (const block of out.split(/### \d+\./).slice(1)) {
+      const t = block.match(/^(.+?)$/m)
+      const u = block.match(/\*\*URL\*\*:\s*(https?:\/\/\S+)/)
+      if (t && u) results.push({ title: t[1].trim(), url: u[1], snippet: (block.match(/^- (.+?)$/m) || [])[1] || '' })
+    }
+    return results.slice(0, limit)
+  } catch { return [] }
+}
 
 // Parse CLI args
 const args = process.argv.slice(2)
@@ -57,21 +72,7 @@ function log(msg) {
   fs.appendFileSync(LOG_FILE, line + '\n')
 }
 
-async function searxngSearch(query, limit = 5) {
-  const url = `${SEARXNG_URL.replace(/\/$/, '')}/search?q=${encodeURIComponent(query)}&format=json&categories=general&pageno=1&language=all`
-  const ctrl = new AbortController()
-  const t = setTimeout(() => ctrl.abort(), 15000)
-  try {
-    const res = await fetch(url, { signal: ctrl.signal })
-    const data = await res.json()
-    return (data.results || []).slice(0, limit)
-  } catch (err) {
-    if (err.name === 'AbortError') throw new Error('searxng_timeout')
-    throw err
-  } finally {
-    clearTimeout(t)
-  }
-}
+
 
 async function mcpPost(tool, input, timeoutMs = 60000) {
   const headers = { 'Content-Type': 'application/json' }
@@ -115,8 +116,8 @@ async function processTopic(topic) {
 
   for (const query of topic.queries) {
     try {
-      log(`  🔍 SearXNG: "${query}"`)
-      const results = await searxngSearch(query, topic.maxResults || 3)
+      log(`  🔍 Search: "${query}"`)
+      const results = await anysearchSearch(query, topic.maxResults || 3)
       log(`  📊 Found ${results.length} results`)
 
       for (const r of results) {

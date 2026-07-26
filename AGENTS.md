@@ -14,7 +14,7 @@ Market Orca is a **real-time market intelligence dashboard + AI report engine** 
 
 **Tech stack:** Node.js (ESM), Express, better-sqlite3 (WAL mode), Vue 3, Vite, Discord.js, @modelcontextprotocol/sdk, pdfkit
 
-**Default ports:** Backend API `4567`, MCP HTTP `1788`, SearXNG `18080`, Frontend dev `5173`
+**Default ports:** Backend API `4567`, MCP HTTP `1788`, Frontend dev `5173`
 
 ---
 
@@ -78,7 +78,7 @@ market-orca/
 ├── reports/                        # Generated reports (.md, .html, .json, .png)
 ├── docs/
 │   └── APM_IMPLEMENTATION_PLAN.md  # Feature tracking + task table
-├── docker-compose.searxng.yml      # SearXNG search engine container
+├── docker-compose.searxng.yml      # (removed) SearXNG search engine container
 └── .claude/                        # Agent tooling config
 ```
 
@@ -199,8 +199,7 @@ npm run build    # → dist/
 
 ### SearXNG (local search engine)
 ```bash
-docker compose -f docker-compose.searxng.yml up -d
-# Available at http://127.0.0.1:18080
+# Search backend via DuckDuckGo/Bing/Yahoo/Yandex built-in scrapers
 ```
 
 ### Environment Variables

@@ -1,11 +1,9 @@
 /**
  * Indonesian Economic News Aggregator
- * Fetches from SearXNG news category, targeting reputable Indonesian economic sources.
+ * Fetches from Google News RSS, DDG, targeting reputable Indonesian economic sources.
  * Sources: Kontan, Bisnis.com, CNBC Indonesia, Tempo, Detik, Katadata, IDN Financials
  */
 import { validateFetchUrl, webCacheStats } from './web-search.js'
-
-const SEARXNG_BASE = process.env.SEARXNG_URL || process.env.SEARX_URL || 'http://localhost:18080'
 
 const INDONESIAN_NEWS_SOURCES = [
   'kontan.co.id', 'bisnis.com', 'cnbcindonesia.com', 'tempo.co',
@@ -43,32 +41,8 @@ function isIndonesianSource(url = '') {
   return INDONESIAN_NEWS_SOURCES.some(s => h === s || h.endsWith('.' + s) || h === 'www.' + s)
 }
 
-/* ── SearXNG news fetch ─────────────────────────────────────────────── */
-async function fetchSearxngNews(query, { limit = 15, timeRange = 'week', language = 'id' } = {}) {
-  const url = `${SEARXNG_BASE.replace(/\/$/, '')}/search?q=${encodeURIComponent(query)}&format=json&language=${language}&safesearch=0&categories=news&time_range=${timeRange}`
-  const v = await validateFetchUrl(url, { internal: true })
-  if (!v.ok) throw new Error(`searxng_validate:${v.error}`)
-  const r = await fetch(url, {
-    headers: { 'user-agent': 'MarketOrcaNews/1.0', 'accept': 'application/json' },
-    signal: AbortSignal.timeout(8000)
-  })
-  if (!r.ok) throw new Error(`searxng_${r.status}`)
-  const j = await r.json()
-  const rows = Array.isArray(j.results) ? j.results : []
-  return rows.slice(0, limit).map(x => {
-    const u = x.url || ''
-    return {
-      title: clean(x.title || ''),
-      url: u,
-      snippet: clean(x.content || ''),
-      source: host(u),
-      engine: x.engines || ['searxng'],
-      publishedAt: x.publishedDate || x.published_date || '',
-      thumbnail: x.thumbnail || '',
-      isIndonesianSource: isIndonesianSource(u)
-    }
-  }).filter(x => x.title && x.url && /^https?:/.test(x.url))
-}
+// ponytail: SearXNG removed. DDG + Google News RSS are primary sources.
+async function fetchSearxngNews(){ return [] }
 
 /* ── Google News RSS fallback ───────────────────────────────────────── */
 async function fetchGoogleNewsRSS(query, { limit = 10 } = {}) {
@@ -100,10 +74,7 @@ export async function fetchIndonesianNews({ query, limit = 20, timeRange = 'week
   const all = []
   const errors = []
 
-  // 1) SearXNG news (primary)
-  try {
-    all.push(...await fetchSearxngNews(q, { limit: limit + 5, timeRange, language }))
-  } catch (e) { errors.push({ engine: 'searxng', error: String(e.message || e) }) }
+  // 1) DDG news (primary — was SearXNG fallback #3)
 
   // 2) Google News RSS (fallback)
   if (all.length < limit) {
@@ -168,7 +139,8 @@ export async function fetchTrendingNews({ limit = 15, timeRange = 'day' } = {}) 
   const queries = NEWS_QUERIES.slice(0, 3)
   await Promise.allSettled(queries.map(async q => {
     try {
-      const items = await fetchSearxngNews(q, { limit: 8, timeRange })
+      // SearXNG removed; use DDG/Google News via fetchIndonesianNews instead
+      const items = await fetchIndonesianNews({ query: q, limit: 8, timeRange })
       all.push(...items)
     } catch (e) { errors.push({ query: q, error: String(e.message || e) }) }
   }))

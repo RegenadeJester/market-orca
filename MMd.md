@@ -136,3 +136,26 @@
 - **Files:** `backend/src/report-server.js`, `backend/src/server.js`
 - **Deliverable:** Errors in request-path handlers no longer vanish; visible in logs for debugging. Continuation of Feature #21 pattern.
 - **Branch:** `feat/silent-catch-fixes-batch2` → PR #14
+
+## 2026-07-26 — Feature #43: Final English→Indonesian Sweep (vibeTag, persona, impact, buttons)
+- **Pain point:** 25+ English strings still leaked in generated reports despite prior translation features (#33, #34, #37, #40, #41): vibeTag labels (8), personaSection labels (5), Market Impact Watch headers (6), HTML buttons (3), PDF labels (2).
+- **Done:**
+  - `vibeTag()`: all 8 category labels translated (dev-core→inti-dev, money moves→gerakan-uang, red flag→bendera-merah, model wars→perang-model, market mood→mood-pasar, new tool drop→tool-baru-drop, lab notes→catatan-lab, worth knowing→berharga-diketahui)
+  - `personaSection`: 'Tailored For You' → 'Disesuaikan Untuk Anda'; Profile/risk/timeframe/sectors/alert style/context → Indonesian
+  - 'Market Impact Watch' → 'Pantauan Dampak Pasar'; Regime → Rezim; conviction → keyakinan; Indonesia pulse → Denyut Indonesia; Event bias → Bias peristiwa; Drivers → Pendorong; Signals → Sinyal
+  - HTML: Show more → Buka selengkapnya; Hide item → Sembunyikan item; Rewrite section → Tulis ulang section
+  - PDF: Quality → Kualitas; Regime → Regim
+- **Files:** `backend/src/ai-daily-report.js`
+- **Deliverable:** Report generation now produces fully Indonesian output (text, HTML, PDF). PR #43 on main repo.
+- **Branch:** `feat/id-fix-remaining-leaks`
+- **Backlog:** Catch-up Report Engine; Discord Digest improvements; Market Impact Simulator v2 custom events
+
+## 2026-07-26 — Maintenance: IPv4 Listen + Autolearn Blacklist/Quality Filter
+- **Pain point:** Servers bound to `::` (IPv6 dual-stack) unnecessarily; autolearn ingested dictionary/low-quality sites.
+- **Done:**
+  - `server.js`, `report-server.js`: bind to `127.0.0.1` (IPv4 only, no IPv6 exposure)
+  - `autolearn-enhanced-v3.js`: added 6 domains to blacklist (thesaurus.com, kbbi, bdir.in, knowyourgst.com, mybroadband.co.za); added `MIN_QUALITY=30` threshold filter
+  - `frontend/`: 8 Vue pages translated to Bahasa Indonesia (ColabNotes, AssetPage, DeliveryDashboard, RagReportBuilder, ReportCanvas, ReportEditor, ReportPage, ReportPreferences)
+- **Files:** `backend/src/server.js`, `backend/src/report-server.js`, `scripts/autolearn-enhanced-v3.js`, `frontend/src/pages/*.vue`, `frontend/src/components/ColabNotes.vue`
+- **Deliverable:** Backend IPv4-only; autolearn quality filter; frontend ID labels. Committed to main (backend) + PR #3 (frontend).
+- **Branch:** main (backend), `feat/impact-sim-id-labels` (frontend)

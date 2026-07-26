@@ -61,10 +61,7 @@ async function phase1_HealthChecks() {
   results.checks.mcp = mcp.ok && mcp.output === '200' ? 'healthy' : 'down'
   log(`MCP: ${results.checks.mcp}`)
 
-  // SearXNG
-  const searxng = runCmd('curl -s -o /dev/null -w "%{http_code}" http://localhost:18080/')
-  results.checks.searxng = searxng.ok && searxng.output === '200' ? 'healthy' : 'down'
-  log(`SearXNG: ${results.checks.searxng}`)
+
 
   // Database
   let assetCnt = 0
@@ -102,7 +99,7 @@ async function phase2_SecurityAudit() {
   log('=== PHASE 2: Security Audit ===')
   
   // 1. Check for exposed ports
-  const ports = runCmd('ss -tlnp | grep -E ":(4567|4568|1788|18080|5678)"')
+  const ports = runCmd('ss -tlnp | grep -E ": (4567|4568|1788|5678)"')
   results.security.push({ check: 'exposed_ports', status: ports.ok ? 'ok' : 'unknown', detail: ports.output })
 
   // 2. Check SSH config
