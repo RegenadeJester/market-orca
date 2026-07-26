@@ -159,3 +159,30 @@
 - **Files:** `backend/src/server.js`, `backend/src/report-server.js`, `scripts/autolearn-enhanced-v3.js`, `frontend/src/pages/*.vue`, `frontend/src/components/ColabNotes.vue`
 - **Deliverable:** Backend IPv4-only; autolearn quality filter; frontend ID labels. Committed to main (backend) + PR #3 (frontend).
 - **Branch:** main (backend), `feat/impact-sim-id-labels` (frontend)
+
+## 2026-07-27 — Feature #43: Final English→Indonesian Sweep (vibeTag, persona, impact, buttons)
+- **Pain point:** 25+ English strings still leaked in generated reports despite prior translation features (#33, #34, #37, #40, #41): vibeTag labels (8), personaSection labels (5), Market Impact Watch headers (6), HTML buttons (3), PDF labels (2).
+- **Done:** Translated all remaining user-facing English strings in `ai-daily-report.js`:
+  - `vibeTag()`: all 8 category labels (dev-core→inti-dev, money moves→gerakan-uang, red flag→bendera-merah, model wars→perang-model, market mood→mood-pasar, new tool drop→tool-baru-drop, lab notes→catatan-lab, worth knowing→berharga-diketahui)
+  - `personaSection`: 'Tailored For You'→'Disesuaikan Untuk Anda'; Profile/risk/timeframe/sectors/alert style/context→Indonesian
+  - 'Market Impact Watch'→'Pantauan Dampak Pasar'; Regime→Rezim; conviction→keyakinan; Indonesia pulse→Denyut Indonesia; Event bias→Bias peristiwa; Drivers→Pendorong; Signals→Sinyal
+  - HTML buttons: Show more→Buka selengkapnya; Hide item→Sembunyikan item; Rewrite section→Tulis ulang section
+  - PDF: Quality→Kualitas; Regime→Regim
+- **Files:** `backend/src/ai-daily-report.js`
+- **Deliverable:** Report generation now produces fully Indonesian output (text, HTML, PDF). PR #30 ✅ merged.
+- **Branch:** `feat/id-fix-remaining-leaks` → PR #30 ✅ merged
+- **Backlog:** SearXNG→direct search engine migration (unstaged changes in server.js, web-search.js, etc.)
+
+## 2026-07-27 — Feature #44: SearXNG → OpenRouter Embeddings + Reranker
+- **Pain point:** SearXNG required Docker deployment, added maintenance overhead. Lightweight hash-based embeddings (128-dim) were low quality for RAG search. No reranking capability.
+- **Done:**
+  - Created `backend/src/openrouter.js`: OpenRouter API client for embedding (nvidia/nemotron-3-embed-1b, 2048-dim), reranking (nvidia/llama-nemotron-rerank-vl-1b-v2), verification (inclusionai/ling-3.0-flash)
+  - `web-search.js`: Default engines changed from SearXNG to DDG/Bing/Yahoo/Yandex; added OpenRouter reranking for top-8 results
+  - `news-fetcher.js`: Removed SearXNG news fetch; Google News RSS + DDG now primary sources
+  - `rag.js`: Replaced 128-dim hash embeddings with 2048-dim OpenRouter embeddings; `ragSemanticSearch` now uses real embeddings with proper cosine similarity; `ragHybridSearch` made async; vector dim 128→2048
+  - Deleted SearXNG infra: `docker-compose.searxng.yml`, `scripts/searxng-lite.py`
+  - Rate limiting (4 concurrent), retries, timeouts, graceful fallback when OPENROUTER_API_KEY not set
+- **Files:** `backend/src/openrouter.js` (new), `backend/src/web-search.js`, `backend/src/news-fetcher.js`, `backend/src/rag.js`, `backend/src/server.js`, `backend/src/report-server.js`, `searxng/settings.yml`, `scripts/autolearn*.js`
+- **Deliverable:** SearXNG no longer required; search uses direct scrapers + OpenRouter reranking; RAG uses 2048-dim embeddings. PR #31 ✅ merged.
+- **Branch:** `feat/search-engine-migration` → PR #31 ✅ merged
+- **Backlog:** —
