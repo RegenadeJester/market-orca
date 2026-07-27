@@ -14,8 +14,33 @@ const LOG_FILE = path.join(__dirname, '..', 'collections', 'autolearn.log')
 const LEARNED_FILE = path.join(__dirname, '..', 'collections', 'autolearn-learned.json')
 const METRICS_FILE = path.join(__dirname, '..', 'collections', 'autolearn-metrics.json')
 const MCP_BASE = process.env.MCP_BASE || 'http://127.0.0.1:4567'
-const SEARXNG_URL = process.env.SEARXNG_URL || 'http://127.0.0.1:18080'
 
+// AnySearch CLI wrapper
+const ANYSEARCH_CLI = 'python3 /home/dicky/.hermes/skills/anysearch-skill/scripts/anysearch_cli.py'
+
+async function anysearchSearch(query, limit = 5) {
+  try {
+    const { execSync } = await import('node:child_process')
+    const cmd = `${ANYSEARCH_CLI} search "${query.replace(/"/g, '\\\\"')}" --max_results ${limit}`
+    const out = execSync(cmd, { timeout: 25000, encoding: 'utf8' })
+    const results = []
+    const blocks = out.split(/### \d+\./).slice(1)
+    for (const block of blocks) {
+      const titleMatch = block.match(/^(.+?)$/m)
+      const urlMatch = block.match(/\*\*URL\*\*:\s*(https?:\/\/\S+)/)
+      const snippetMatch = block.match(/^- (.+?)$/m)
+      if (titleMatch && urlMatch) {
+        results.push({
+          title: titleMatch[1].trim(),
+          url: urlMatch[1],
+          content: snippetMatch?.[1] || '',
+          publishedDate: ''
+        })
+      }
+    }
+    return results.slice(0, limit)
+  } catch { return [] }
+}
 const args = process.argv.slice(2)
 const filterTopic = args.includes('--topic') ? args[args.indexOf('--topic') + 1] : null
 const dryRun = args.includes('--dry-run')
@@ -58,19 +83,7 @@ function log(msg) {
 }
 
 // ─── Search Engines ────────────────────────────────────────────
-async function searxngSearch(query, limit = 5) {
-  const url = `${SEARXNG_URL.replace(/\/$/, '')}/search?q=${encodeURIComponent(query)}&format=json&categories=general,news&pageno=1&language=all&safesearch=0`
-  const ctrl = new AbortController()
-  const t = setTimeout(() => ctrl.abort(), 20000)
-  try {
-    const res = await fetch(url, { signal: ctrl.signal })
-    const data = await res.json()
-    return (data.results || []).slice(0, limit)
-  } catch (err) {
-    if (err.name === 'AbortError') throw new Error('searxng_timeout')
-    throw err
-  } finally { clearTimeout(t) }
-}
+
 
 async function restSearch(query, limit = 5) {
   try {
@@ -237,8 +250,9 @@ async function processTopic(topic) {
     try {
       log(`  🔍 Search: "${query}"`)
       let results = await restSearch(query, topic.maxResults || 5)
+      // Fallback: AnySearch
       if (!results.length) {
-        results = await searxngSearch(query, topic.maxResults || 5)
+        results = await anysearchSearch(query, topic.maxResults || 5)
       }
       if (!results.length) { log(`  ⚠️ No results`); continue }
       log(`  📊 Found ${results.length} results`)
