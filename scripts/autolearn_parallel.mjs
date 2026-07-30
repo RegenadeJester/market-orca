@@ -39,7 +39,7 @@ async function anysearchSearch(query, limit = 5) {
       }
     }
     return results.slice(0, limit)
-  } catch { return [] }
+  } catch (e) { log("  [autolearn-parallel] anysearchSearch failed: " + e.message); return [] }
 }
 const args = process.argv.slice(2)
 const filterTopic = args.includes('--topic') ? args[args.indexOf('--topic') + 1] : null
@@ -64,22 +64,22 @@ try {
       }
     }
   }
-} catch {}
+} catch (e) { log("  [autolearn-parallel] Token load failed: " + e.message) }
 
 let learnedStore = {}
 if (!dryRun && fs.existsSync(LEARNED_FILE)) {
-  try { learnedStore = JSON.parse(fs.readFileSync(LEARNED_FILE, 'utf8')) } catch {}
+  try { learnedStore = JSON.parse(fs.readFileSync(LEARNED_FILE, 'utf8')) } catch (e) { log("  [autolearn-parallel] Load learned failed: " + e.message) }
 }
 
 let metrics = { runs: [], topicStats: {} }
 if (fs.existsSync(METRICS_FILE)) {
-  try { metrics = JSON.parse(fs.readFileSync(METRICS_FILE, 'utf8')) } catch {}
+  try { metrics = JSON.parse(fs.readFileSync(METRICS_FILE, 'utf8')) } catch (e) { log("  [autolearn-parallel] Load metrics failed: " + e.message) }
 }
 
 function log(msg) {
   const line = `[${new Date().toISOString()}] ${msg}`
   console.log(line)
-  try { fs.appendFileSync(LOG_FILE, line + '\n') } catch {}
+  try { fs.appendFileSync(LOG_FILE, line + '\n') } catch (e) { console.warn("[autolearn-parallel] log append failed: " + e.message) }
 }
 
 // ─── Search Engines ────────────────────────────────────────────
@@ -99,7 +99,7 @@ async function restSearch(query, limit = 5) {
       title: r.title, url: r.url, snippet: r.snippet, source: r.source,
       domain: r.domain, trust: r.trust || 50, quality: r.quality || 0
     })).slice(0, limit)
-  } catch { return [] }
+  } catch (e) { log("  [autolearn-parallel] restSearch failed: " + e.message); return [] }
 }
 
 async function mcpPost(tool, input, timeoutMs = 60000) {
@@ -140,7 +140,7 @@ async function fetchPageContent(url) {
       .replace(/\s+/g, ' ').trim()
     const source = new URL(url).hostname.replace(/^www\./, '')
     return { title, content: clean.slice(0, 20000), url, source, image: ogImage, description, publishedDate }
-  } catch { return null }
+  } catch (e) { log("  [autolearn-parallel] fetchPageContent failed: " + e.message); return null }
   finally { clearTimeout(t) }
 }
 
@@ -185,7 +185,7 @@ function isTrustedDomain(url) {
   try {
     const host = new URL(url).hostname.replace(/^www\./, '')
     return TRUSTED_DOMAINS.some(d => host.endsWith(d))
-  } catch { return false }
+  } catch (e) { log("  [autolearn-parallel] isBlacklisted failed: " + e.message); return false }
 }
 
 function isBlacklisted(url) {
@@ -199,7 +199,7 @@ function isBlacklisted(url) {
       'facebook.com', 'twitter.com', 'x.com', 'instagram.com', 'linkedin.com',
       'youtube.com', 'vimeo.com', 'dailymotion.com',
       'pinterest.com', 'tumblr.com'].some(d => host.includes(d))
-  } catch { return false }
+  } catch (e) { log("  [autolearn-parallel] saveMetrics failed: " + e.message); return false }
 }
 
 // ─── Concurrency helper ────────────────────────────────────────
@@ -324,7 +324,7 @@ async function processTopic(topic) {
   metrics.topicStats[topic.id] = stats
   metrics.runs.push({ topicId: topic.id, ingested: totalIngested, fetched: totalFetched, quality: avgQuality, timestamp: new Date().toISOString() })
   if (metrics.runs.length > 1000) metrics.runs = metrics.runs.slice(-500)
-  if (!dryRun) { try { fs.writeFileSync(METRICS_FILE, JSON.stringify(metrics, null, 2)) } catch {} }
+  if (!dryRun) { try { fs.writeFileSync(METRICS_FILE, JSON.stringify(metrics, null, 2)) } catch (e) { log("  [autolearn-parallel] saveMetrics failed: " + e.message) } }
 
   log(`  ✅ ${topic.id}: ${totalIngested} ingested / ${totalFetched} fetched (avg Q:${avgQuality})`)
   return { topic: topic.id, name: topic.name, ingested: totalIngested, fetched: totalFetched, avgQuality, tags: topic.assetTags }
