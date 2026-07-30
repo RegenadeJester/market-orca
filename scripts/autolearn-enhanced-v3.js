@@ -43,7 +43,7 @@ async function anysearchSearch(query, limit = 5) {
       }
     }
     return results.slice(0, limit)
-  } catch { return [] }
+  } catch (e) { log("  [autolearn] anysearchSearch failed: " + e.message); return [] }
 }
 const args = process.argv.slice(2)
 const filterTopic = args.includes('--topic') ? args[args.indexOf('--topic') + 1] : null
@@ -63,23 +63,23 @@ try {
       if (match) MCP_TOKEN = match[1].trim()
     }
   }
-} catch {}
+} catch (e) { log("  [autolearn] Token load failed: " + e.message) }
 
 // ─── Store ─────────────────────────────────────────────────────
 let learnedStore = {}
 if (!dryRun && fs.existsSync(LEARNED_FILE)) {
-  try { learnedStore = JSON.parse(fs.readFileSync(LEARNED_FILE, 'utf8')) } catch {}
+  try { learnedStore = JSON.parse(fs.readFileSync(LEARNED_FILE, 'utf8')) } catch (e) { log("  [autolearn] Load learned failed: " + e.message) }
 }
 
 let metrics = { runs: [], topicStats: {} }
 if (fs.existsSync(METRICS_FILE)) {
-  try { metrics = JSON.parse(fs.readFileSync(METRICS_FILE, 'utf8')) } catch {}
+  try { metrics = JSON.parse(fs.readFileSync(METRICS_FILE, 'utf8')) } catch (e) { log("  [autolearn] Load metrics failed: " + e.message) }
 }
 
 function log(msg) {
   const line = `[${new Date().toISOString()}] ${msg}`
   console.log(line)
-  try { fs.appendFileSync(LOG_FILE, line + '\n') } catch {}
+  try { fs.appendFileSync(LOG_FILE, line + '\n') } catch (e) { console.warn("[autolearn] log append failed: " + e.message) }
 }
 
 // ─── Search Engines ────────────────────────────────────────────
@@ -104,7 +104,7 @@ async function restSearch(query, limit = 5) {
       trust: r.trust || 50,
       quality: r.quality || 0
     })).slice(0, limit)
-  } catch { return [] }
+  } catch (e) { log("  [autolearn] restSearch failed: " + e.message); return [] }
 }
 
 async function mcpPost(tool, input, timeoutMs = 60000, retries = 2) {
@@ -162,7 +162,7 @@ async function fetchPageContent(url) {
 
     const source = new URL(url).hostname.replace(/^www\./, '')
     return { title, content: clean.slice(0, 20000), url, source, image: ogImage, description, publishedDate }
-  } catch { return null }
+  } catch (e) { log("  [autolearn] fetchPageContent failed: " + e.message); return null }
   finally { clearTimeout(t) }
 }
 
@@ -352,7 +352,7 @@ function recordMetrics(topicId, ingested, fetched, quality) {
 
 function saveMetrics() {
   if (!dryRun) {
-    try { fs.writeFileSync(METRICS_FILE, JSON.stringify(metrics, null, 2)) } catch {}
+    try { fs.writeFileSync(METRICS_FILE, JSON.stringify(metrics, null, 2)) } catch (e) { log("  [autolearn] Save metrics failed: " + e.message) }
   }
 }
 
@@ -374,7 +374,7 @@ function isBlacklisted(url) {
   try {
     const host = new URL(url).hostname.replace(/^www\./, '')
     return BLACKLIST_DOMAINS.some(d => host.includes(d))
-  } catch { return false }
+  } catch (e) { log("  [autolearn] isBlacklisted failed: " + e.message); return false }
 }
 
 // ─── Topic Processing ──────────────────────────────────────────
@@ -535,7 +535,7 @@ async function main() {
   try {
     const stats = await mcpPost('rag.storage', {})
     log(`\n📊 RAG Stats: ${JSON.stringify(stats.stats || stats)}`)
-  } catch {}
+  } catch (e) { log("  [autolearn] RAG stats failed: " + e.message) }
 
   log('\n═══════════════════════════════════════')
   log('🐋 Autolearn v3 Summary')
