@@ -107,15 +107,27 @@ async function restSearch(query, limit = 5) {
   } catch { return [] }
 }
 
-async function mcpPost(tool, input, timeoutMs = 60000) {
+async function mcpPost(tool, input, timeoutMs = 60000, retries = 2) {
   const headers = { 'Content-Type': 'application/json' }
   if (MCP_TOKEN) headers['Authorization'] = `Bearer ${MCP_TOKEN}`
-  const res = await fetch(`${MCP_BASE}/mcp/tool/${tool}`, {
-    method: 'POST', headers, body: JSON.stringify(input),
-    signal: AbortSignal.timeout(timeoutMs)
-  })
-  if (!res.ok) throw new Error(`MCP ${tool} ${res.status}`)
-  return res.json()
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      const res = await fetch(`${MCP_BASE}/mcp/tool/${tool}`, {
+        method: 'POST', headers, body: JSON.stringify(input),
+        signal: AbortSignal.timeout(timeoutMs)
+      })
+      if (res.status === 401) throw new Error(`MCP ${tool} ${res.status} — check MCP_AUTH_TOKEN`)
+      if (!res.ok) throw new Error(`MCP ${tool} ${res.status}`)
+      return res.json()
+    } catch (err) {
+      if (attempt < retries && (err.message.includes('fetch failed') || err.message.includes('ECONNREFUSED'))) {
+        log(`  ⚠️ MCP retry ${attempt+1}/${retries}: ${err.message}`)
+        await new Promise(r => setTimeout(r, 2000))
+        continue
+      }
+      throw err
+    }
+  }
 }
 
 // ─── Content Processing ────────────────────────────────────────
