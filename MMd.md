@@ -159,3 +159,17 @@
 - **Files:** `backend/src/server.js`, `backend/src/report-server.js`, `scripts/autolearn-enhanced-v3.js`, `frontend/src/pages/*.vue`, `frontend/src/components/ColabNotes.vue`
 - **Deliverable:** Backend IPv4-only; autolearn quality filter; frontend ID labels. Committed to main (backend) + PR #3 (frontend).
 - **Branch:** main (backend), `feat/impact-sim-id-labels` (frontend)
+
+## 2026-07-31 — Feature #45: Autolearn Silent Catch Elimination (scripts/)
+- **Pain point:** 20 silent `catch {}` blocks in `scripts/autolearn-enhanced-v3.js` (10) and `scripts/autolearn_parallel.mjs` (10) swallowed network failures, file I/O errors, JSON parse failures, and blacklist check errors without logging. Backend had 5 batches of fixes (Features #21, #26, #27, #28, #31) but scripts/ was overlooked.
+- **Done:** All 20 catches now log context + error message:
+  - `anysearchSearch`, `restSearch`: log search failures
+  - Token load, learned/metrics load/save: log file/JSON errors
+  - Log append: console.warn on write failure
+  - `fetchPageContent`: log page fetch failures
+  - `isBlacklisted`: log URL parse failures
+  - RAG stats: log MCP call failures
+- **Files:** `scripts/autolearn-enhanced-v3.js`, `scripts/autolearn_parallel.mjs`
+- **Deliverable:** Autolearn cron failures now surface in logs. Silent-catch campaign complete across codebase. PR #33 ✅ merged.
+- **Branch:** `feat/autolearn-silent-catch` → PR #33 ✅ merged
+- **Backlog:** —
