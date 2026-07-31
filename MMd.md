@@ -173,3 +173,19 @@
 - **Deliverable:** Autolearn cron failures now surface in logs. Silent-catch campaign complete across codebase. PR #33 ✅ merged.
 - **Branch:** `feat/autolearn-silent-catch` → PR #33 ✅ merged
 - **Backlog:** —
+
+## 2026-08-01 — Feature #46: Impact Simulator Full Indonesian Translation
+- **Pain point:** Impact Simulator event templates (7), drivers, signals, classifier keywords, markdown export, direction labels (neutral→netral), risk levels (high/medium/low), bull/base/bear descriptions, and frontend UI all still English despite prior i18n work.
+- **Done:** Translated all to Bahasa Indonesia:
+  - 7 template labels: Rate hike→Kenaikan suku bunga / bank sentral hawkish, Earnings miss→Laporan laba mengecewakan / panduan lemah, Regulation news→Berita regulasi, Supply shock→Gangguan pasokan, AI breakthrough→Terobosan AI / peluncuran produk, Liquidity crunch→Krisis likuiditas / tekanan kredit, Geopolitical risk→Risiko geopolitik
+  - All drivers/signals translated (21 drivers, 21 signals)
+  - Classifier keywords: added Indonesian terms (suku bunga, bi rate, regulasi, kebijakan, pasokan, minyak, laba, pendapatan, likuiditas, kredit, perang, konflik)
+  - Markdown export headers: Event→Event, Timeframe→Jangka Waktu, Severity→Severitas, Probability→Probabilitas, Drivers→Pendorong, Signals to watch→Sinyal yang dipantau
+  - Direction: neutral→netral (kept bullish/bearish as technical terms)
+  - Risk levels: high→tinggi, medium→sedang, low→rendah
+  - Bull/base/bear scenarios translated
+  - Frontend UI: Severity→Severitas, Probability→Probabilitas, Custom event→Event kustom, Bull/Base/Bear→Bullish/Dasar/Bearish, added dirClass/dirLabel/riskLabel helpers
+- **Files:** `backend/src/server.js`, `backend/src/report-server.js`, `frontend/src/pages/ImpactSimulatorPage.vue`
+- **Deliverable:** Impact Simulator now fully Indonesian end-to-end.
+- **Branch:** `feat/impact-sim-id-templates` → PR #34 (backend); `feat/impact-sim-id-labels` → PR #3 (frontend repo)
+- **Backlog:** —
