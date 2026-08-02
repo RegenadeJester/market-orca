@@ -1292,13 +1292,13 @@ app.get('/api/image-proxy', async (req, res) => {
 })
 
 const EVENT_TEMPLATES = {
-  rate_hike: { label: 'Rate hike / hawkish central bank', bias: { crypto:-2, stock:-1.2, forex:1, commodity:-0.4 }, drivers:['higher discount rate','risk-off flow','stronger USD'], signals:['DXY','US10Y','Fed speech'] },
-  earnings_miss: { label: 'Earnings miss / weak guidance', bias: { stock:-2.4, crypto:-0.4, forex:0, commodity:0 }, drivers:['margin pressure','lower guidance','valuation reset'], signals:['volume spike','analyst downgrade','sector sympathy'] },
-  regulation_news: { label: 'Regulation news', bias: { crypto:-2, stock:-0.7, forex:0.2, commodity:0 }, drivers:['policy uncertainty','compliance cost','liquidity shift'], signals:['official statement','exchange response','legal timeline'] },
-  supply_shock: { label: 'Supply shock', bias: { commodity:2.4, stock:-0.6, forex:0.2, crypto:0 }, drivers:['scarcity premium','inflation impulse','margin squeeze'], signals:['inventory data','shipping rates','geopolitical update'] },
-  ai_breakthrough: { label: 'AI breakthrough / product launch', bias: { stock:1.5, crypto:0.4, forex:0, commodity:0 }, drivers:['growth narrative','capex rotation','AI adoption'], signals:['product traction','cloud spend','chip demand'] },
-  liquidity_crunch: { label: 'Liquidity crunch / credit stress', bias: { crypto:-2.6, stock:-1.8, forex:0.7, commodity:-0.8 }, drivers:['cash preference','spread widening','forced deleveraging'], signals:['credit spreads','stablecoin flows','VIX'] },
-  geopolitical_risk: { label: 'Geopolitical risk', bias: { commodity:1.8, forex:0.8, stock:-1.1, crypto:-0.5 }, drivers:['safe-haven flow','energy disruption','risk premium'], signals:['oil/gold spike','USD/JPY','official escalation'] },
+  rate_hike: { label: 'Kenaikan suku bunga / bank sentral hawkish', bias: { crypto:-2, stock:-1.2, forex:1, commodity:-0.4 }, drivers:['suku bunga lebih tinggi','aliran risk-off','USD lebih kuat'], signals:['DXY','US10Y','pidato Fed'] },
+  earnings_miss: { label: 'Laporan laba mengecewakan / panduan lemah', bias: { stock:-2.4, crypto:-0.4, forex:0, commodity:0 }, drivers:['tekanan margin','panduan lebih rendah','penurunan valuasi'], signals:['lonjakan volume','penurunan rating analis','simpati sektor'] },
+  regulation_news: { label: 'Berita regulasi', bias: { crypto:-2, stock:-0.7, forex:0.2, commodity:0 }, drivers:['ketidakpastian kebijakan','biaya kepatuhan','pergeseran likuiditas'], signals:['pernyataan resmi','respons bursa','jadwal hukum'] },
+  supply_shock: { label: 'Gangguan pasokan', bias: { commodity:2.4, stock:-0.6, forex:0.2, crypto:0 }, drivers:['premium kelangkaan','dorongan inflasi','penyusutan margin'], signals:['data inventaris','tarif pengiriman','perkembangan geopolitik'] },
+  ai_breakthrough: { label: 'Terobosan AI / peluncuran produk', bias: { stock:1.5, crypto:0.4, forex:0, commodity:0 }, drivers:['narasi pertumbuhan','rotasi belanja modal','adopsi AI'], signals:['traksi produk','belanja cloud','permintaan chip'] },
+  liquidity_crunch: { label: 'Krisis likuiditas / tekanan kredit', bias: { crypto:-2.6, stock:-1.8, forex:0.7, commodity:-0.8 }, drivers:['preferensi kas','pelebaran spread','deleveraging paksa'], signals:['spread kredit','aliran stablecoin','VIX'] },
+  geopolitical_risk: { label: 'Risiko geopolitik', bias: { commodity:1.8, forex:0.8, stock:-1.1, crypto:-0.5 }, drivers:['aliran tempat aman','gangguan energi','premium risiko'], signals:['lonjakan minyak/emas','USD/JPY','eskalasi resmi'] },
 }
 for (const [id, t] of Object.entries(EVENT_TEMPLATES)) {
   db.prepare(`INSERT OR IGNORE INTO event_templates (id,label,bias_json,drivers_json,signals_json) VALUES (?,?,?,?,?)`).run(id, t.label, JSON.stringify(t.bias), JSON.stringify(t.drivers), JSON.stringify(t.signals))
@@ -1322,7 +1322,7 @@ function impactFor(asset, tmpl, timeframe='1d') {
   const score = Number((base * vol * tf).toFixed(2))
   const level = Math.abs(score) >= 4 ? 'high' : Math.abs(score) >= 2 ? 'medium' : 'low'
   const direction = score > .25 ? 'bullish' : score < -.25 ? 'bearish' : 'neutral'
-  return { slug: asset.slug, symbol: asset.symbol, name: asset.name, kind, price: asset.price, change_percent: asset.change_percent, direction, impact_score: score, risk_level: level, bull: score >= 0 ? 'momentum continuation if signal confirms' : 'relief bounce if headline fades', base: 'watch confirmation signals before action', bear: score <= 0 ? 'drawdown risk if event escalates' : 'fade risk if market prices it in' }
+  return { slug: asset.slug, symbol: asset.symbol, name: asset.name, kind, price: asset.price, change_percent: asset.change_percent, direction, impact_score: score, risk_level: level, bull: score >= 0 ? 'lanjutan momentum jika sinyal mengkonfirmasi' : 'pemulihan jika berita mereda', base: 'pantau sinyal konfirmasi sebelum bertindak', bear: score <= 0 ? 'risiko penurunan jika event meningkat' : 'risiko pelemahan jika pasar sudah mengantisipasi' }
 }
 app.get('/api/impact-simulator/templates', (_req, res) => {
   const templates = loadEventTemplates()
@@ -1335,12 +1335,12 @@ app.post('/api/impact-simulator', (req, res) => {
   let eventType = req.body?.event_type || 'rate_hike'
   if (customText) {
     const t = customText.toLowerCase()
-    if (/rate|fed|inflation|yield|suku bunga/.test(t)) eventType = 'rate_hike'
-    else if (/regulat|sec|ban|policy|aturan/.test(t)) eventType = 'regulation_news'
-    else if (/supply|oil|opec|shipping|geopolitical/.test(t)) eventType = 'supply_shock'
-    else if (/earning|guidance|revenue|profit/.test(t)) eventType = 'earnings_miss'
-    else if (/liquid|credit|stress/.test(t)) eventType = 'liquidity_crunch'
-    else if (/war|geopolitical|conflict/.test(t)) eventType = 'geopolitical_risk'
+    if (/rate|fed|inflation|yield|suku bunga|kenaikan bunga|bi rate/.test(t)) eventType = 'rate_hike'
+    else if (/regulat|sec|ban|policy|aturan|regulasi|kebijakan/.test(t)) eventType = 'regulation_news'
+    else if (/supply|oil|opec|shipping|geopolitical|pasokan|minyak/.test(t)) eventType = 'supply_shock'
+    else if (/earning|guidance|revenue|profit|laba|pendapatan/.test(t)) eventType = 'earnings_miss'
+    else if (/liquid|credit|stress|likuiditas|kredit/.test(t)) eventType = 'liquidity_crunch'
+    else if (/war|geopolitical|conflict|perang|konflik/.test(t)) eventType = 'geopolitical_risk'
     else eventType = 'ai_breakthrough'
   }
   const timeframe = req.body?.timeframe || '1d'
@@ -1356,12 +1356,12 @@ app.post('/api/impact-simulator', (req, res) => {
   const rows = assets.map(a => {
     const r = impactFor(a, tmpl, timeframe)
     r.impact_score = Number((r.impact_score * severity * probability).toFixed(2))
-    r.direction = r.impact_score > .25 ? 'bullish' : r.impact_score < -.25 ? 'bearish' : 'neutral'
-    r.risk_level = Math.abs(r.impact_score) >= 4 ? 'high' : Math.abs(r.impact_score) >= 2 ? 'medium' : 'low'
+    r.direction = r.impact_score > .25 ? 'bullish' : r.impact_score < -.25 ? 'bearish' : 'netral'
+    r.risk_level = Math.abs(r.impact_score) >= 4 ? 'tinggi' : Math.abs(r.impact_score) >= 2 ? 'sedang' : 'rendah'
     return r
   }).sort((a,b)=>Math.abs(b.impact_score)-Math.abs(a.impact_score))
   const eventLabel = customText || tmpl.label
-  const md = `## Market Event Impact Simulator\n- **Event**: ${eventLabel}\n- **Timeframe**: ${timeframe}\n- **Severity**: ${severity}x\n- **Probability**: ${Math.round(probability*100)}%\n- **Drivers**: ${tmpl.drivers.join(', ')}\n- **Signals to watch**: ${tmpl.signals.join(', ')}\n\n` + rows.map(r => `- **${r.symbol}** (${r.direction}, ${r.risk_level}, score ${r.impact_score}): bull=${r.bull}; base=${r.base}; bear=${r.bear}`).join('\n')
+  const md = `## Simulator Dampak Event Pasar\n- **Event**: ${eventLabel}\n- **Jangka Waktu**: ${timeframe}\n- **Severitas**: ${severity}x\n- **Probabilitas**: ${Math.round(probability*100)}%\n- **Pendorong**: ${tmpl.drivers.join(', ')}\n- **Sinyal yang dipantau**: ${tmpl.signals.join(', ')}\n\n` + rows.map(r => `- **${r.symbol}** (${r.direction}, ${r.risk_level}, score ${r.impact_score}): bullish=${r.bull}; base=${r.base}; bearish=${r.bear}`).join('\n')
   res.json({ ok:true, event_type:eventType, event_label: eventLabel, custom_event_text:customText, timeframe, severity, probability, drivers:tmpl.drivers, signals:tmpl.signals, items:rows, markdown:md, report_block:md })
 })
 
